@@ -22,12 +22,12 @@
     "start": "parcel index.html",
     "build": "parcel build --public-url '/scalable-vega/' index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start-server": "tsc server.ts && node server.js"
+    "start:server": "tsc server.ts && node server.js"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.1",
     "parcel-bundler": "^1.12.3",
     "typescript": "^3.3.4000",
-    "@types/cors": "^2.8.1",
     "webpack": "^2.2.1"
   }
 }
