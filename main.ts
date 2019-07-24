@@ -2,7 +2,26 @@ import * as vega from "vega";
 import QueryCore from "vega-transform-omnisci-core";
 import "@mapd/connector/dist/browser-connector";
 
-const connection = new (window as any).MapdCon()
+const http = require('http');
+
+http.get('http://localhost:3000/', (resp) => {
+  let data = '';
+
+  // A chunk of data has been recieved.
+  resp.on('data', (chunk) => {
+    data += chunk;
+  });
+
+  // The whole response has been received. Print out the result.
+  resp.on('end', () => {
+    console.log(data);
+  });
+
+}).on("error", (err) => {
+  console.log("Error: " + err.message);
+});
+
+/*const connection = new (window as any).MapdCon()
   .protocol("https")
   .host("metis.mapd.com")
   .port("443")
@@ -185,4 +204,4 @@ const spec: vega.Spec = {
     }
   ],
   config: { axisY: { minExtent: 30 } }
-};
+};*/
