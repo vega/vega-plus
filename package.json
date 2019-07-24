@@ -9,6 +9,7 @@
   "dependencies": {
     "@mapd/connector": "^4.4.0",
     "@types/node": "^7.0.22",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.15.3",
     "gh-pages": "^2.0.1",

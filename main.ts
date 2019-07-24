@@ -1,72 +1,90 @@
 import * as vega from "vega";
 import QueryCore from "vega-transform-omnisci-core";
 import "@mapd/connector/dist/browser-connector";
-
 const http = require('http');
+const querystring = require('querystring');
 
-http.get('http://localhost:3000/', (resp) => {
-  let data = '';
-
-  // A chunk of data has been recieved.
-  resp.on('data', (chunk) => {
-    data += chunk;
+function query(queryStr: string) {
+  return new Promise<any>((resolve, reject) => {
+    const postData = querystring.stringify({
+      'query': queryStr
+    });
+    const options = {
+      hostname: 'localhost',
+      port: 3000,
+      method: 'POST',
+      path: '/query',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    }
+    const req = http.request(options, (res: any) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        console.log(JSON.parse(data).rows);
+        resolve(data);
+      });
+    });
+    req.on('error', (e: any) => {
+      console.error(`Error: ${e}`);
+      reject();
+    });
+    req.write(postData);
+    req.end();
   });
+}
 
-  // The whole response has been received. Print out the result.
-  resp.on('end', () => {
-    console.log(data);
-  });
-
-}).on("error", (err) => {
-  console.log("Error: " + err.message);
-});
-
-/*const connection = new (window as any).MapdCon()
-  .protocol("https")
-  .host("metis.mapd.com")
-  .port("443")
-  .dbName("mapd")
-  .user("mapd")
-  .password("HyperInteractive");
+QueryCore.prototype.transform = function() {
+  return query("select * from cars;");
+}
+/**
+ * Generates a function to query data from an Sql database.
+ * @constructor
+ * @param {object} params - The parameters for this operator.
+ * @param {function(object): *} params.query - The SQL query.
+ */
+/*export default function SqlTransform(params) {
+  Transform.call(this, [], params);
+}
+SqlTransform.session = function (session) {
+  if (session) {
+    this._session = session;
+    return this;
+  }
+  return this._session;
+};
+SqlTransform.Definition = {
+  type: "QueryCore",
+  metadata: { changes: true, source: true },
+  params: [{ name: "query", type: "string", required: true }]
+};
+const prototype = inherits(SqlTransform, Transform);
+prototype.transform = async function (_, pulse) {
+  const result = await query(_.query);
+  result.forEach(ingest);
+  const out = pulse.fork(pulse.NO_FIELDS & pulse.NO_SOURCE);
+  out.rem = this.value;
+  this.value = out.add = out.source = result;
+  return out;
+};*/
 
 const table = "flights_donotmodify";
-
-connection.connectAsync().then(session => {
-  // assign session to OmniSci Core transform
-  QueryCore.session(session);
-
-  // add core transforms
-  (vega as any).transforms["querycore"] = QueryCore;
-
-  const runtime = vega.parse(spec);
-  const view = new vega.View(runtime)
-    .logLevel(vega.Info)
-    .renderer("svg")
-    .initialize(document.querySelector("#view"));
-
-  view.runAsync();
-
-  // assign view and vega to window so we can debug them
-  window["vega"] = vega;
-  window["view"] = view;
-});
-
-// transform to compute the extent
 const extent = {
   type: "querycore",
   query: {
     signal: `'select min(' + field + ') as "min", max(' + field + ') as "max" from ${table}'`
   }
 } as any;
-
-// bin and aggregate
 const data = {
   type: "querycore",
   query: {
     signal: `'select ' + bins.step + ' * floor((' + field + '-cast(' + bins.start + ' as float))/' + bins.step + ') as "bin_start", count(*) as "cnt" from ${table} where ' + field + ' between ' + bins.start + ' and ' + bins.stop + ' group by bin_start'`
   }
 } as any;
-
 const spec: vega.Spec = {
   $schema: "https://vega.github.io/schema/vega/v5.json",
   autosize: "pad",
@@ -204,4 +222,14 @@ const spec: vega.Spec = {
     }
   ],
   config: { axisY: { minExtent: 30 } }
-};*/
+};
+
+vega.transforms["querycore"] = QueryCore;
+const runtime = vega.parse(spec);
+const view = new vega.View(runtime)
+  .logLevel(vega.Info)
+  .renderer("svg")
+  .initialize(document.querySelector("#view"));
+view.runAsync();
+window["vega"] = vega;
+window["view"] = view;
