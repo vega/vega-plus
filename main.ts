@@ -3,59 +3,101 @@ import VegaTransformPostgres from "vega-transform-pg";
 
 const table = "cars";
 const xField = "cylinders";
-const yField = "miles_per_gallon";
-
-const query = `select ${xField}, avg(${yField}) from ${table} group by ${xField}`;
-
-const extent = {
+const yFieldRaw = "miles_per_gallon";
+const yField = "avg";
+const precision = 2;
+const query = `select ${xField}, round(cast(${yField}(${yFieldRaw}) as numeric), ${precision}) as ${yField} from ${table} group by ${xField}`;
+const data = {
   type: "postgres",
   query: {
     signal: `'${query}'`
   }
 } as any;
-const spec: vega.Spec = {
+const spec:vega.Spec = {
   $schema: "https://vega.github.io/schema/vega/v5.json",
-  autosize: "pad",
-  padding: 5,
-  width: 600,
-  height: 250,
+  width: 400,
+  height: 200,
+  padding: 10,
   data: [
     {
-      name: "extent",
-      transform: [extent]
+      name: "table",
+      transform: [data]
     }
   ],
+
+  signals: [
+    {
+      name: "tooltip",
+      value: {},
+      on: [
+        {events: "rect:mouseover", update: "datum"},
+        {events: "rect:mouseout",  update: "{}"}
+      ]
+    }
+  ],
+
+  scales: [
+    {
+      name: "xscale",
+      type: "band",
+      domain: {data: "table", field: xField},
+      range: "width",
+      padding: 0.05,
+      round: true
+    },
+    {
+      name: "yscale",
+      domain: {data: "table", field: yField},
+      nice: true,
+      range: "height"
+    }
+  ],
+
+  axes: [
+    { orient: "bottom", scale: "xscale", title: xField },
+    { orient: "left", scale: "yscale", title: `${yField}(${yFieldRaw})` }
+  ],
+
   marks: [
     {
-      name: "marks",
       type: "rect",
-      from: { data: "extent" },
+      from: {data:"table"},
       encode: {
+        enter: {
+          x: {scale: "xscale", field: xField},
+          width: {scale: "xscale", band: 1},
+          y: {scale: "yscale", field: yField},
+          y2: {scale: "yscale", value: 0}
+        },
         update: {
-          fill: { value: "steelblue" },
-          x: {field: xField},
-          y: {field: yField}
+          fill: {value: "steelblue"}
+        },
+        hover: {
+          fill: {value: "red"}
+        }
+      }
+    },
+    {
+      type: "text",
+      encode: {
+        enter: {
+          align: {value: "center"},
+          baseline: {value: "bottom"},
+          fill: {value: "#333"}
+        },
+        update: {
+          x: {scale: "xscale", signal: `tooltip.${xField}`, band: 0.5},
+          y: {scale: "yscale", signal: `tooltip.${yField}`, offset: -2},
+          text: {signal: `tooltip.${yField}`},
+          fillOpacity: [
+            {test: `isNaN(tooltip.${yField})`, value: 0},
+            {value: 1}
+          ]
         }
       }
     }
-  ],
-  scales: [
-    {
-      name: "x",
-      type: "linear",
-      domain: [0, 10],
-      range: [0, { signal: "width" }],
-    },
-    {
-      name: "y",
-      type: "linear",
-      domain: [0, 30],
-      range: [{ signal: "height" }, 0],
-      nice: true,
-      zero: true
-    }
   ]
-};
+}
 
 VegaTransformPostgres.setHttpOptions({
   hostname: 'localhost',
@@ -72,6 +114,6 @@ const view = new vega.View(runtime)
   .logLevel(vega.Info)
   .renderer("svg")
   .initialize(document.querySelector("#view"));
-view.runAsync();
 window["vega"] = vega;
 window["view"] = view;
+view.runAsync();
