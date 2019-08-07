@@ -2,7 +2,6 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 
 // PostgreSQL client initialization
-const format = require('pg-format')
 const pg = require('pg');
 const pghost = 'localhost';
 const pgport = '5432';
