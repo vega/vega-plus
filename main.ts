@@ -99,6 +99,7 @@ const spec:vega.Spec = {
   ]
 }
 
+VegaTransformPostgres.setPostgresConnectionString('postgres://localhost:5432/voyager');
 VegaTransformPostgres.setHttpOptions({
   hostname: 'localhost',
   port: 3000,

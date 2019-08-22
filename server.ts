@@ -1,41 +1,51 @@
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
+const { Pool, Client } = require('pg')
 
-// PostgreSQL client initialization
-const pg = require('pg');
-const pghost = 'localhost';
-const pgport = '5432';
-const pgdb = 'voyager';
-const connectionString = 'postgres://' + pghost + ':' + pgport + '/' + pgdb;
-console.log('Connecting to ' + connectionString);
-const pgclient = new pg.Client(connectionString);
-pgclient.connect(err => {
-  if (err) {
-    console.log(`Could not connect to pg: ${err}`);
-    return;
-  }
-  console.log(`Connected to pg`);
-});
+// Postgres connection pools.
+const pools = {};
 
 // Express server
 const express = require('express');
 const app = express();
 const port = 3000;
-
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json({ limit: '20mb', type: 'application/json' }));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json({limit: '20mb', type: 'application/json'}));
+app.listen(port, () => console.log(`server listening on port ${port}`));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+function poolFor(connectionString: string) {
+  if(!(connectionString in pools)) {
+    pools[connectionString] = new Pool({connectionString: connectionString});
+  }
+  return pools[connectionString];
+}
+function handleError(err: any, res: any) {
+  const msg = err.stack ? err.stack.split('\n')[0] : err;
+  console.log(msg);
+  res.status(400).send(msg);
+}
 
-app.post('/query', (req: any, res: any) => {
-  console.log(req.body.query);
-  const query = pgclient.query(req.body.query, (err: any, results: any) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send(err);
-    } else {
-      res.status(200).send(results);
+app.post('/query', async (req: any, res: any) => {
+  if(!req.body.postgresConnectionString) {
+    throw 'request body must define postgresConnectionString property';
+  }
+  let client: any;
+  try {
+    if(!req.body.query) {
+      throw 'request body must define query property'
     }
-  });
+    console.log(req.body.postgresConnectionString);
+    console.log(req.body.query);
+    const pool = poolFor(req.body.postgresConnectionString);
+    client = await pool.connect();
+    const results = await client.query(req.body.query);
+    res.status(200).send(results);
+  } catch(err) {
+    handleError(err, res);
+  } finally {
+    if(client) {
+      client.release();
+    }
+  }
 });
