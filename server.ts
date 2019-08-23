@@ -27,11 +27,11 @@ function handleError(err: any, res: any) {
 }
 
 app.post('/query', async (req: any, res: any) => {
-  if(!req.body.postgresConnectionString) {
-    throw 'request body must define postgresConnectionString property';
-  }
   let client: any;
   try {
+    if(!req.body.postgresConnectionString) {
+      throw 'request body must define postgresConnectionString property';
+    }
     if(!req.body.query) {
       throw 'request body must define query property'
     }
