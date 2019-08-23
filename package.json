@@ -18,7 +18,7 @@
     "pg-native": "^3.0.0",
     "vega": "^5.3.2",
     "vega-transform-omnisci-core": "^0.0.8",
-    "vega-transform-pg": "^1.0.4"
+    "vega-transform-pg": "^1.0.8"
   },
   "scripts": {
     "start": "parcel index.html",
