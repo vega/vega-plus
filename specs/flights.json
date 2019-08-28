@@ -1,0 +1,78 @@
+{
+  "$schema": "https:\/\/vega.github.io\/schema\/vega\/v5.json",
+  "width": 400,
+  "height": 200,
+  "padding": 10,
+  "data": [
+    {
+      "name": "table",
+      "transform": [
+        {
+          "type": "postgres",
+          "query": {
+            "signal": "'select distance, avg(delay) from flights20k where delay >= 0 group by distance'"
+          }
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "linear",
+      "domain": {
+        "data": "table",
+        "field": "distance"
+      },
+      "range": "width",
+      "round": true
+    },
+    {
+      "name": "yscale",
+      "domain": {
+        "data": "table",
+        "field": "avg"
+      },
+      "nice": true,
+      "range": "height"
+    }
+  ],
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "distance"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "avg(delay)"
+    }
+  ],
+  "marks": [
+    {
+      "type": "symbol",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "distance"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "avg"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "steelblue"
+          },
+          "fillOpacity": {"value": 0.5}
+        }
+      }
+    }
+  ]
+}
