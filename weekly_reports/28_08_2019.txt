@@ -14,5 +14,5 @@
 
 ## Additional Notes
 * Working (manually) with the Vega specs is a bit difficult and error prone. For example, field identifiers need to be
-  duplicated in many properties/sub-properties of the JSON. Generating JSON specs with code that uses variables per field can
+  duplicated in many properties/sub-properties of the JSON. Generating specs with code that uses variables per field can
   mitigate this.
