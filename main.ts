@@ -30,6 +30,7 @@ function handleVegaSpec() {
     run(spec);
   };
   reader.readAsText(this.files[0]);
+  (<HTMLInputElement>document.getElementById("vega-spec")).value = "";
 }
 
 document.getElementById("vega-spec").addEventListener("change", handleVegaSpec, false);
