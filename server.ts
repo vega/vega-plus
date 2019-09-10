@@ -1,6 +1,6 @@
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-const { Pool, Client } = require('pg');
+const { Pool } = require('pg');
 const format = require('pg-format');
 
 // Postgres connection pools.
@@ -36,8 +36,8 @@ app.post('/query', async (req: any, res: any) => {
     if(!req.body.query) {
       throw 'request body must define query property'
     }
-    console.log(req.body.postgresConnectionString);
-    console.log(req.body.query);
+    console.log(`connected to ${req.body.postgresConnectionString}`);
+    console.log(`running query: ${req.body.query}`);
     const pool = poolFor(req.body.postgresConnectionString);
     client = await pool.connect();
     const results = await client.query(req.body.query);
@@ -52,7 +52,8 @@ app.post('/query', async (req: any, res: any) => {
 });
 
 function postgresTypeFor(value : any): string {
-  // FixMe: want to use INTs too, if possible. Client needs to send more data.
+  // FixMe: want to use INTs too, if possible. 
+  // Client needs to send more type data in this case.
   const type = typeof value;
   if(type === 'string') {
     return 'VARCHAR(256)';
@@ -61,7 +62,7 @@ function postgresTypeFor(value : any): string {
   } else if(type === 'boolean') {
     return 'BOOLEAN';
   } else {
-    console.log('ERROR: undefined type: \'' + type + '\'');
+    throw 'undefined type: \'' + type + '\'';
   }
 }
 
@@ -77,7 +78,7 @@ function postgresSchemaFor(dataObj: any): string {
 }
 
 function createTableQueryStrFor(tableName: string, schema: any): string {
-  let out: string = 'CREATE TABLE ' + tableName + '('
+  let out: string = 'create table ' + tableName + '('
   let first: boolean = true;
   for(var attrName in schema) {
     if(!schema.hasOwnProperty(attrName)) {
@@ -122,15 +123,15 @@ app.post('/createSql', async (req: any, res: any) => {
 
     // Check if table exists yet
     let exists = false;
-    const existsQueryStr = 'SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name='+
+    const existsQueryStr = 'select exists(select 1 from information_schema.tables where table_name='+
       '\'' + req.body.name.toLowerCase() + '\');'
     const response = await client.query(existsQueryStr);
     if(response.rows[0]['exists']) {
       exists = true;
-      console.log('INFO: table ' + req.body.name + ' already exists.');
+      console.log('table ' + req.body.name + ' already exists');
     } else {
       exists = false;
-      console.log('INFO: table ' + req.body.name + ' does not exist');
+      console.log('table ' + req.body.name + ' does not exist');
     }
 
     const data = JSON.parse(req.body.data);
@@ -138,10 +139,10 @@ app.post('/createSql', async (req: any, res: any) => {
 
     // Create table if it doesn't exist yet
     if(!exists) {
-      console.log('INFO: creating table ' + req.body.name);
-      console.log('INFO: built postgres schema: '+JSON.stringify(schema));
+      console.log('creating table ' + req.body.name);
+      console.log('built postgres schema: '+JSON.stringify(schema));
       const createTableQueryStr = createTableQueryStrFor(req.body.name, schema);
-      console.log('INFO: running create query: ' + createTableQueryStr);  
+      console.log('running create query: ' + createTableQueryStr);  
       await client.query(createTableQueryStr);
     }
 
@@ -170,9 +171,10 @@ app.post('/createSql', async (req: any, res: any) => {
     }
 
     // Execute the insert queries.
-    const queryStr = format('INSERT INTO ' + req.body.name + ' (' + attrNamesStr + ') VALUES %L', rows);
-    console.log('INFO: running insert queries for ' + req.body.name);
+    const queryStr = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', rows);
+    console.log('running insert queries for ' + req.body.name);
     await client.query(queryStr);
+    console.log('insert queries complete')
     res.status(200).send();
   } catch(err) {
     handleError(err, res);
