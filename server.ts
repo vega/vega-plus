@@ -27,6 +27,26 @@ function handleError(err: any, res: any) {
   res.status(400).send(msg);
 }
 
+function binQueryFor(body: any) {
+  return `with
+  ${body.field}_stats as (
+    select min(${body.field}) as min, max(${body.field}) as max
+    from ${body.table}
+  ),
+  histogram as (
+    select width_bucket(${body.field}, min, max, ${body.max_bins}) as bucket,
+      int4range(
+        cast (min(${body.field}) as integer),
+        cast (max(${body.field}) as integer),
+        '[]') as range,
+      count(*) as freq
+    from ${body.table}, ${body.field}_stats
+    where ${body.field} is not null
+    group by bucket
+    order by bucket)
+  select * from histogram;`
+}
+
 app.post('/query', async (req: any, res: any) => {
   let client: any;
   try {
@@ -37,10 +57,11 @@ app.post('/query', async (req: any, res: any) => {
       throw 'request body must define query property'
     }
     console.log(`connected to ${req.body.postgresConnectionString}`);
-    console.log(`running query: ${req.body.query}`);
+    const query = req.body.query === "bin" ? binQueryFor(req.body) : req.body.query;
+    console.log(`running query: ${query}`);
     const pool = poolFor(req.body.postgresConnectionString);
     client = await pool.connect();
-    const results = await client.query(req.body.query);
+    const results = await client.query(query);
     res.status(200).send(results);
   } catch(err) {
     handleError(err, res);
