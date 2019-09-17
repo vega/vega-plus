@@ -11,8 +11,9 @@ const express = require('express');
 const app = express();
 const port = 3000;
 app.use(cors());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json({limit: '20mb', type: 'application/json'}));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
 app.listen(port, () => console.log(`server listening on port ${port}`));
 
 function poolFor(connectionString: string) {
