@@ -37,43 +37,61 @@ function handleVegaSpec() {
   (<HTMLInputElement>document.getElementById("vega-spec")).value = "";
 }
 
+function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, tableName: string) {   
+  const endOffset = Math.min(startOffset + rowsPerChunk, data.length);
+  console.log("uploadSqlDataHelper: sending rows [" + startOffset + ", " + endOffset + ")");
+  const chunk = data.slice(startOffset, endOffset);
+  const endpoint = "insertSql";
+  const postData = querystring.stringify({
+    name: tableName,
+    data: JSON.stringify(chunk),
+    postgresConnectionString: postgresConnectionString
+  });
+  const httpOptions = {
+    hostname: 'localhost',
+    port: 3000,
+    method: 'POST',
+    path: '/createSql',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    'Content-Length': Buffer.byteLength(postData)
+  };
+  const req = http.request(httpOptions, res => {
+    let result = '';
+    res.on('data', chunk => {
+      result += chunk;
+    });
+    res.on('end', () => {
+      if(res.statusCode === 400) {
+        throw `${res.statusMessage}: ${result}`;
+      }
+    });
+  });
+  req.write(postData);
+  req.end();
+  if(endOffset < data.length) {
+    uploadSqlDataHelper(data, rowsPerChunk, endOffset, tableName);
+  }
+}
+
+function uploadSqlData(data: Object[], tableName: string) {
+  const chunkBytes: number = 10*1024*1024; // 10MB
+  const rowBytesSample: number = data.length > 0 ? JSON.stringify(data[0]).length : 1;
+  const rowsPerChunk: number = Math.floor(chunkBytes/rowBytesSample);
+  uploadSqlDataHelper(data, rowsPerChunk, 0, tableName);
+}
+
 function handleData() {
   const reader = new FileReader();
-  let filename;
+  let filename: string;
   reader.onload = function(e:any) {
     if(filename.slice(filename.length-'.json'.length) != '.json') {
       throw `file ${filename} must have .json extension`;
     }
     const tableName = filename.slice(0,(filename.length-'.json.'.length)+1);
     const data = JSON.parse(e.target.result);
-    const postData = querystring.stringify({
-      name: tableName,
-      data: JSON.stringify(data),
-      postgresConnectionString: postgresConnectionString
-    });
-    const httpOptions = {
-      hostname: 'localhost',
-      port: 3000,
-      method: 'POST',
-      path: '/createSql',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      'Content-Length': Buffer.byteLength(postData)
-    };
-    const req = http.request(httpOptions, res => {
-      let result = '';
-      res.on('data', chunk => {
-        result += chunk;
-      });
-      res.on('end', () => {
-        if(res.statusCode === 400) {
-          throw `${res.statusMessage}: ${result}`;
-        }
-      });
-    });
-    req.write(postData);
-    req.end();
+    uploadSqlData(data, tableName);
   }
   filename = this.files[0].name;
   reader.readAsText(this.files[0]);
