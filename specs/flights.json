@@ -10,7 +10,7 @@
         {
           "type": "postgres",
           "query": {
-            "signal": "'select distance, avg(delay) from flights20k where delay >= 0 group by distance'"
+            "signal": "'select distance, avg(delay) from flights_20k where delay >= 0 group by distance'"
           }
         }
       ]
