@@ -89,7 +89,7 @@ function handleData() {
     if(filename.slice(filename.length-'.json'.length) != '.json') {
       throw `file ${filename} must have .json extension`;
     }
-    const tableName = filename.slice(0,(filename.length-'.json.'.length)+1);
+    const tableName = filename.slice(0,(filename.length-'.json.'.length)+1).replace("-", "_");
     const data = JSON.parse(e.target.result);
     uploadSqlData(data, tableName);
   }
