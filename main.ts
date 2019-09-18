@@ -3,10 +3,10 @@ import VegaTransformPostgres from "vega-transform-pg";
 const querystring = require('querystring');
 const http = require('http');
 
-const postgresConnectionString = 'postgres://localhost:5432/voyager';
+const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
 function run(spec:vega.Spec) {
-  VegaTransformPostgres.setPostgresConnectionString('postgres://localhost:5432/voyager');
+  VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
   VegaTransformPostgres.setHttpOptions({
     hostname: 'localhost',
     port: 3000,
