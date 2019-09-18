@@ -6,5 +6,5 @@
     "noEmit": true,
     "strict": false
   },
-  "files": ["main.ts"]
+  "files": ["main.ts", "server.ts"]
 }
