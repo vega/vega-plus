@@ -36,11 +36,9 @@ function binQueryFor(body: any) {
   ),
   histogram as (
     select width_bucket(${body.field}, min, max, ${body.max_bins}) as bucket,
-      int4range(
-        cast (min(${body.field}) as integer),
-        cast (max(${body.field}) as integer),
-        '[]') as range,
-      count(*) as freq
+      min(${body.field}) as bin0,
+      max(${body.field}) as bin1,
+      count(*)
     from ${body.table}, ${body.field}_stats
     where ${body.field} is not null
     group by bucket
