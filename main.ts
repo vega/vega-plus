@@ -5,7 +5,54 @@ const http = require('http');
 
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
+function toPostgreSQL(spec:vega.Spec) {
+  const supportedEncodings = ["x", "y"];
+  for(var dataIdx=0; dataIdx<spec.data.length; dataIdx++) {
+    const data:any = spec.data[dataIdx];
+    if(!data.source || !data.source.trim().startsWith('postgres')) {
+      continue;
+    } 
+    const tableName = data.source.split('/').slice(-1)[0];
+    const mark: any = spec.marks.filter(m => m.from && m.from.data === data.name)[0];
+    if(!mark) {
+      continue;
+    }
+    const enterAttributes = Object.keys(mark.encode.enter)
+      .filter(e => supportedEncodings.includes(e))
+      .map(e => mark.encode.enter[e].field);
+    const updateAttributes = Object.keys(mark.encode.update)
+      .filter(e => supportedEncodings.includes(e))
+      .map(e => mark.encode.update[e].field);
+    const attributes = [...new Set(enterAttributes.concat(updateAttributes))];
+    const tokens = ['SELECT'];
+    for(var attrIdx=0; attrIdx<attributes.length; ++attrIdx) {
+      if(attrIdx!=0) {
+        tokens.push(',');
+      }
+      tokens.push(attributes[attrIdx]);
+    }
+    tokens.push('FROM');
+    tokens.push(tableName);
+    tokens.push(';');
+    const query = tokens.join(' ');
+    (spec.data[dataIdx] as any) = {
+      name: data.name,
+      transform: [
+        {
+          type: "postgres",
+          // FixMe: figure out why red squiggles for type attribute.
+          query: {
+            signal: `'${query}'`
+          }
+        }
+      ]
+    }
+  }
+  return spec;
+}
+
 function run(spec:vega.Spec) {
+  spec = toPostgreSQL(spec);
   VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
   VegaTransformPostgres.setHttpOptions({
     hostname: 'localhost',
@@ -39,7 +86,6 @@ function handleVegaSpec() {
 
 function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, tableName: string) {   
   const endOffset = Math.min(startOffset + rowsPerChunk, data.length);
-  console.log("uploadSqlDataHelper: sending rows [" + startOffset + ", " + endOffset + ")");
   const chunk = data.slice(startOffset, endOffset);
   const endpoint = "insertSql";
   const postData = querystring.stringify({
