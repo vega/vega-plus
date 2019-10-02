@@ -37,7 +37,7 @@
 See here: https://github.com/vega/vega-datasets/tree/master/data
 Or see here: https://github.com/vega/vega-datasets/blob/master/src/data.ts
 
-# 09/05/2019 - 09/12/2019
+# 09/04/2019 - 09/10/2019
 ## Goals for this week
 * [X] Finish first-pass implementation of binned query on server, along with an example vega spec.
 * [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
@@ -81,3 +81,17 @@ with
   select * from histogram;
 
 * The server finally returns the binned data.
+
+# 09/11/2019 - 09/18/2019
+* [X] Added client-side chunking for JSON data file upload
+* [X] Looked at OmiSci’s Vega examples — it’s hardcoded sql, just like Dom’s transform for OmniSci and mine for Postgres.
+* [X] Looked at Ibis and Altair, again I can’t find any Vega -> sql compilation, just wrappers around Vega. Data is still specified via url, file path, or inline, not by query
+* [X] Updated README with steps to install and run demo
+* [X] Got Vega's example histogram/binning spec normal-2d.json working statically (i.e. without the step and anchor signals); began work on making the signals work (i.e. re-issue the query with new step and anchor)
+* [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
+* [ ] Start with translating some transform operators (e.g. bin).
+
+# 09/18/2019 - 09/24/2019
+* [ ] Finish implementing histogram signal support.
+* [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
+* [ ] Start with translating some transform operators (e.g. bin).
