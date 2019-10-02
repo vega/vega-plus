@@ -83,6 +83,7 @@ with
 * The server finally returns the binned data.
 
 # 09/11/2019 - 09/18/2019
+## Goals for this week
 * [X] Added client-side chunking for JSON data file upload
 * [X] Looked at OmiSci’s Vega examples — it’s hardcoded sql, just like Dom’s transform for OmniSci and mine for Postgres.
 * [X] Looked at Ibis and Altair, again I can’t find any Vega -> sql compilation, just wrappers around Vega. Data is still specified via url, file path, or inline, not by query
@@ -91,7 +92,20 @@ with
 * [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
 * [ ] Start with translating some transform operators (e.g. bin).
 
-# 09/18/2019 - 09/24/2019
-* [ ] Finish implementing histogram signal support.
+# 09/18/2019 - 09/25/2019 - 10/02/2019
+## Goals for this week
+* [X] First pass implementation of SQL generation from vega. Does not support the following: (1) aggregation (2) encodings beyond x, y.
+* [X] Sent query to OmiSci RE if they generate SQL, or if it is all handwritten. No response yet. 
+* [X] Met with Hannah and described project to her.
+* [ ] Finish implementing histogram signal support (still need to figure out how to re-trigger pg signal when step-size/anchor change).
+* [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
+* [ ] Start with translating some transform operators (e.g. bin).
+
+
+# 09/18/2019 - 10/03/2019 - 10/09/2019
+## Goals for this week
+* [ ] Add support for SQL generation for some aggregations
+* [ ] Add support for SQL generation for encodings beyond x, y
+* [ ] Finish implementing histogram signal support (still need to figure out how to re-trigger pg signal when step-size/anchor change).
 * [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
 * [ ] Start with translating some transform operators (e.g. bin).
