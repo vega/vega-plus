@@ -6,6 +6,15 @@ const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
 function toPostgreSQL(spec:vega.Spec) {
+  // FixMe: this won't work in the case where there are multiple marks
+  // using the same postgres data source named 'table', each with different aggregations. 
+  // To handle that case, I think we have to do the following:
+  // 1. Generate a data source for each mark (i.e. table_X for mark X and tbale_Y for mark Y)
+  // 2. Rename the from.data for mark X to table_X and the from.data for make Y to table_Y.
+  //
+  // FixMe: this doesn't support aggregation.
+  //
+  // FixMe: this doesn't support encodings beyond x and y.
   const supportedEncodings = ["x", "y"];
   for(var dataIdx=0; dataIdx<spec.data.length; dataIdx++) {
     const data:any = spec.data[dataIdx];
