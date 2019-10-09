@@ -104,8 +104,28 @@ with
 
 # 09/18/2019 - 10/03/2019 - 10/09/2019
 ## Goals for this week
-* [ ] Add support for SQL generation for some aggregations
-* [ ] Add support for SQL generation for encodings beyond x, y
-* [ ] Finish implementing histogram signal support (still need to figure out how to re-trigger pg signal when step-size/anchor change).
-* [ ] Look at how the bin operator is implemented in vega. See: https://github.com/vega/vega/blob/master/packages/vega-transforms/src/Bin.js and https://github.com/vega/vega/blob/master/packages/vega-statistics/src/bin.js
-* [ ] Start with translating some transform operators (e.g. bin).
+* [X] Read/take notes on at “how vega works” for docs on dataflow. See: https://observablehq.com/@vega/how-vega-works.
+* [X] console.log() some dataflows. See scalable-vega/node_modules/vega-dataflow/src/dataflow/run.js:123 in evaluate().
+* [X] Reason about how hard it is to make some nodes executable by sql.
+* [ ] Handle a simple projection by manipulating the dataflow graph
+* [X] Resolved windowed-join issue with Leilani/Arvind
+* [ ] (Original approach) Add support for SQL generation for some aggregations
+* [ ] (Original approach) Add support for SQL generation for encodings beyond x, y
+
+## Additional Notes
+* Here's a diff to log the dataflow graph nodes:
+122a123,126
+>   console.log("Data");
+>   console.log(df._runtime.data.table.input.value);
+>   console.log("Graph");
+>   console.log(df._runtime.nodes);
+* Transform operators get run at scalable-vega/node_modules/vega-dataflow/src/dataflow/run.js:74
+
+## Challenges
+* I was been able to collect the nodes that reference my postgres transform node, but those nodes contain no info about field names.
+* I dumped the dataflow, and there is only one reference to one of the fields, cylinders (x):
+"_inputs": [
+   "cylinders"
+],
+I'm not clear yet on the function of that node in particular. But there is no reference at all to the other mark field, miles_per_gallon (y).
+* I looked through all the operators of type "mark", but I could not find any information in them about field names.
