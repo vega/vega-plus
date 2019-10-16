@@ -1,3 +1,20 @@
+# 09/18/2019 - 10/10/2019 - 10/16/2019
+## Goals for this week
+[X] Figure out how to collect field names from the dataflow graph (look at node._argval.encoders.enter.fields)
+[X] Figure out how to identify specific operator nodes in the dataflow graph
+[X] Implement first pass of altered postgres transform:
+  Recursively traverse postgres transform targets until a node N with fields f is hit.
+  For each such node N, backtrack up the graph until N's upstream collector node C is his.
+  Emit (C, f) for query generation.
+
+## Additional notes
+* Right now, I only generate simple `select f1, ..., f2 from table` queries.
+* I also pulse the changes through at the postgres transform node, rather than collector nodes.
+
+## Challenges
+* Need to figure out how to pulse changes through at the collector node level, rather than the postgres transform node.
+* Need to start handling all the operators (and therefore more query generation) here: https://github.com/vega/vega/tree/a27ffe09de611c99e338e2ca77c1d1bdfc662381/packages/vega-transforms.
+
 # 08/22/2019 - 08/28/2019
 ## Goals for this week
 * [X] Compile Vega lite gallery specs to Vega to see how much more complex the Vega specs are.
@@ -129,3 +146,4 @@ with
 ],
 I'm not clear yet on the function of that node in particular. But there is no reference at all to the other mark field, miles_per_gallon (y).
 * I looked through all the operators of type "mark", but I could not find any information in them about field names.
+
