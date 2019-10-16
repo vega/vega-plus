@@ -3,9 +3,9 @@
 * [X] Figure out how to collect field names from the dataflow graph (look at node._argval.encoders.enter.fields)
 * [X] Figure out how to identify specific operator nodes in the dataflow graph
 * [X] Implement first pass of altered postgres transform:
-  Recursively traverse postgres transform targets until a node N with fields f is hit.
-  For each such node N, backtrack up the graph until N's upstream collector node C is his.
-  Emit (C, f) for query generation.
+  1. Recursively traverse postgres transform targets until a node N with fields f is hit.
+  2. For each such node N, backtrack up the graph until N's upstream collector node C is hit.
+  3. Emit (C, f) for query generation.
 
 ## Additional notes
 * Right now, I only generate simple `select f1, ..., f2 from table` queries.
