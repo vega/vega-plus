@@ -43,7 +43,7 @@ function binQueryFor(body: any) {
     where ${body.field} is not null
     group by bucket
     order by bucket)
-  select * from histogram;`
+  select * from histogram;`;
 }
 
 app.post('/query', async (req: any, res: any) => {
