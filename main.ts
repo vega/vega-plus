@@ -5,7 +5,7 @@ const http = require('http');
 
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
-function toPostgreSQL(spec:vega.Spec) {
+function generatePgTransform(spec:vega.Spec) {
   // FixMe: this won't work in the case where there are multiple marks
   // using the same postgres data source named 'table', each with different aggregations. 
   // To handle that case, I think we have to do the following:
@@ -49,7 +49,6 @@ function toPostgreSQL(spec:vega.Spec) {
       transform: [
         {
           type: "postgres",
-          // FixMe: figure out why red squiggles for type attribute.
           query: {
             signal: `'${query}'`
           }
@@ -61,7 +60,7 @@ function toPostgreSQL(spec:vega.Spec) {
 }
 
 function run(spec:vega.Spec) {
-  spec = toPostgreSQL(spec);
+  spec = generatePgTransform(spec);
   VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
   VegaTransformPostgres.setHttpOptions({
     hostname: 'localhost',
