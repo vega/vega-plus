@@ -1,5 +1,7 @@
 import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-pg";
+import { notDeepEqual } from "assert";
+import { openSync } from "fs";
 const querystring = require('querystring');
 const http = require('http');
 
@@ -60,63 +62,90 @@ function collectFields(node, transform) {
   return out;
 }
 
-function queryFor(fields: any, table:string) {
-  // FixMe: only projections are implemented right now.
+function opToSql(op:string) {
+  if(op === "average") {
+    return "AVG";
+  } else {
+    throw `Unsupported aggregate operation: ${op}`;
+  }
+}
+
+function queryFor(node:any, table:string) {
+  // FixMe: support WHERE clause.
+
   let out = "SELECT ";
+  const fields = node._argval.fields.map((f:any) => f.fname);
+  const ops = node._argval.ops;
+  const as = node._argval.as;
   for(let fieldIdx=0; fieldIdx<fields.length; ++fieldIdx) {
-    if(fieldIdx) {
+    if(fieldIdx !== 0) {
       out += ", ";
     }
-    out += fields[fieldIdx];
+    if(fieldIdx < ops.length) {
+      out += `${opToSql(ops[fieldIdx])}(${fields[fieldIdx]})`;
+    } else {
+      out += fields[fieldIdx];
+    }
+    if(fieldIdx < as.length) {
+      out += ` AS ${as[fieldIdx]}`
+    }
   }
-  out += ` FROM ${table};`
+
+  out += ` FROM ${table}`
+
+  const groupby = node._argval.groupby.map((f:any) => f.fname);
+  if(groupby.length > 0) {
+    out += " GROUP BY ";
+    for(let groupbyIdx=0; groupbyIdx<groupby.length; ++groupbyIdx) {
+      if(groupbyIdx !== 0) {
+        out += ", ";
+      }
+      out += groupby[groupbyIdx];
+    }
+  }
+
+  out += ";"
+
   return out;
 }
 
 function generatePgQueryForNode(node: any) {
   // For the given node, generatesd a Postgres query to be
   // executed at runtime, based on that node's dependents.
+  if(!node._targets || node._targets.length === 0) {
+    return;
+  }
 
-  // FixMe: need to handle multiple entries, not just one.
-  // To do that, I have to figure out a way to use async
-  // calls in a loop without getting this error:
-  // 
-  // 'babel-plugin-transform-async-to-promises/helpers' is imported by index.js, but could not be resolved – treating it as an external dependency
-  // Error: Could not load babel-plugin-transform-async-to-promises/helpers (imported by /Users/afichman/Desktop/Projects/scalable-vega/node_modules/vega-transform-pg/index.js): ENOENT: no such file or directory, open 'babel-plugin-transform-async-to-promises/helpers'
-  //
-  // Or, I can just chain promises with then().
-  const fields = collectFields(node, node);
-  const collectNodeId = Object.keys(fields)[0];
-  const entry = fields[collectNodeId];
-  const query = queryFor(entry.fields, node._argval.table); // FixMe: this will change to 'relation'.
-  node._argval.query = query;
+  // Case 1: single downstream aggregate operator from same transform array.
+  // Compute the aggregate query for the operator, overwrite the operator's
+  // transform function, then remove the Postgres node as it is no longer needed.
+  const query = queryFor(node._targets[0], node._argval.table);
+  node._targets[0]._query = query;
+  node._targets[0].transform = node.__proto__.transform;
+  node.transform = () => {}; // FixMe: delete entire node instead.
+
+  // Case 2: multiple downstream aggregate operators from different transform arrays.
+  // FixMe: fill in -- intermediate children are Relay nodes. 
+
+  // Case 3: no aggregation at all. Marks depend directly on the pg data.
+  // FixMe: fill in.
 }
 
-function generatePgQueriesForView(runtime: any, view: vega.View) {
+function generatePgQueriesForView(view: vega.View) {
   // For each Postgres transform node in the View's dataflow graph,
   // generates a Postgres query to be executed at runtime, based
   // on that node's dependents. 
-
-  // FixMe: shouldn't need the runtime parameter or the below code.
-  // But for now I don't know how to extract postgres nodes from the View, 
-  // since the VegaTransformPostgres type is getting renamed with a 
-  // generated type name ('s' for example), and the type name is 
-  // the only way to identify a postgres node in the View. 
-  const pgTransformIds = [];
-  for(const operator of runtime.operators) {
-    if(operator.type === "postgres") {
-      pgTransformIds.push(operator.id);
-    }
-  }
   const nodes = (view as any)._runtime.nodes;
   for(const nodeId in nodes) {
-    if(pgTransformIds.includes(parseInt(nodeId))) {
+    if(nodes[nodeId].__proto__.constructor.Definition
+      && nodes[nodeId].__proto__.constructor.Definition.type === "postgres") {
       generatePgQueryForNode(nodes[nodeId]);
     }
   }
 }
 
 function run(spec:vega.Spec) {
+  // FixMe: should we define these attributes in the spec somehow?
   VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
   VegaTransformPostgres.setHttpOptions({
     hostname: 'localhost',
@@ -133,7 +162,7 @@ function run(spec:vega.Spec) {
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
-  generatePgQueriesForView(runtime, view);
+  generatePgQueriesForView(view);
   view.runAsync();
 }
 

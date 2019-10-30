@@ -25,7 +25,7 @@ function poolFor(connectionString: string) {
 
 function handleError(err: any, res: any) {
   const msg = err.stack ? err.stack.split('\n')[0] : err;
-  console.log(msg);
+  console.error(msg);
   res.status(400).send(msg);
 }
 

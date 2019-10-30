@@ -5,11 +5,18 @@
   "padding": 10,
   "data": [
     {
-      "name": "table",
+      "name": "cars",
       "transform": [
         {
           "type": "postgres",
           "table": "cars"
+        },
+        {
+          "type": "aggregate",
+          "fields": ["miles_per_gallon", "cylinders"],
+          "ops": ["average"],
+          "as": ["miles_per_gallon"],
+          "groupby": ["cylinders"]
         }
       ]
     }
@@ -19,7 +26,7 @@
       "name": "xscale",
       "type": "band",
       "domain": {
-        "data": "table",
+        "data": "cars",
         "field": "cylinders"
       },
       "range": "width",
@@ -29,7 +36,7 @@
     {
       "name": "yscale",
       "domain": {
-        "data": "table",
+        "data": "cars",
         "field": "miles_per_gallon"
       },
       "nice": true,
@@ -52,7 +59,7 @@
     {
       "type": "rect",
       "from": {
-        "data": "table"
+        "data": "cars"
       },
       "encode": {
         "enter": {
