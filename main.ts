@@ -66,11 +66,11 @@ function opToSql(op:string) {
   if(op === "average") {
     return "AVG";
   } else {
-    throw `Unsupported aggregate operation: ${op}`;
+    throw Error(`Unsupported aggregate operation: ${op}`);
   }
 }
 
-function queryFor(node:any, table:string) {
+function queryFor(node:any, relation:string) {
   // FixMe: support WHERE clause.
 
   let out = "SELECT ";
@@ -91,7 +91,7 @@ function queryFor(node:any, table:string) {
     }
   }
 
-  out += ` FROM ${table}`
+  out += ` FROM ${relation}`
 
   const groupby = node._argval.groupby.map((f:any) => f.fname);
   if(groupby.length > 0) {
@@ -119,7 +119,7 @@ function generatePgQueryForNode(node: any) {
   // Case 1: single downstream aggregate operator from same transform array.
   // Compute the aggregate query for the operator, overwrite the operator's
   // transform function, then remove the Postgres node as it is no longer needed.
-  const query = queryFor(node._targets[0], node._argval.table);
+  const query = queryFor(node._targets[0], node._argval.relation);
   node._targets[0]._query = query;
   node._targets[0].transform = node.__proto__.transform;
   node.transform = () => {}; // FixMe: delete entire node instead.
@@ -176,12 +176,12 @@ function handleVegaSpec() {
   (<HTMLInputElement>document.getElementById("vega-spec")).value = "";
 }
 
-function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, tableName: string) {   
+function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, relationName: string) {   
   const endOffset = Math.min(startOffset + rowsPerChunk, data.length);
   const chunk = data.slice(startOffset, endOffset);
   const endpoint = "insertSql";
   const postData = querystring.stringify({
-    name: tableName,
+    name: relationName,
     data: JSON.stringify(chunk),
     postgresConnectionString: postgresConnectionString
   });
@@ -202,22 +202,22 @@ function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: 
     });
     res.on('end', () => {
       if(res.statusCode === 400) {
-        throw `${res.statusMessage}: ${result}`;
+        throw Error(`${res.statusMessage}: ${result}`);
       }
     });
   });
   req.write(postData);
   req.end();
   if(endOffset < data.length) {
-    uploadSqlDataHelper(data, rowsPerChunk, endOffset, tableName);
+    uploadSqlDataHelper(data, rowsPerChunk, endOffset, relationName);
   }
 }
 
-function uploadSqlData(data: Object[], tableName: string) {
+function uploadSqlData(data: Object[], relationName: string) {
   const chunkBytes: number = 10*1024*1024; // 10MB
   const rowBytesSample: number = data.length > 0 ? JSON.stringify(data[0]).length : 1;
   const rowsPerChunk: number = Math.floor(chunkBytes/rowBytesSample);
-  uploadSqlDataHelper(data, rowsPerChunk, 0, tableName);
+  uploadSqlDataHelper(data, rowsPerChunk, 0, relationName);
 }
 
 function handleData() {
@@ -225,11 +225,11 @@ function handleData() {
   let filename: string;
   reader.onload = function(e:any) {
     if(filename.slice(filename.length-'.json'.length) != '.json') {
-      throw `file ${filename} must have .json extension`;
+      throw Error(`file ${filename} must have .json extension`);
     }
-    const tableName = filename.slice(0,(filename.length-'.json.'.length)+1).replace("-", "_");
+    const relationName = filename.slice(0,(filename.length-'.json.'.length)+1).replace("-", "_");
     const data = JSON.parse(e.target.result);
-    uploadSqlData(data, tableName);
+    uploadSqlData(data, relationName);
   }
   filename = this.files[0].name;
   reader.readAsText(this.files[0]);
