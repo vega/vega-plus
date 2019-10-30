@@ -9,7 +9,7 @@
       "transform": [
         {
           "type": "postgres",
-          "table": "cars"
+          "relation": "cars"
         },
         {
           "type": "aggregate",
