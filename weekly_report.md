@@ -13,10 +13,6 @@ Still need to support the following:
 3. More aggregations (COUNT, and so on).
 4. Safely remove the original pg node.
 
-## Challenges
-* Need to figure out how to pulse changes through at the collector node level, rather than the postgres transform node.
-* Need to start handling all the operators (and therefore more query generation) here: https://github.com/vega/vega/tree/a27ffe09de611c99e338e2ca77c1d1bdfc662381/packages/vega-transforms.
-
 # 09/18/2019 - 10/10/2019 - 10/16/2019
 ## Goals for this week
 * [X] Figure out how to collect field names from the dataflow graph (look at node._argval.encoders.enter.fields)
