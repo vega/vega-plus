@@ -1,3 +1,20 @@
+# 10/17/2019 - 10/30/2019 - 10/16/2019
+## Goals for these weeks
+* [X] Implement first pass of algorithm to rewrite aggregation nodes downstream of postgres operators in the dataflow graph.
+  1. Average aggregation with aliases is supported.
+  2. Case where the downstream node is a transform in the same data transform array is supported.
+  3. Implementation involves composing an aggregate query from the aggregate node in question and then overwriting that node's transform function after the View (dataflow graph) is initialized.
+
+## Additional notes
+* Still need to support the following: 
+1. Handle case where downstream nodes are other data sources or marks
+2. Handle filters (WHERE clause)
+3. Handle more aggregations (COUNT, and so on)
+
+## Challenges
+* Need to figure out how to pulse changes through at the collector node level, rather than the postgres transform node.
+* Need to start handling all the operators (and therefore more query generation) here: https://github.com/vega/vega/tree/a27ffe09de611c99e338e2ca77c1d1bdfc662381/packages/vega-transforms.
+
 # 09/18/2019 - 10/10/2019 - 10/16/2019
 ## Goals for this week
 * [X] Figure out how to collect field names from the dataflow graph (look at node._argval.encoders.enter.fields)
