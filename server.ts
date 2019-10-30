@@ -22,6 +22,7 @@ function poolFor(connectionString: string) {
   }
   return pools[connectionString];
 }
+
 function handleError(err: any, res: any) {
   const msg = err.stack ? err.stack.split('\n')[0] : err;
   console.log(msg);
