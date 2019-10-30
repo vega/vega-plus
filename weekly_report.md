@@ -1,15 +1,17 @@
 # 10/17/2019 - 10/30/2019 - 10/16/2019
 ## Goals for these weeks
 * [X] Implement first pass of algorithm to rewrite aggregation nodes downstream of postgres operators in the dataflow graph.
-  1. Average aggregation with aliases is supported.
-  2. Case where the downstream node is a transform in the same data transform array is supported.
-  3. Implementation involves composing an aggregate query from the aggregate node in question and then overwriting that node's transform function after the View (dataflow graph) is initialized.
+  ** Average aggregation with aliases is supported.
+  ** Case where the downstream node is a transform in the same data transform array is supported.
+  ** Implementation involves composing an aggregate query from the aggregate node in question and then overwriting that node's transform function after the View (dataflow graph) is initialized.
+  ** The original pg node's transform function is overwritten with a no-op for now.
 
 ## Additional notes
-* Still need to support the following: 
-1. Handle case where downstream nodes are other data sources or marks
-2. Handle filters (WHERE clause)
-3. Handle more aggregations (COUNT, and so on)
+Still need to support the following: 
+1. Case where downstream nodes are other data sources or marks.
+2. Filters (WHERE clause).
+3. More aggregations (COUNT, and so on).
+4. Safely remove the original pg node.
 
 ## Challenges
 * Need to figure out how to pulse changes through at the collector node level, rather than the postgres transform node.
