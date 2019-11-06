@@ -6,29 +6,46 @@ const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
 function opToSql(op:string) {
-  if(op === "average") {
-    return "AVG";
-  } else {
-    throw Error(`Unsupported aggregate operation: ${op}`);
+  // Converts supported Vega operations to SQL.
+  switch(op.toLowerCase()) {
+    case "average": 
+      return "AVG";
+    case "count":
+      return "COUNT";
+    case "valid":
+      return "COUNT";
+    default: 
+      throw Error(`Unsupported aggregate operation: ${op}`);
   }
 }
 
-function postgresQueryForAggregateNode(node:any, relation:string) {
-  // FixMe: support WHERE clause.
-  let out = "SELECT ";
+function generatePostgresQueryForAggregateNode(node:any, relation:string) {
+  // Given an aggregation node and a relation name, generates
+  // a Postgres query.
+  //
+  // FixMe: support filters for WHERE clause. This requires supporting
+  // expressions, which we are going to punt on for now.
+   
   const fields = node._argval.fields.map((f:any) => f.fname);
   const ops = node._argval.ops;
-  const opsStr = JSON.stringify(ops);
-  if(opsStr !== '["mean"]' && opsStr !== '["average"]') {
-    throw Error(`unsupported ops: ${ops}`);
-  } 
   const as = node._argval.as;
+  const validOpIdxs = [];
+  
+  // Select 
+  let out = "SELECT ";
   for(let fieldIdx=0; fieldIdx<fields.length; ++fieldIdx) {
     if(fieldIdx !== 0) {
       out += ", ";
     }
     if(fieldIdx < ops.length) {
-      out += `${opToSql(ops[fieldIdx])}(${fields[fieldIdx]})`;
+      const op = ops[fieldIdx];
+      if(op === "valid") {
+        validOpIdxs.push(fieldIdx);
+      }
+      const sqlOp = opToSql(op);
+      if(sqlOp) {
+        out += `${sqlOp}(${fields[fieldIdx]})`;
+      }
     } else {
       out += fields[fieldIdx];
     }
@@ -37,8 +54,21 @@ function postgresQueryForAggregateNode(node:any, relation:string) {
     }
   }
 
+  // From
   out += ` FROM ${relation}`
 
+  // Where
+  if(validOpIdxs.length > 0) {
+    out += " WHERE ";
+  }
+  for(const validOpIdx of validOpIdxs) {
+    if(validOpIdx !== 0) {
+      out += ", ";
+    }
+    out += `${fields[validOpIdx]} IS NOT NULL`  
+  }
+  
+  // Group by
   const groupby = node._argval.groupby.map((f:any) => f.fname);
   if(groupby.length > 0) {
     out += " GROUP BY ";
@@ -50,7 +80,7 @@ function postgresQueryForAggregateNode(node:any, relation:string) {
     }
   }
 
-  out += ";"
+  out += ";";
 
   return out;
 }
@@ -65,7 +95,7 @@ function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
   // 2. Ovewrwrite the aggregate node's transform function with
   //    the VegaTransformPostgres transform function.
   if(currentNode instanceof vegaTransforms.aggregate) {
-    const query = postgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
+    const query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
     currentNode._query = query;
     currentNode.transform = pgNode.__proto__.transform;
     return;
