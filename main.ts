@@ -89,19 +89,64 @@ function generatePostgresQueriesForNode(node: any) {
   // FixMe: fill in.
 }
 
+function removeNodesFromDataFlow(nodes: any, dataflow: any) {
+  // Remove given nodes from dataflow.
+
+  for(const node of nodes) {
+    
+    if(node._targets) {
+      // Remove references from targets to node.
+      for(const target of node._targets) {
+        delete target.source;
+      }
+      // Remove references from node to targets.
+      delete node._targets;
+    }
+
+    if(node.source) {
+      // Remove reference from source to node.
+      for(let sourceTargetIdx=0; sourceTargetIdx<node.source._targets.length; ++sourceTargetIdx) {
+        if(node.source._targets[sourceTargetIdx].id === node.id) {
+          node.source._targets.splice(sourceTargetIdx, 1);
+          break;
+        }
+      }
+      // Remove reference from node to source.
+      delete node.source;
+    }
+  }
+
+  const nodeIds = nodes.map((n: any) => n.id);
+
+  // Remove references from dataflow to nodes.
+  for(const id of nodeIds) {
+    delete (dataflow as any)._runtime.nodes[id.toString()];
+  }
+
+  // Remove references from touched array to nodes.
+  const touched = (dataflow as any)._touched;
+  for(let touchedIdx=0; touchedIdx<touched.length; ++touchedIdx) {
+    if(nodeIds.includes(touched[touchedIdx].id)) {
+      touched.splice(touchedIdx, 1);
+    }
+  }
+}
+
 function generatePostgresQueriesForView(view: vega.View) {
   // For each Postgres transform node in the View's dataflow graph,
   // generates a Postgres query to be executed at runtime, based
   // on that node's dependents. 
   const nodes = (view as any)._runtime.nodes;
+  const pgNodes = [];
   for(const nodeId in nodes) {
-    const node = nodes[nodeId]
+    const node = nodes[nodeId];
     if(node.__proto__.constructor.Definition
       && node.__proto__.constructor.Definition.type === "postgres") {
       generatePostgresQueriesForNode(node);
-      node.transform = () => {}; // FixMe: delete entire node instead.
+      pgNodes.push(node);
     }
   }
+  removeNodesFromDataFlow(pgNodes, view);
 }
 
 function run(spec:vega.Spec) {
