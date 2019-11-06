@@ -14,6 +14,8 @@ function opToSql(op:string) {
       return "COUNT";
     case "valid":
       return "COUNT";
+    case "missing":
+      return "COUNT";
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
@@ -30,6 +32,7 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   const ops = node._argval.ops;
   const as = node._argval.as;
   const validOpIdxs = [];
+  const missingOpIdxs = [];
   
   // Select 
   let out = "SELECT ";
@@ -41,6 +44,9 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
       const op = ops[fieldIdx];
       if(op === "valid") {
         validOpIdxs.push(fieldIdx);
+      } 
+      if(op === "missing") {
+        missingOpIdxs.push(fieldIdx);
       }
       const sqlOp = opToSql(op);
       if(sqlOp) {
@@ -58,16 +64,22 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   out += ` FROM ${relation}`
 
   // Where
-  if(validOpIdxs.length > 0) {
+  if(validOpIdxs.length > 0 || missingOpIdxs.length > 0) {
     out += " WHERE ";
   }
-  for(const validOpIdx of validOpIdxs) {
-    if(validOpIdx !== 0) {
-      out += ", ";
+  for(const [i, validOpIdx] of validOpIdxs.entries()) {
+    if(i !== 0) {
+      out += " AND ";
     }
-    out += `${fields[validOpIdx]} IS NOT NULL`  
+    out += `${fields[validOpIdx]} IS NOT NULL`;
   }
-  
+  for(const [i, missingOpIdx] of missingOpIdxs.entries()) {
+    if(i !== 0 || validOpIdxs.length > 0) {
+      out += " AND ";
+    }
+    out += `${fields[missingOpIdx]} IS NULL`;
+  }
+
   // Group by
   const groupby = node._argval.groupby.map((f:any) => f.fname);
   if(groupby.length > 0) {

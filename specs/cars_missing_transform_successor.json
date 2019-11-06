@@ -1,0 +1,91 @@
+{
+  "$schema": "https:\/\/vega.github.io\/schema\/vega\/v5.json",
+  "width": 400,
+  "height": 200,
+  "padding": 10,
+  "data": [
+    {
+      "name": "cars",
+      "transform": [
+        {
+          "type": "postgres",
+          "relation": "cars"
+        },
+        {
+          "type": "aggregate",
+          "fields": ["name", "miles_per_gallon", "cylinders"],
+          "ops": ["count", "missing"],
+          "as": ["name"],
+          "groupby": ["cylinders", "miles_per_gallon"]
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "band",
+      "domain": {
+        "data": "cars",
+        "field": "name"
+      },
+      "range": "width",
+      "padding": 0.05,
+      "round": true
+    },
+    {
+      "name": "yscale",
+      "domain": {
+        "data": "cars",
+        "field": "cylinders"
+      },
+      "nice": true,
+      "range": "height"
+    }
+  ],
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "Name"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "Number of Cylinders"
+    }
+  ],
+  "marks": [
+    {
+      "type": "rect",
+      "from": {
+        "data": "cars"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "name"
+          },
+          "width": {
+            "scale": "xscale",
+            "band": 1
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "cylinders"
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 0
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "steelblue"
+          }
+        }
+      }
+    }
+  ]
+}
