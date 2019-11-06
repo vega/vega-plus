@@ -11,6 +11,7 @@ Still need to support the following:
 1. Case where downstream nodes are marks.
 2. Filters (WHERE clause). But this involves supporting expressions.
 3. More aggregations.
+4. Add a test fwk.
 
 # 10/17/2019 - 10/30/2019
 ## Goals for these weeks
