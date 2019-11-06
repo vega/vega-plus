@@ -4,3 +4,4 @@ dist
 server.js
 *.swp
 package-lock.json
+*.DS_Store

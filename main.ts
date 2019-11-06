@@ -1,66 +1,9 @@
 import * as vega from "vega";
+import * as vegaTransforms from "vega-transforms";
 import VegaTransformPostgres from "vega-transform-pg";
-import { notDeepEqual } from "assert";
-import { openSync } from "fs";
 const querystring = require('querystring');
 const http = require('http');
-
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
-
-function hasFields(node) {
-  return node._argval 
-    && node._argval.encoders 
-    && node._argval.encoders.enter 
-    && node._argval.encoders.enter.fields
-    && node._argval.encoders.enter.fields.length
-}
-
-function hasSourcePathTo(node, dest) {
-  if(node.source) {
-    if(node.source.id === dest.id) {
-      return true;
-    }
-    return hasSourcePathTo(node.source, dest);
-  }
-  return false;
-}
-
-function isCollectNode(node) {
-  const def = node.__proto__.constructor.Definition;
-  return def && def.type === "Collect";
-}
-
-function upstreamCollectNodeFor(node) {
-  if(isCollectNode(node.source)) {
-    return node.source;
-  }
-  return upstreamCollectNodeFor(node.source);
-}
-
-function collectFields(node, transform) {
-  // FixMe: this function and its subroutines 
-  // can be made more efficient. E.g. get the collect
-  // node on the way to checking if there is a source path
-  // to the transform.
-  let out = {};
-
-  if(hasFields(node) && hasSourcePathTo(node, transform)) {
-    const upstreamCollectNode = upstreamCollectNodeFor(node);
-    out[upstreamCollectNode.id] = {
-      collectNode: upstreamCollectNode,
-      fields: node._argval.encoders.enter.fields
-    }
-  }
-  
-  if(!node._targets) {
-    return out;
-  }
-   
-  for(const target of node._targets) {
-    out = {...out, ...collectFields(target, transform)};
-  }
-  return out;
-}
 
 function opToSql(op:string) {
   if(op === "average") {
@@ -70,12 +13,15 @@ function opToSql(op:string) {
   }
 }
 
-function queryFor(node:any, relation:string) {
+function postgresQueryForAggregateNode(node:any, relation:string) {
   // FixMe: support WHERE clause.
-
   let out = "SELECT ";
   const fields = node._argval.fields.map((f:any) => f.fname);
   const ops = node._argval.ops;
+  const opsStr = JSON.stringify(ops);
+  if(opsStr !== '["mean"]' && opsStr !== '["average"]') {
+    throw Error(`unsupported ops: ${ops}`);
+  } 
   const as = node._argval.as;
   for(let fieldIdx=0; fieldIdx<fields.length; ++fieldIdx) {
     if(fieldIdx !== 0) {
@@ -109,37 +55,51 @@ function queryFor(node:any, relation:string) {
   return out;
 }
 
-function generatePgQueryForNode(node: any) {
-  // For the given node, generatesd a Postgres query to be
-  // executed at runtime, based on that node's dependents.
-  if(!node._targets || node._targets.length === 0) {
+function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
+  // Rewrites all top-level aggregate nodes in the subtree starting at
+  // currentNode. For each path starting from currentNode, a top-level 
+  // aggregate node is the first aggregate node in that path.
+  // 
+  // Rewriting involves the following:
+  // 1. Generate the Postgres query for the aggregate node.
+  // 2. Ovewrwrite the aggregate node's transform function with
+  //    the VegaTransformPostgres transform function.
+  if(currentNode instanceof vegaTransforms.aggregate) {
+    const query = postgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
+    currentNode._query = query;
+    currentNode.transform = pgNode.__proto__.transform;
+    return;
+  } 
+  if(!currentNode._targets) {
     return;
   }
+  for(const target of currentNode._targets) {
+    rewriteTopLevelAggregateNodesFor(target, pgNode);
+  }
+}
 
-  // Case 1: single downstream aggregate operator from same transform array.
-  // Compute the aggregate query for the operator, overwrite the operator's
-  // transform function, then remove the Postgres node as it is no longer needed.
-  const query = queryFor(node._targets[0], node._argval.relation);
-  node._targets[0]._query = query;
-  node._targets[0].transform = node.__proto__.transform;
-  node.transform = () => {}; // FixMe: delete entire node instead.
+function generatePostgresQueriesForNode(node: any) {
+  // For the given node, generates Postgres queries to be
+  // executed at runtime, based on that node's dependents.
+  
+  // Case 1: rewriting downstream aggregate nodes.
+  rewriteTopLevelAggregateNodesFor(node, node);
 
-  // Case 2: multiple downstream aggregate operators from different transform arrays.
-  // FixMe: fill in -- intermediate children are Relay nodes. 
-
-  // Case 3: no aggregation at all. Marks depend directly on the pg data.
+  // Case 2: no aggregation at all. Marks depend directly on the pg data.
   // FixMe: fill in.
 }
 
-function generatePgQueriesForView(view: vega.View) {
+function generatePostgresQueriesForView(view: vega.View) {
   // For each Postgres transform node in the View's dataflow graph,
   // generates a Postgres query to be executed at runtime, based
   // on that node's dependents. 
   const nodes = (view as any)._runtime.nodes;
   for(const nodeId in nodes) {
-    if(nodes[nodeId].__proto__.constructor.Definition
-      && nodes[nodeId].__proto__.constructor.Definition.type === "postgres") {
-      generatePgQueryForNode(nodes[nodeId]);
+    const node = nodes[nodeId]
+    if(node.__proto__.constructor.Definition
+      && node.__proto__.constructor.Definition.type === "postgres") {
+      generatePostgresQueriesForNode(node);
+      node.transform = () => {}; // FixMe: delete entire node instead.
     }
   }
 }
@@ -162,7 +122,7 @@ function run(spec:vega.Spec) {
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
-  generatePgQueriesForView(view);
+  generatePostgresQueriesForView(view);
   view.runAsync();
 }
 
