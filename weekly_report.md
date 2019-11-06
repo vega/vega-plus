@@ -4,7 +4,7 @@
 * [X] Add support for more aggregation operations (count, valid, missing).
 * [X] Add code to remove pg nodes from the data flow. 
 * [X] Start text matrix, see here: https://docs.google.com/spreadsheets/d/13WNrjA9Vnv8mlIhPJJeumJzR0H25oSJ0JyBMF8a958E/edit#gid=0
-* [ ] Do 1-paragrap writeup of what I've done so far.
+* [ ] Do 1-paragraph writeup of what I've done so far.
 
 ## Additional notes
 Still need to support the following: 
