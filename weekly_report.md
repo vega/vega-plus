@@ -1,6 +1,6 @@
 # 10/31/2019 - 11/06/2019
 ## Goals for these weeks
-* [X] Add support for data entries that source a pg transform. Algorithm to handle this case plus the downstream transform is to recursively check the targets of the pg node for top-level aggregation nodes, i.e. the first nodes on each path out from the pg node.
+* [X] Add support for data entries that source a pg transform. Algorithm to handle this case plus the downstream transform is to recursively check the targets of the pg node for top-level aggregation nodes, i.e. the first aggregate nodes on each path out from the pg node.
 * [X] Add support for more aggregation operations (count, valid, missing).
 * [X] Add code to remove pg nodes from the data flow. 
 * [X] Start text matrix, see here: https://docs.google.com/spreadsheets/d/13WNrjA9Vnv8mlIhPJJeumJzR0H25oSJ0JyBMF8a958E/edit#gid=0
