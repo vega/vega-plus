@@ -5,17 +5,17 @@ const querystring = require('querystring');
 const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
-function opToSql(op:string) {
+function opToSql(op:string, field:string) {
   // Converts supported Vega operations to SQL.
   switch(op.toLowerCase()) {
     case "average": 
-      return "AVG";
+      return `AVG(${field})`;
     case "count":
-      return "COUNT";
     case "valid":
-      return "COUNT";
     case "missing":
-      return "COUNT";
+      return `COUNT(${field})`;
+    case "distinct":
+      return `COUNT(DISTINCT ${field})`
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
@@ -48,10 +48,7 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
       if(op === "missing") {
         missingOpIdxs.push(fieldIdx);
       }
-      const sqlOp = opToSql(op);
-      if(sqlOp) {
-        out += `${sqlOp}(${fields[fieldIdx]})`;
-      }
+      out += opToSql(op, fields[fieldIdx]);
     } else {
       out += fields[fieldIdx];
     }
