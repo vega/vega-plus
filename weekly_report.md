@@ -1,7 +1,7 @@
 # 11/07/2019 - 11/13/2019
 ## Goals for this week
-* [ ] Add support for remaining aggregate queries
-* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and pooke around the codebase. If there's nothing usable here, to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
+* [ ] Add support + tests for remaining aggregate queries.
+* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and pooke around the codebase. If there's nothing usable here to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
 * [ ] Work on technical report.
 * [ ] Add simple test fwk.
 * [ ] Handle case where marks source the pg transform.
