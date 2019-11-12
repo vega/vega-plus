@@ -6,6 +6,7 @@
 * [ ] Add simple test fwk.
 * [ ] Handle case where marks source the pg transform.
 * [ ] Add placeholder in server.ts for sampling. Start with a naive algorithm that does random sampling when the number of datapoints exceeds some threshold (e.g. 5000). The plan would be to eventually plug in something more sophisticated. 
+* [X] Meet with Junran to explain the project.
 
 # 10/31/2019 - 11/06/2019
 ## Goals for this week
