@@ -5,6 +5,10 @@ const querystring = require('querystring');
 const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
+function percentileContSql(field:string, fraction:number) {
+  return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
+}
+
 function opToSql(op:string, field:string) {
   // Converts supported Vega operations to SQL
   // for the given field.
@@ -32,6 +36,12 @@ function opToSql(op:string, field:string) {
       return `STDDEV_POP(${field})`;
     case "stderr":
       return `STDDEV(${field})/SQRT(COUNT(${field}))`;
+    case "median":
+      return percentileContSql(field, 0.5);
+    case "q1":
+      return percentileContSql(field, 0.25);
+    case "q3":
+      return percentileContSql(field, 0.75);
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
