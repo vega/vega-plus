@@ -8,6 +8,9 @@ const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 function opToSql(op:string, field:string) {
   // Converts supported Vega operations to SQL
   // for the given field.
+  // FixMe: we will need to eventually support the case where
+  // the 'field' is actually a vega expression, which would
+  // require translating vega expressions into SQL.
   switch(op.toLowerCase()) {
     case "average": 
       return `AVG(${field})`;
@@ -27,6 +30,8 @@ function opToSql(op:string, field:string) {
       return `STDDEV(${field})`;
     case "stdevp":
       return `STDDEV_POP(${field})`;
+    case "stderr":
+      return `STDDEV(${field})/SQRT(COUNT(${field}))`;
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
