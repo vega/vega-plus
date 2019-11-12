@@ -1,10 +1,19 @@
+# 11/07/2019 - 11/13/2019
+## Goals for this week
+* [ ] Add support + tests for remaining aggregate queries.
+* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and pooke around the codebase. If there's nothing usable here to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
+* [ ] Work on technical report.
+* [ ] Add simple test fwk.
+* [ ] Handle case where marks source the pg transform.
+* [ ] Add placeholder in server.ts for sampling. Start with a naive algorithm that does random sampling when the number of datapoints exceeds some threshold (e.g. 5000). The plan would be to eventually plug in something more sophisticated. 
+
 # 10/31/2019 - 11/06/2019
-## Goals for these weeks
+## Goals for this week
 * [X] Add support for data entries that source a pg transform. Algorithm to handle this case plus the downstream transform is to recursively check the targets of the pg node for top-level aggregation nodes, i.e. the first aggregate nodes on each path out from the pg node.
 * [X] Add support for more aggregation operations (count, valid, missing).
 * [X] Add code to remove pg nodes from the data flow. 
 * [X] Start text matrix, see here: https://docs.google.com/spreadsheets/d/13WNrjA9Vnv8mlIhPJJeumJzR0H25oSJ0JyBMF8a958E/edit#gid=0
-* [ ] Do 1-paragraph writeup of what I've done so far.
+* [X] Do 1-paragraph writeup of what I've done so far.
 
 ## Additional notes
 Still need to support the following: 
