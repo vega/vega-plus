@@ -19,6 +19,8 @@ function opToSql(op:string, field:string) {
       return `COUNT(DISTINCT ${field})`;
     case "sum":
       return `SUM(${field})`;
+    case "variance":
+      return `VARIANCE(${field})`;
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
