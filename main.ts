@@ -42,6 +42,10 @@ function opToSql(op:string, field:string) {
       return percentileContSql(field, 0.25);
     case "q3":
       return percentileContSql(field, 0.75);
+    case "min":
+      return `MIN(${field})`;
+    case "max":
+      return `MAX(${field})`;
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
