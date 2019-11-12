@@ -6,7 +6,8 @@ const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
 function opToSql(op:string, field:string) {
-  // Converts supported Vega operations to SQL.
+  // Converts supported Vega operations to SQL
+  // for the given field.
   switch(op.toLowerCase()) {
     case "average": 
       return `AVG(${field})`;
@@ -15,7 +16,9 @@ function opToSql(op:string, field:string) {
     case "missing":
       return `COUNT(${field})`;
     case "distinct":
-      return `COUNT(DISTINCT ${field})`
+      return `COUNT(DISTINCT ${field})`;
+    case "sum":
+      return `SUM(${field})`;
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
