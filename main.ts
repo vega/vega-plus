@@ -21,6 +21,12 @@ function opToSql(op:string, field:string) {
       return `SUM(${field})`;
     case "variance":
       return `VARIANCE(${field})`;
+    case "variancep":
+      return `VAR_POP(${field})`;
+    case "stdev":
+      return `STDDEV(${field})`;
+    case "stdevp":
+      return `STDDEV_POP(${field})`;
     default: 
       throw Error(`Unsupported aggregate operation: ${op}`);
   }
