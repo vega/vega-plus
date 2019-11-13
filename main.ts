@@ -59,14 +59,17 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   // expressions, which we are going to punt on for now.
    
   const fields = node._argval.fields.map((f:any) => f.fname);
+  const groupbyFields = node._argval.groupby.map((f:any) => f.fname);
   const ops = node._argval.ops;
   const as = node._argval.as;
   const validOpIdxs = [];
   const missingOpIdxs = [];
   
-  // Select 
+  //////////////////////////////////////////////////////////////////////////////
+  // SELECT clause
+  //////////////////////////////////////////////////////////////////////////////
   let out = "SELECT ";
-  for(let fieldIdx=0; fieldIdx<fields.length; ++fieldIdx) {
+  for(const [fieldIdx, field] of fields.entries()) {
     if(fieldIdx !== 0) {
       out += ", ";
     }
@@ -78,19 +81,29 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
       if(op === "missing") {
         missingOpIdxs.push(fieldIdx);
       }
-      out += opToSql(op, fields[fieldIdx]);
+      out += opToSql(op, field);
     } else {
-      out += fields[fieldIdx];
+      out += field;
     }
     if(fieldIdx < as.length) {
       out += ` AS ${as[fieldIdx]}`
     }
   }
+  for(const [groupbyFieldIdx, groupbyField] of groupbyFields.entries()) {
+    if(fields.length > 0 || groupbyFieldIdx > 0) {
+      out += ", ";
+    }
+    out += groupbyField;
+  }
 
-  // From
+  //////////////////////////////////////////////////////////////////////////////
+  // FROM clause
+  //////////////////////////////////////////////////////////////////////////////
   out += ` FROM ${relation}`
 
-  // Where
+  //////////////////////////////////////////////////////////////////////////////
+  // WHERE clause
+  //////////////////////////////////////////////////////////////////////////////
   if(validOpIdxs.length > 0 || missingOpIdxs.length > 0) {
     out += " WHERE ";
   }
@@ -107,15 +120,16 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
     out += `${fields[missingOpIdx]} IS NULL`;
   }
 
-  // Group by
-  const groupby = node._argval.groupby.map((f:any) => f.fname);
-  if(groupby.length > 0) {
+  //////////////////////////////////////////////////////////////////////////////
+  // GROUP BY clause
+  //////////////////////////////////////////////////////////////////////////////
+  if(groupbyFields.length > 0) {
     out += " GROUP BY ";
-    for(let groupbyIdx=0; groupbyIdx<groupby.length; ++groupbyIdx) {
-      if(groupbyIdx !== 0) {
+    for(const [groupbyFieldIdx, groupbyField] of groupbyFields.entries()) {
+      if(groupbyFieldIdx !== 0) {
         out += ", ";
       }
-      out += groupby[groupbyIdx];
+      out += groupbyField;
     }
   }
 
