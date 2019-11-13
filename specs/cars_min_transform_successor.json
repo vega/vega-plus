@@ -13,7 +13,7 @@
         },
         {
           "type": "aggregate",
-          "fields": ["miles_per_gallon", "cylinders"],
+          "fields": ["miles_per_gallon"],
           "ops": ["min"],
           "as": ["miles_per_gallon"],
           "groupby": ["cylinders"]
