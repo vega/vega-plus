@@ -13,10 +13,10 @@
         },
         {
           "type": "aggregate",
-          "fields": ["name", "miles_per_gallon", "cylinders"],
-          "ops": ["count", "missing"],
-          "as": ["name"],
-          "groupby": ["cylinders", "miles_per_gallon"]
+          "fields": ["miles_per_gallon"],
+          "ops": ["missing"],
+          "as": ["miles_per_gallon"],
+          "groupby": ["cylinders"]
         }
       ]
     }
@@ -27,7 +27,7 @@
       "type": "band",
       "domain": {
         "data": "cars",
-        "field": "name"
+        "field": "cylinders"
       },
       "range": "width",
       "padding": 0.05,
@@ -37,7 +37,7 @@
       "name": "yscale",
       "domain": {
         "data": "cars",
-        "field": "cylinders"
+        "field": "miles_per_gallon"
       },
       "nice": true,
       "range": "height"
@@ -47,12 +47,12 @@
     {
       "orient": "bottom",
       "scale": "xscale",
-      "title": "Name"
+      "title": "Number of Cylinders"
     },
     {
       "orient": "left",
       "scale": "yscale",
-      "title": "Number of Cylinders"
+      "title": "Miles per Gallon"
     }
   ],
   "marks": [
@@ -65,7 +65,7 @@
         "enter": {
           "x": {
             "scale": "xscale",
-            "field": "name"
+            "field": "cylinders"
           },
           "width": {
             "scale": "xscale",
@@ -73,7 +73,7 @@
           },
           "y": {
             "scale": "yscale",
-            "field": "cylinders"
+            "field": "miles_per_gallon"
           },
           "y2": {
             "scale": "yscale",

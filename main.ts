@@ -21,7 +21,7 @@ function opToSql(op:string, field:string) {
     case "count":
     case "valid":
     case "missing":
-      return `COUNT(${field})`;
+      return `COUNT(*)`;
     case "distinct":
       return `COUNT(DISTINCT ${field})`;
     case "sum":
