@@ -3,7 +3,7 @@
 * [X] Add support + tests for remaining aggregate queries (sum, variance, variancep, stdev, stdevp, stderr, median, q1, q3, min, max) EXCEPT confidence interval and argmin/argmax -- see Challenges section for more info.
 * [X] Write initial draft of abstract.
 * [X] Meet with Junran to explain the project.
-* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and pooke around the codebase. If there's nothing usable here to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
+* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and poke around the codebase. If there's nothing usable here to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
 
 ## Long-term goals
 * [ ] First draft of technical report.
