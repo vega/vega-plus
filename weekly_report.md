@@ -3,7 +3,10 @@
 * [X] Add support + tests for remaining aggregate queries (sum, variance, variancep, stdev, stdevp, stderr, median, q1, q3, min, max) EXCEPT confidence interval and argmin/argmax -- see Challenges section for more info.
 * [X] Write initial draft of abstract.
 * [X] Meet with Junran to explain the project.
-* [X] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Looks like they do handle it, see here: https://github.com/Quansight/ibis-vega-transform/blob/7fba12a11f8e539165a19bd432799cd364c3cd80/ibis_vega_transform/vegaexpr.py#L70.
+* [X] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Looks like they do handle it partially. See the following:
+** https://github.com/Quansight/ibis-vega-transform/blob/master/ibis_vega_transform/transforms/filter.py
+** https://github.com/Quansight/ibis-vega-transform/blob/7fba12a11f8e539165a19bd432799cd364c3cd80/ibis_vega_transform/vegaexpr.py#L70.
+** https://github.com/altair-viz/altair-transform/blob/master/altair_transform/utils/_evaljs.py
 
 ## Long-term goals
 * [ ] First draft of technical report.
