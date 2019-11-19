@@ -1,6 +1,6 @@
 import * as vega from "vega";
-import {aggregate} from "vega-transforms"; // FixMe: don't import all
-import {encode} from "vega-encode"; // FixMe: don't import all
+import {aggregate, extent} from "vega-transforms";
+import {encode} from "vega-encode";
 import VegaTransformPostgres from "vega-transform-pg";
 const querystring = require('querystring');
 const http = require('http');
@@ -143,14 +143,22 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   return out;
 }
 
-function hasEncodedFields(node:any) {
+function hasEncodeFields(node:any) {
   // Returns true iff the given node has fields defined in an 
   // enter encoding function.
   return node._argval 
     && node._argval.encoders 
     && node._argval.encoders.enter 
     && node._argval.encoders.enter.fields
-    && node._argval.encoders.enter.fields.length
+    && node._argval.encoders.enter.fields.length;
+}
+
+function hasExtentFields(node:any) {
+  // Returns true iff the given node has extent
+  // fields defined.
+  return node._argval
+    && node._argval.field
+    && node._argval.field.fields;
 }
 
 function generatePostgresQueryForMarkFields(fields:string[], relation:string) {
@@ -204,51 +212,65 @@ function hasSourcePathTo(node:any, dest:any) {
   return false;
 }
 
-function collectEncodeFieldsFor(node:any, pgNode:any) {
-  // Collects the union of all fields mentioned in encode nodes for which the 
-  // following holds:
+function collectNonAggregateFieldsFor(node:any, pgNode:any) {
+  // Recursively collects the union of all fields mentioned in encode nodes 
+  // for which the following holds:
   // 1. The encode node is on a path from pgNode.
   // 2. There is no intervening aggregate node on the path from 
   //    pgNode to the encode node.
   // 3. FixMe: we use hasSourcePathTo() to avoid collecting field names
   //    for some other nodes. The correct thing to do is to get the schema
   //    from the server and use that to filter out unwanted field names.
-  if(node instanceof encode 
-    && hasEncodedFields(node) 
-    && hasSourcePathTo(node, pgNode)) {
-    return node._argval.encoders.enter.fields;
-  }
+
   if(node instanceof aggregate) {
     // Aggregate nodes cut off the field search, since aggregate nodes
     // are handled separately. 
     return [];
   }
+
+  let out = [];
+
+  if(node instanceof encode 
+    && hasEncodeFields(node) 
+    && hasSourcePathTo(node, pgNode)) {
+    out = node._argval.encoders.enter.fields;
+  }
+
+  if(node instanceof extent
+    && hasExtentFields(node)
+    && hasSourcePathTo(node, pgNode)) {
+    out = node._argval.field.fields;
+  }
+  
   if(!node._targets) {
     return [];
   }
-  let out = [];
+
   for(const target of node._targets) {
-    out = out.concat(collectEncodeFieldsFor(target, pgNode));
+    out = out.concat(collectNonAggregateFieldsFor(target, pgNode));
   }
+
   return out;
 }
 
-function generatePostgresQueriesForNode(node: any) {
+function generatePostgresQueriesForNode(pgNode: any) {
   // For the given pg node, generates Postgres queries to be
   // executed at runtime, based on that node's dependents.
-  if(node.__proto__.constructor.Definition.type !== "postgres") {
+
+  if(pgNode.__proto__.constructor.Definition.type !== "postgres") {
     throw Error("generatePostgresQueriesForNode called on non-postgres");
   }
 
-  // Rewrite top-level aggregate nodes
-  rewriteTopLevelAggregateNodesFor(node, node);
+  // Rewrite top-level aggregate nodes.
+  rewriteTopLevelAggregateNodesFor(pgNode, pgNode);
 
-  // If there are encodings that directly reference the pg datasource (i.e.
-  // there are no intervening aggregate nodes), then collect all the referenced
-  // fields into a simple select query for the pg node.
-  const markFields:string[] = Array.from(new Set(collectEncodeFieldsFor(node, node)));
+  // Collect into a simple SELECT query all fields from non-aggregate nodes 
+  // that are on a downstream path from the pg node such that there is no 
+  // intervening aggregate node on the path.
+  // FixMe: we need to filter out fields that aren't in the pg node's relation.
+  const markFields:string[] = Array.from(new Set(collectNonAggregateFieldsFor(pgNode, pgNode)));
   if(markFields.length) {
-    node._query = generatePostgresQueryForMarkFields(markFields, node._argval.relation);
+    pgNode._query = generatePostgresQueryForMarkFields(markFields, pgNode._argval.relation);
   }
 }
 

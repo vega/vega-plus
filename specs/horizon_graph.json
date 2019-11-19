@@ -38,9 +38,7 @@
       "transform" : [
         {
           "type": "postgres",
-          "query": {
-            "signal": "'select x, y from horizon_graph'"
-          }
+          "relation": "horizon_graph"
         }
       ]
     }
