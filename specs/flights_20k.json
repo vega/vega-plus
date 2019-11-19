@@ -9,9 +9,14 @@
       "transform": [
         {
           "type": "postgres",
-          "query": {
-            "signal": "'select distance, avg(delay) from flights_20k where delay >= 0 group by distance'"
-          }
+          "relation": "flights_20k"
+        },
+        {
+          "type": "aggregate",
+          "fields": ["delay"],
+          "ops": ["average"],
+          "as": ["delay"],
+          "groupby": ["distance"]
         }
       ]
     }
@@ -31,7 +36,7 @@
       "name": "yscale",
       "domain": {
         "data": "table",
-        "field": "avg"
+        "field": "delay"
       },
       "nice": true,
       "range": "height"
@@ -41,12 +46,12 @@
     {
       "orient": "bottom",
       "scale": "xscale",
-      "title": "distance"
+      "title": "Distance"
     },
     {
       "orient": "left",
       "scale": "yscale",
-      "title": "avg(delay)"
+      "title": "Average Delay"
     }
   ],
   "marks": [
@@ -63,7 +68,7 @@
           },
           "y": {
             "scale": "yscale",
-            "field": "avg"
+            "field": "delay"
           }
         },
         "update": {
