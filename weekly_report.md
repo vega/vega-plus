@@ -1,12 +1,23 @@
 # 11/07/2019 - 11/13/2019
-## Goals for this week
-* [ ] Add support + tests for remaining aggregate queries.
-* [ ] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Install it and pooke around the codebase. If there's nothing usable here to handle expressions, we will want to leverage Vega's expression parser and translate the AST it generates to SQL.
-* [ ] Work on technical report.
+## Primary goals for this week
+* [X] Add support + tests for remaining aggregate queries (sum, variance, variancep, stdev, stdevp, stderr, median, q1, q3, min, max) EXCEPT confidence interval and argmin/argmax -- see Challenges section for more info.
+* [X] Write initial draft of abstract.
+* [X] Meet with Junran to explain the project.
+* [X] Investigate how Omnisci handles Vega expression translation to SQL, if they do at all. See jupyterlab-omnisci github. Looks like they do handle it partially. See the following:
+* https://github.com/Quansight/ibis-vega-transform/blob/master/ibis_vega_transform/transforms/filter.py
+* https://github.com/Quansight/ibis-vega-transform/blob/7fba12a11f8e539165a19bd432799cd364c3cd80/ibis_vega_transform/vegaexpr.py#L70.
+* https://github.com/altair-viz/altair-transform/blob/master/altair_transform/utils/_evaljs.py
+
+## Long-term goals
+* [ ] First draft of technical report.
 * [ ] Add simple test fwk.
 * [ ] Handle case where marks source the pg transform.
 * [ ] Add placeholder in server.ts for sampling. Start with a naive algorithm that does random sampling when the number of datapoints exceeds some threshold (e.g. 5000). The plan would be to eventually plug in something more sophisticated. 
-* [X] Meet with Junran to explain the project.
+
+## Challenges
+
+* I struggled writing an argmin/argmax aggregate transform in vega. I understand the concept, but when I write a spec that does argmin on in-line values, I keep getting -Inf/+Inf for the data range. 
+* I also struggled coming up with a query to do a bootstrap confidence interval. I have a query that does a single sample mean, but I can't figure out how to iterate 1000 times and collate the results in a single SQL query.
 
 # 10/31/2019 - 11/06/2019
 ## Goals for this week
@@ -14,7 +25,6 @@
 * [X] Add support for more aggregation operations (count, valid, missing).
 * [X] Add code to remove pg nodes from the data flow. 
 * [X] Start text matrix, see here: https://docs.google.com/spreadsheets/d/13WNrjA9Vnv8mlIhPJJeumJzR0H25oSJ0JyBMF8a958E/edit#gid=0
-* [X] Do 1-paragraph writeup of what I've done so far.
 
 ## Additional notes
 Still need to support the following: 
