@@ -1,9 +1,15 @@
 import * as vega from "vega";
-import * as vegaTransforms from "vega-transforms";
+import {aggregate} from "vega-transforms"; // FixMe: don't import all
+import {encode} from "vega-encode"; // FixMe: don't import all
 import VegaTransformPostgres from "vega-transform-pg";
 const querystring = require('querystring');
 const http = require('http');
+
+// FixMe: put connection string into vega spec.
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
+
+// FixMe: write JSdocs for this file.
+// FixMe: split dataflow rewrite functions into a different file.
 
 function percentileContSql(field:string, fraction:number) {
   return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
@@ -57,7 +63,6 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   //
   // FixMe: support filters for WHERE clause. This requires supporting
   // expressions, which we are going to punt on for now.
-   
   const fields = node._argval.fields.map((f:any) => f.fname);
   const groupbyFields = node._argval.groupby.map((f:any) => f.fname);
   const ops = node._argval.ops;
@@ -138,6 +143,33 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   return out;
 }
 
+function hasEncodedFields(node:any) {
+  // Returns true iff the given node has fields defined in an 
+  // enter encoding function.
+  return node._argval 
+    && node._argval.encoders 
+    && node._argval.encoders.enter 
+    && node._argval.encoders.enter.fields
+    && node._argval.encoders.enter.fields.length
+}
+
+function generatePostgresQueryForMarkFields(fields:string[], relation:string) {
+  // Generates a SELECT f1, f2, ..., fn FROM <relation> query for the given 
+  // list of fields and relation.
+  //
+  // FixMe: we should query the database for the relation schema
+  // and only use those fields in the schema to build the select query.
+  let out = "SELECT ";
+  for(const [fieldIdx, field] of fields.entries()) {
+    if(fieldIdx !== 0) {
+      out += ", "
+    }
+    out += field;
+  }
+  out += ` FROM ${relation}`;
+  return out;
+}
+
 function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
   // Rewrites all top-level aggregate nodes in the subtree starting at
   // currentNode. For each path starting from currentNode, a top-level 
@@ -147,12 +179,12 @@ function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
   // 1. Generate the Postgres query for the aggregate node.
   // 2. Ovewrwrite the aggregate node's transform function with
   //    the VegaTransformPostgres transform function.
-  if(currentNode instanceof vegaTransforms.aggregate) {
-    const query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
-    currentNode._query = query;
+  if(currentNode instanceof aggregate && currentNode._argval.fields) {
+    currentNode._query = generatePostgresQueryForAggregateNode(
+      currentNode, pgNode._argval.relation);
     currentNode.transform = pgNode.__proto__.transform;
     return;
-  } 
+  }
   if(!currentNode._targets) {
     return;
   }
@@ -161,20 +193,67 @@ function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
   }
 }
 
+function hasSourcePathTo(node:any, dest:any) {
+  // Returns true iff there is a source path from node to dest.
+  if(node.source) {
+    if(node.source.id === dest.id) {
+      return true;
+    }
+    return hasSourcePathTo(node.source, dest);
+  }
+  return false;
+}
+
+function collectEncodeFieldsFor(node:any, pgNode:any) {
+  // Collects the union of all fields mentioned in encode nodes for which the 
+  // following holds:
+  // 1. The encode node is on a path from pgNode.
+  // 2. There is no intervening aggregate node on the path from 
+  //    pgNode to the encode node.
+  // 3. FixMe: we use hasSourcePathTo() to avoid collecting field names
+  //    for some other nodes. The correct thing to do is to get the schema
+  //    from the server and use that to filter out unwanted field names.
+  if(node instanceof encode 
+    && hasEncodedFields(node) 
+    && hasSourcePathTo(node, pgNode)) {
+    return node._argval.encoders.enter.fields;
+  }
+  if(node instanceof aggregate) {
+    // Aggregate nodes cut off the field search, since aggregate nodes
+    // are handled separately. 
+    return [];
+  }
+  if(!node._targets) {
+    return [];
+  }
+  let out = [];
+  for(const target of node._targets) {
+    out = out.concat(collectEncodeFieldsFor(target, pgNode));
+  }
+  return out;
+}
+
 function generatePostgresQueriesForNode(node: any) {
-  // For the given node, generates Postgres queries to be
+  // For the given pg node, generates Postgres queries to be
   // executed at runtime, based on that node's dependents.
-  
-  // Case 1: rewriting downstream aggregate nodes.
+  if(node.__proto__.constructor.Definition.type !== "postgres") {
+    throw Error("generatePostgresQueriesForNode called on non-postgres");
+  }
+
+  // Rewrite top-level aggregate nodes
   rewriteTopLevelAggregateNodesFor(node, node);
 
-  // Case 2: no aggregation at all. Marks depend directly on the pg data.
-  // FixMe: fill in.
+  // If there are encodings that directly reference the pg datasource (i.e.
+  // there are no intervening aggregate nodes), then collect all the referenced
+  // fields into a simple select query for the pg node.
+  const markFields:string[] = Array.from(new Set(collectEncodeFieldsFor(node, node)));
+  if(markFields.length) {
+    node._query = generatePostgresQueryForMarkFields(markFields, node._argval.relation);
+  }
 }
 
 function removeNodesFromDataFlow(nodes: any, dataflow: any) {
   // Remove given nodes from dataflow.
-
   for(const node of nodes) {
     
     if(node._targets) {
@@ -229,7 +308,7 @@ function generatePostgresQueriesForView(view: vega.View) {
       pgNodes.push(node);
     }
   }
-  removeNodesFromDataFlow(pgNodes, view);
+  removeNodesFromDataFlow(pgNodes.filter((n:any) => !n._query), view);
 }
 
 function run(spec:vega.Spec) {
@@ -267,7 +346,6 @@ function handleVegaSpec() {
 function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, relationName: string) {   
   const endOffset = Math.min(startOffset + rowsPerChunk, data.length);
   const chunk = data.slice(startOffset, endOffset);
-  const endpoint = "insertSql";
   const postData = querystring.stringify({
     name: relationName,
     data: JSON.stringify(chunk),

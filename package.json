@@ -17,6 +17,7 @@
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
     "vega": "^5.3.2",
+    "vega-encode": "^4.5.0",
     "vega-transform-omnisci-core": "^0.0.8",
     "vega-transform-pg": "^1.0.9",
     "vega-transforms": "4.4.3"

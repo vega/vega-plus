@@ -73,7 +73,6 @@ function postgresSchemaFor(dataObj: any): string {
   const schema: any = {};
   for(var property in dataObj) {
     if(dataObj.hasOwnProperty(property)) {
-      const pgType = postgresTypeFor(dataObj[property]);
       schema[property] = postgresTypeFor(dataObj[property]);
     }
   }

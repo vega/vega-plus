@@ -6,7 +6,12 @@
   "data": [
     {
       "name": "table",
-      "source": "postgres://localhost:5432/scalable_vega/cars"
+      "transform": [
+        {
+          "type": "postgres",
+          "relation": "cars"
+        }
+      ]
     }
   ],
   "signals": [
