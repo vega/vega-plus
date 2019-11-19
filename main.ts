@@ -1,6 +1,6 @@
 import * as vega from "vega";
 import {aggregate, extent} from "vega-transforms";
-import {encode} from "vega-encode";
+import {encode, pie} from "vega-encode";
 import VegaTransformPostgres from "vega-transform-pg";
 const querystring = require('querystring');
 const http = require('http');
@@ -143,22 +143,22 @@ function generatePostgresQueryForAggregateNode(node:any, relation:string) {
   return out;
 }
 
-function hasEncodeFields(node:any) {
-  // Returns true iff the given node has fields defined in an 
-  // enter encoding function.
-  return node._argval 
+function encodeFieldsFor(node:any) {
+  // Returns encode fields for the given node.
+  return (node._argval 
     && node._argval.encoders 
     && node._argval.encoders.enter 
     && node._argval.encoders.enter.fields
-    && node._argval.encoders.enter.fields.length;
+    && node._argval.encoders.enter.fields.length) ? 
+    node._argval.encoders.enter.fields : [];
 }
 
-function hasExtentFields(node:any) {
-  // Returns true iff the given node has extent
-  // fields defined.
-  return node._argval
+function fieldsFor(node:any) {
+  // Returns fields for the given node.
+  return (node._argval
     && node._argval.field
-    && node._argval.field.fields;
+    && node._argval.field.fields) ? 
+    node._argval.field.fields : [];
 }
 
 function generatePostgresQueryForMarkFields(fields:string[], relation:string) {
@@ -218,9 +218,6 @@ function collectNonAggregateFieldsFor(node:any, pgNode:any) {
   // 1. The encode node is on a path from pgNode.
   // 2. There is no intervening aggregate node on the path from 
   //    pgNode to the encode node.
-  // 3. FixMe: we use hasSourcePathTo() to avoid collecting field names
-  //    for some other nodes. The correct thing to do is to get the schema
-  //    from the server and use that to filter out unwanted field names.
 
   if(node instanceof aggregate) {
     // Aggregate nodes cut off the field search, since aggregate nodes
@@ -230,16 +227,15 @@ function collectNonAggregateFieldsFor(node:any, pgNode:any) {
 
   let out = [];
 
-  if(node instanceof encode 
-    && hasEncodeFields(node) 
-    && hasSourcePathTo(node, pgNode)) {
-    out = node._argval.encoders.enter.fields;
+  if(node instanceof encode && hasSourcePathTo(node, pgNode)) {
+    // FixMe: we use hasSourcePathTo() to avoid collecting field names
+    // for some other nodes. The correct thing to do is to get the schema
+    // from the server and use that to filter out unwanted field names.
+    out = encodeFieldsFor(node);
   }
 
-  if(node instanceof extent
-    && hasExtentFields(node)
-    && hasSourcePathTo(node, pgNode)) {
-    out = node._argval.field.fields;
+  if(node instanceof extent || node instanceof pie) {
+    out = fieldsFor(node);
   }
   
   if(!node._targets) {

@@ -37,9 +37,7 @@
       "transform": [
         {
           "type": "postgres",
-          "query": {
-            "signal": "'select id, field from pie_chart'"
-          }
+          "relation": "pie_chart"
         },
         {
           "type": "pie",
