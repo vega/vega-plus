@@ -1,5 +1,7 @@
 # 12/05/2019 - 12/11/2019
 * [ ] Finish technical report. Submit as scholarly paper on the 9th.
+* [ ] Hook things up to Voyager.
+* [ ] Maybe try to user Saul's expression parsing stuff, or use Vega parser.
 
 # 11/27/2019 - 12/04/2019
 * [X] Initial draft of technical report
