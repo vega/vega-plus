@@ -1,15 +1,15 @@
 # 12/05/2019 - 12/11/2019
-[ ] Finish technical report. Submit as scholarly paper on the 9th.
+* [ ] Finish technical report. Submit as scholarly paper on the 9th.
 
 # 11/27/2019 - 12/04/2019
-[X] Initial draft of technical report
+* [X] Initial draft of technical report
 
 # 11/21 - 11/27
 Break
 
 # 11/14/2019 - 11/20/2019
-[X] Handle case where marks source the pg transform. This involved identifying downstream Extent and Encode nodes that have no intervening aggregate node, collecting all the fields, and then configuring the pg node with a simple select query of all those field. 
-[X] Disucssed expression evaluation with Saul. His team has an Vega expression parser written in Python that generates ibis expressions. The ibis expressions are sent to a server and evaluated as SQL statements. On avenue is to rewrite their Vega parser in JavaScript and then have it generate SQL from the AST directly, rather than output ibis.
+* [X] Handle case where marks source the pg transform. This involved identifying downstream Extent and Encode nodes that have no intervening aggregate node, collecting all the fields, and then configuring the pg node with a simple select query of all those field. 
+* [X] Disucssed expression evaluation with Saul. His team has an Vega expression parser written in Python that generates ibis expressions. The ibis expressions are sent to a server and evaluated as SQL statements. On avenue is to rewrite their Vega parser in JavaScript and then have it generate SQL from the AST directly, rather than output ibis.
 
 
 # 11/07/2019 - 11/13/2019
