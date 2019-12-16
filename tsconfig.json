@@ -9,6 +9,6 @@
   "files": [
     "main.ts",
     "server.ts",
-    "lib/dataflow-pg-rewrite"
+    "./lib/dataflow-rewrite-pg.ts"
   ]
 }

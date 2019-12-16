@@ -1,6 +1,7 @@
 import * as vega from "vega";
 import { aggregate, extent, bin } from "vega-transforms";
 import { encode, pie } from "vega-encode";
+import VegaTransformPostgres from "vega-transform-pg";
 
 // FixMe: write JSdocs for this file.
 
@@ -141,7 +142,6 @@ function generatePostgresQueryForBinNode(node: any, relation: string) {
   // a Postgres query.
   // FixMe: support anchor.
   // FixMe: support step.
-  console.log(node);
   const field = node._argval.field.fname;
   const maxbins = node._argval.maxbins ? node._argval.maxbins : 10;
   return `with
@@ -215,6 +215,8 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any) {
   if (currentNode instanceof aggregate && currentNode._argval.fields) {
     currentNode._query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
     currentNode.transform = pgNode.__proto__.transform;
+    const x = VegaTransformPostgres();
+    console.log(x);
     return;
   }
 
@@ -354,7 +356,7 @@ function removeNodesFromDataFlow(nodes: any, dataflow: any) {
   }
 }
 
-export function generatePostgresQueriesForView(view: vega.View) {
+export function dataflowRewritePostgres(view: vega.View) {
   // For each Postgres transform node in the View's dataflow graph,
   // generates a Postgres query to be executed at runtime, based
   // on that node's dependents.

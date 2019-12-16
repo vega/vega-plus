@@ -1,6 +1,6 @@
 import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-pg";
-import { generatePostgresQueriesForView } from "./lib/dataflow-pg-rewrite";
+import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
 const querystring = require('querystring');
 const http = require('http');
 
@@ -26,8 +26,7 @@ function run(spec: vega.Spec) {
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
-  console.log(view);
-  generatePostgresQueriesForView(view);
+  dataflowRewritePostgres(view);
   view.runAsync();
 }
 
