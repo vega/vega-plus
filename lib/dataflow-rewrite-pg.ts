@@ -215,8 +215,6 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any) {
   if (currentNode instanceof aggregate && currentNode._argval.fields) {
     currentNode._query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
     currentNode.transform = pgNode.__proto__.transform;
-    const x = VegaTransformPostgres();
-    console.log(x);
     return;
   }
 
@@ -314,7 +312,7 @@ function generatePostgresQueriesForNode(pgNode: any) {
   }
 }
 
-function removeNodesFromDataFlow(nodes: any, dataflow: any) {
+function removeNodesFromDataflow(nodes: any, dataflow: any) {
   // Remove given nodes from dataflow.
   for (const node of nodes) {
 
@@ -370,5 +368,5 @@ export function dataflowRewritePostgres(view: vega.View) {
       pgNodes.push(node);
     }
   }
-  removeNodesFromDataFlow(pgNodes.filter((n: any) => !n._query), view);
+  removeNodesFromDataflow(pgNodes.filter((n: any) => !n._query), view);
 }
