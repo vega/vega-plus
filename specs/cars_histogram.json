@@ -5,16 +5,43 @@
   "padding": 10,
   "data": [
     {
-      "name": "binned",
+      "name": "points",
       "transform": [
         {
           "type": "postgres",
-          "query": {
-            "signal": "'bin'"
-          },
+          "relation": "cars"
+        }
+      ]
+    },
+    {
+      "name": "binned",
+      "source": "points",
+      "transform": [
+        {
+          "type": "bin",
           "field": "miles_per_gallon",
-          "table": "cars",
-          "max_bins": 10
+          "extent": [
+            0,
+            50
+          ],
+          "maxbins": 10
+        },
+        {
+          "type": "aggregate",
+          "key": "bin0",
+          "groupby": [
+            "bin0",
+            "bin1"
+          ],
+          "fields": [
+            "bin0"
+          ],
+          "ops": [
+            "count"
+          ],
+          "as": [
+            "count"
+          ]
         }
       ]
     }
@@ -24,33 +51,71 @@
       "name": "xscale",
       "type": "linear",
       "range": "width",
-      "domain": {"data": "binned", "field": "bin0"}
+      "domain": [
+        0,
+        50
+      ]
     },
     {
       "name": "yscale",
       "type": "linear",
-      "range": "height", "round": true,
-      "domain": {"data": "binned", "field": "count"},
-      "zero": true, "nice": true
+      "range": "height",
+      "round": true,
+      "domain": {
+        "data": "binned",
+        "field": "count"
+      },
+      "zero": true,
+      "nice": true
     }
   ],
   "axes": [
-    {"orient": "bottom", "scale": "xscale", "zindex": 1},
-    {"orient": "left", "scale": "yscale", "tickCount": 5, "zindex": 1}
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "zindex": 1
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "tickCount": 5,
+      "zindex": 1
+    }
   ],
   "marks": [
     {
       "type": "rect",
-      "from": {"data": "binned"},
+      "from": {
+        "data": "binned"
+      },
       "encode": {
         "update": {
-          "x": {"scale": "xscale", "field": "bin0"},
-          "x2": {"scale": "xscale", "field": "bin1"},
-          "y": {"scale": "yscale", "field": "count"},
-          "y2": {"scale": "yscale", "value": 0},
-          "fill": {"value": "steelblue"}
+          "x": {
+            "scale": "xscale",
+            "field": "bin0"
+          },
+          "x2": {
+            "scale": "xscale",
+            "field": "bin1",
+            "offset": 0
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "count"
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 0
+          },
+          "fill": {
+            "value": "steelblue"
+          }
         },
-        "hover": { "fill": {"value": "firebrick"} }
+        "hover": {
+          "fill": {
+            "value": "firebrick"
+          }
+        }
       }
     }
   ]

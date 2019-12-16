@@ -1,5 +1,5 @@
 import * as vega from "vega";
-import { aggregate, extent } from "vega-transforms";
+import { aggregate, extent, bin } from "vega-transforms";
 import { encode, pie } from "vega-encode";
 import VegaTransformPostgres from "vega-transform-pg";
 const querystring = require('querystring');
@@ -15,7 +15,7 @@ function percentileContSql(field: string, fraction: number) {
   return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
 }
 
-function opToSql(op: string, field: string) {
+function aggregateOpToSql(op: string, field: string) {
   // Converts supported Vega operations to SQL
   // for the given field.
   // FixMe: we will need to eventually support the case where
@@ -86,7 +86,7 @@ function generatePostgresQueryForAggregateNode(node: any, relation: string) {
       if (op === "missing") {
         missingOpIdxs.push(fieldIdx);
       }
-      out += opToSql(op, field);
+      out += aggregateOpToSql(op, field);
     } else {
       out += field;
     }
@@ -143,6 +143,32 @@ function generatePostgresQueryForAggregateNode(node: any, relation: string) {
   return out;
 }
 
+function generatePostgresQueryForBinNode(node: any, relation: string) {
+  // Given a bin node and a relation name, generates
+  // a Postgres query.
+  // FixMe: support anchor.
+  // FixMe: support step.
+  console.log(node);
+  const field = node._argval.field.fname;
+  const maxbins = node._argval.maxbins ? node._argval.maxbins : 10;
+  return `with
+  ${field}_stats as (
+    select min(${field}) as min, max(${field}) as max
+    from ${relation}
+  ),
+  histogram as (
+    select width_bucket(${field}, min, max, ${maxbins}) as bucket,
+      min(${field}) as bin0,
+      max(${field}) as bin1,
+      count(*)
+    from ${relation}, ${field}_stats
+    where ${field} is not null
+    group by bucket
+    order by bucket)
+  select bin0, bin1, count from histogram;`
+}
+
+
 function encodeFieldsFor(node: any) {
   // Returns encode fields for the given node.
   return (node._argval
@@ -167,6 +193,7 @@ function generatePostgresQueryForMarkFields(fields: string[], relation: string) 
   //
   // FixMe: we should query the database for the relation schema
   // and only use those fields in the schema to build the select query.
+  // FixMe: we should also handle aggregate transforms defined directly in marks.
   let out = "SELECT ";
   for (const [fieldIdx, field] of fields.entries()) {
     if (fieldIdx !== 0) {
@@ -178,26 +205,48 @@ function generatePostgresQueryForMarkFields(fields: string[], relation: string) 
   return out;
 }
 
-function rewriteTopLevelAggregateNodesFor(currentNode: any, pgNode: any) {
-  // Rewrites all top-level aggregate nodes in the subtree starting at
+function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any) {
+  // Rewrites all top-level transform nodes in the subtree starting at
   // currentNode. For each path starting from currentNode, a top-level
-  // aggregate node is the first aggregate node in that path.
+  // transform node is the first transform node in that path.
+  //
+  // Currenty supported transforms:
+  // - aggregate
+  // - bin
   //
   // Rewriting involves the following:
-  // 1. Generate the Postgres query for the aggregate node.
-  // 2. Ovewrwrite the aggregate node's transform function with
+  // 1. Generate the Postgres query for the transform node.
+  // 2. Ovewrwrite the transform node's transform function with
   //    the VegaTransformPostgres transform function.
+
   if (currentNode instanceof aggregate && currentNode._argval.fields) {
-    currentNode._query = generatePostgresQueryForAggregateNode(
-      currentNode, pgNode._argval.relation);
+    currentNode._query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
     currentNode.transform = pgNode.__proto__.transform;
     return;
   }
+
+  // For bin nodes, we overwrite the target aggregate node successors'
+  // transform function with a pg transform whose query corresponds to the
+  // bin query.
+  // FixMe: if a bin node has multiple target aggregate nodes, it's inefficient
+  // to execute the query multiple times. We should find a way to do the query
+  // (and store the results) only once. Putting the transform function
+  // directly in the bin node doesn't seem to work, for reasons I don't yet
+  // understand.
+  if (currentNode instanceof bin) {
+    for (const target of currentNode._targets.filter(t => t instanceof aggregate)) {
+      target._query = generatePostgresQueryForBinNode(currentNode, pgNode._argval.relation);
+      target.transform = pgNode.__proto__.transform;
+    }
+    return;
+  }
+
   if (!currentNode._targets) {
     return;
   }
+
   for (const target of currentNode._targets) {
-    rewriteTopLevelAggregateNodesFor(target, pgNode);
+    rewriteTopLevelTransformNodesFor(target, pgNode);
   }
 }
 
@@ -212,16 +261,20 @@ function hasSourcePathTo(node: any, dest: any) {
   return false;
 }
 
-function collectNonAggregateFieldsFor(node: any, pgNode: any) {
+function collectNonTransformFieldsFor(node: any, pgNode: any) {
   // Recursively collects the union of all fields mentioned in encode nodes
   // for which the following holds:
   // 1. The encode node is on a path from pgNode.
-  // 2. There is no intervening aggregate node on the path from
+  // 2. There is no intervening supported transform node on the path from
   //    pgNode to the encode node.
 
-  if (node instanceof aggregate) {
-    // Aggregate nodes cut off the field search, since aggregate nodes
+  if (node instanceof aggregate || node instanceof bin) {
+    // Transform nodes cut off the field search, since they nodes
     // are handled separately.
+    return [];
+  }
+
+  if (!node._targets) {
     return [];
   }
 
@@ -238,12 +291,8 @@ function collectNonAggregateFieldsFor(node: any, pgNode: any) {
     out = fieldsFor(node);
   }
 
-  if (!node._targets) {
-    return [];
-  }
-
   for (const target of node._targets) {
-    out = out.concat(collectNonAggregateFieldsFor(target, pgNode));
+    out = out.concat(collectNonTransformFieldsFor(target, pgNode));
   }
 
   return out;
@@ -258,13 +307,13 @@ function generatePostgresQueriesForNode(pgNode: any) {
   }
 
   // Rewrite top-level aggregate nodes.
-  rewriteTopLevelAggregateNodesFor(pgNode, pgNode);
+  rewriteTopLevelTransformNodesFor(pgNode, pgNode);
 
-  // Collect into a simple SELECT query all fields from non-aggregate nodes
-  // that are on a downstream path from the pg node such that there is no
-  // intervening aggregate node on the path.
+  // Collect into a simple SELECT query all fields from non-transform nodes
+  // that ,are on a downstream path from the pg node such that there is no
+  // intervening transform node on the path.
   // FixMe: we need to filter out fields that aren't in the pg node's relation.
-  const markFields: string[] = Array.from(new Set(collectNonAggregateFieldsFor(pgNode, pgNode)));
+  const markFields: string[] = Array.from(new Set(collectNonTransformFieldsFor(pgNode, pgNode)));
   if (markFields.length) {
     pgNode._query = generatePostgresQueryForMarkFields(markFields, pgNode._argval.relation);
   }
@@ -332,7 +381,7 @@ function generatePostgresQueriesForView(view: vega.View) {
 function run(spec: vega.Spec) {
   // FixMe: should we define these attributes in the spec somehow?
   VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
-  VegaTransformPostgres.setHttpOptions({
+  const httpOptions = {
     hostname: 'localhost',
     port: 3000,
     method: 'POST',
@@ -340,13 +389,15 @@ function run(spec: vega.Spec) {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
-  });
+  }
+  VegaTransformPostgres.setHttpOptions(httpOptions);
   (vega as any).transforms["postgres"] = VegaTransformPostgres;
   const runtime = vega.parse(spec);
   const view = new vega.View(runtime)
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
+  console.log(view);
   generatePostgresQueriesForView(view);
   view.runAsync();
 }
