@@ -1,7 +1,6 @@
 import * as vega from "vega";
 import { aggregate, extent, bin } from "vega-transforms";
 import { encode, pie } from "vega-encode";
-import VegaTransformPostgres from "vega-transform-pg";
 
 // FixMe: write JSdocs for this file.
 
@@ -142,6 +141,7 @@ function generatePostgresQueryForBinNode(node: any, relation: string) {
   // a Postgres query.
   // FixMe: support anchor.
   // FixMe: support step.
+  console.log(node);
   const field = node._argval.field.fname;
   const maxbins = node._argval.maxbins ? node._argval.maxbins : 10;
   return `with
@@ -312,10 +312,10 @@ function generatePostgresQueriesForNode(pgNode: any) {
   }
 }
 
-function removeNodesFromDataflow(nodes: any, dataflow: any) {
+function removeNodesFromDataFlow(nodes: any, dataflow: any) {
   // Remove given nodes from dataflow.
-  for (const entry of nodes) {
-    const node = entry.node;
+  for (const node of nodes) {
+
     if (node._targets) {
       // Remove references from targets to node.
       for (const target of node._targets) {
@@ -338,15 +338,14 @@ function removeNodesFromDataflow(nodes: any, dataflow: any) {
     }
   }
 
+  const nodeIds = nodes.map((n: any) => n.id);
 
   // Remove references from dataflow to nodes.
-  const dataflowIdxs = nodes.map((e) => e.idx);
-  for (const idx of dataflowIdxs) {
-    delete (dataflow as any)._runtime.nodes[idx.toString()];
+  for (const id of nodeIds) {
+    delete (dataflow as any)._runtime.nodes[id.toString()];
   }
 
   // Remove references from touched array to nodes.
-  const nodeIds = nodes.map((e: any) => e.node.id);
   const touched = (dataflow as any)._touched;
   for (let touchedIdx = 0; touchedIdx < touched.length; ++touchedIdx) {
     if (nodeIds.includes(touched[touchedIdx].id)) {
@@ -355,22 +354,21 @@ function removeNodesFromDataflow(nodes: any, dataflow: any) {
   }
 }
 
-function isPostgresTransform(node: any) {
-  return node.__proto__.constructor.Definition
-    && node.__proto__.constructor.Definition.type === "postgres"
-}
-export function dataflowRewritePostgres(view: vega.View) {
+function generatePostgresQueriesForView(view: vega.View) {
   // For each Postgres transform node in the View's dataflow graph,
   // generates a Postgres query to be executed at runtime, based
   // on that node's dependents.
   const nodes = (view as any)._runtime.nodes;
   const pgNodes = [];
-  for (const idx in nodes) {
-    const node = nodes[idx];
-    if (isPostgresTransform(node)) {
+  for (const nodeId in nodes) {
+    const node = nodes[nodeId];
+    if (node.__proto__.constructor.Definition
+      && node.__proto__.constructor.Definition.type === "postgres") {
       generatePostgresQueriesForNode(node);
-      pgNodes.push({ node: node, idx: idx });
+      pgNodes.push(node);
     }
   }
-  removeNodesFromDataflow(pgNodes.filter((e: any) => !e.node._query), view);
+  removeNodesFromDataFlow(pgNodes.filter((n: any) => !n._query), view);
 }
+
+exports = generatePostgresQueriesForNode;
