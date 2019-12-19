@@ -303,7 +303,7 @@ function generatePostgresQueriesForNode(pgNode: any) {
   rewriteTopLevelTransformNodesFor(pgNode, pgNode);
 
   // Collect into a simple SELECT query all fields from non-transform nodes
-  // that ,are on a downstream path from the pg node such that there is no
+  // that are on a downstream path from the pg node such that there is no
   // intervening transform node on the path.
   // FixMe: we need to filter out fields that aren't in the pg node's relation.
   const markFields: string[] = Array.from(new Set(collectNonTransformFieldsFor(pgNode, pgNode)));
