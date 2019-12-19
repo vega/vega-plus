@@ -1,9 +1,12 @@
 # 12/011/2019 - 12/17/2019
 * [ ] Hook things up to Voyager.
-* [ ] Maybe try to user Saul's expression parsing stuff, or use Vega parser/meet with Junran.
+* [ ] Maybe try to use Saul's expression parsing stuff, or use Vega parser/meet with Junran.
+* [X] Continue technical report edits.
+* [X] Added suppport for histograms (this was supported severside way back before we made some changes to our approach)
+* [X] Fixed small issue where Vega transform node was not being removed from dataflow.
 
 # 12/04/2019 - 12/10/2019
-* [X] Finish technical report. Submit as scholarly paper on the 9th.
+* [X] Finish scholarly paper by the 9th.
 * [ ] Hook things up to Voyager.
 * [ ] Maybe try to user Saul's expression parsing stuff, or use Vega parser/meet with Junran.
 
