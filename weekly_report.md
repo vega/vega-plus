@@ -1,4 +1,4 @@
-# 12/011/2019 - 12/17/2019
+# 12/011/2019 - 12/18/2019
 * [ ] Hook things up to Voyager.
 * [ ] Maybe try to use Saul's expression parsing stuff, or use Vega parser/meet with Junran.
 * [X] Continue technical report edits.
