@@ -6,5 +6,9 @@
     "noEmit": true,
     "strict": false
   },
-  "files": ["main.ts", "server.ts"]
+  "files": [
+    "main.ts",
+    "server.ts",
+    "./lib/dataflow-rewrite-pg.ts"
+  ]
 }
