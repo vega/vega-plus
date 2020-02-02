@@ -1,3 +1,26 @@
+# 12/011/2019 - 12/18/2019
+* [ ] Hook things up to Voyager.
+* [ ] Maybe try to use Saul's expression parsing stuff, or use Vega parser/meet with Junran.
+* [X] Continue technical report edits.
+* [X] Added suppport for histograms (this was supported severside way back before we made some changes to our approach)
+* [X] Fixed small issue where Vega transform node was not being removed from dataflow.
+
+# 12/04/2019 - 12/10/2019
+* [X] Finish scholarly paper by the 9th.
+* [ ] Hook things up to Voyager.
+* [ ] Maybe try to user Saul's expression parsing stuff, or use Vega parser/meet with Junran.
+
+# 11/27/2019 - 12/03/2019
+* [X] Initial draft of technical report
+
+# 11/21 - 11/27
+Break
+
+# 11/14/2019 - 11/20/2019
+* [X] Handle case where marks source the pg transform. This involved identifying downstream Extent and Encode nodes that have no intervening aggregate node, collecting all the fields, and then configuring the pg node with a simple select query of all those field. 
+* [X] Disucssed expression evaluation with Saul. His team has an Vega expression parser written in Python that generates ibis expressions. The ibis expressions are sent to a server and evaluated as SQL statements. On avenue is to rewrite their Vega parser in JavaScript and then have it generate SQL from the AST directly, rather than output ibis.
+
+
 # 11/07/2019 - 11/13/2019
 ## Primary goals for this week
 * [X] Add support + tests for remaining aggregate queries (sum, variance, variancep, stdev, stdevp, stderr, median, q1, q3, min, max) EXCEPT confidence interval and argmin/argmax -- see Challenges section for more info.
