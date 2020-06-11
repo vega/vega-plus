@@ -10,6 +10,7 @@ const http = require('http');
 const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
 
 function run(spec: vega.Spec) {
+  // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
   VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
   const httpOptions = {
@@ -24,16 +25,21 @@ function run(spec: vega.Spec) {
   VegaTransformPostgres.setHttpOptions(httpOptions);
   // leilani: should this be a global setting?
   (vega as any).transforms["postgres"] = VegaTransformPostgres;
+  // make a vega execution object (runtime) from the spec
   const runtime = vega.parse(spec);
+  // bind the execution to a dom element as a view
   const view = new vega.View(runtime)
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
+  // rewrite the dataflow execution for the view
   dataflowRewritePostgres(view);
+  // execute the rewritten dataflow for the view
   view.runAsync();
 }
 
 function handleVegaSpec() {
+  // when a new spec is uploaded, re-run vega
   const reader = new FileReader();
   reader.onload = function (e: any) {
     const spec = JSON.parse(e.target.result);
@@ -44,6 +50,7 @@ function handleVegaSpec() {
 }
 
 function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, relationName: string) {
+  // send the uploaded data in batches to the server
   const endOffset = Math.min(startOffset + rowsPerChunk, data.length);
   const chunk = data.slice(startOffset, endOffset);
   const postData = querystring.stringify({
@@ -80,6 +87,7 @@ function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: 
 }
 
 function uploadSqlData(data: Object[], relationName: string) {
+  // when a new spec is uploaded, re-run vega
   const chunkBytes: number = 10 * 1024 * 1024; // 10MB
   const rowBytesSample: number = data.length > 0 ? JSON.stringify(data[0]).length : 1;
   const rowsPerChunk: number = Math.floor(chunkBytes / rowBytesSample);
@@ -87,6 +95,7 @@ function uploadSqlData(data: Object[], relationName: string) {
 }
 
 function handleData() {
+  // when a data file is uploaded, send it to the server and load into PostgreSQL
   const reader = new FileReader();
   let filename: string;
   reader.onload = function (e: any) {

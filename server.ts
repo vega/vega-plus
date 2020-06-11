@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.listen(port, () => console.log(`server listening on port ${port}`));
 
 function poolFor(connectionString: string) {
+  // create or retrieve the connection pool for the given connection string
   if (!(connectionString in pools)) {
     pools[connectionString] = new Pool({ connectionString: connectionString });
   }
@@ -24,11 +25,13 @@ function poolFor(connectionString: string) {
 }
 
 function handleError(err: any, res: any) {
+  // report observed errors and send them back to the client
   const msg = err.stack ? err.stack.split('\n')[0] : err;
   console.error(msg);
   res.status(400).send(msg);
 }
 
+// handle SQL query requests for vega dataflow
 app.post('/query', async (req: any, res: any) => {
   let client: any;
   try {
@@ -55,13 +58,14 @@ app.post('/query', async (req: any, res: any) => {
 });
 
 function postgresTypeFor(value: any): string {
+  // map JavaScript data types to SQL data types
   // FixMe: want to use INTs too, if possible.
   // Client needs to send more type data in this case.
   const type = typeof value;
   if (type === 'string') {
     return 'VARCHAR(256)';
   } else if (type === 'number') {
-    return 'FLOAT';
+    return 'DOUBLE';
   } else if (type === 'boolean') {
     return 'BOOLEAN';
   } else {
@@ -70,6 +74,8 @@ function postgresTypeFor(value: any): string {
 }
 
 function postgresSchemaFor(dataObj: any): string {
+  // create an object that maps property names to SQL data types (basically a
+  // schema object)
   const schema: any = {};
   for (var property in dataObj) {
     if (dataObj.hasOwnProperty(property)) {
@@ -80,6 +86,8 @@ function postgresSchemaFor(dataObj: any): string {
 }
 
 function createTableQueryStrFor(tableName: string, schema: any): string {
+  // given a table name and a schema object, make a corresponding "CREATE
+  // TABLE" SQL query
   let out: string = 'create table ' + tableName + '('
   let first: boolean = true;
   for (var attrName in schema) {
@@ -99,6 +107,8 @@ function createTableQueryStrFor(tableName: string, schema: any): string {
 }
 
 function listToSQLTuple(l: any[], keepQuotes: boolean): string {
+  // takes a list of values and translates them to a string representing a
+  // comma-separated list of the values
   let out: string = JSON.stringify(l);
   out = out.substring(1, out.length - 1);
   out = out.replace(/'/g, '\'\'');
@@ -106,6 +116,7 @@ function listToSQLTuple(l: any[], keepQuotes: boolean): string {
   return out;
 }
 
+// handle requests to create and populate a table in the DBMS
 app.post('/createSql', async (req: any, res: any) => {
   let client: any;
   try {

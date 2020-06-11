@@ -5,8 +5,8 @@ import VegaTransformPostgres from "vega-transform-pg";
 
 // FixMe: write JSdocs for this file.
 
-// creates a percentile predicate for a SQL query
 function percentileContSql(field: string, fraction: number) {
+  // creates a percentile predicate for a SQL query
   return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
 }
 
@@ -359,6 +359,7 @@ function removeNodesFromDataflow(nodes: any, dataflow: any) {
 }
 
 function isPostgresTransform(node: any) {
+  // returns whether the given node is a Postgres transform node
   return node.__proto__.constructor.Definition
     && node.__proto__.constructor.Definition.type === "postgres"
 }
