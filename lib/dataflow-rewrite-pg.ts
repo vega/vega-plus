@@ -5,6 +5,7 @@ import VegaTransformPostgres from "vega-transform-pg";
 
 // FixMe: write JSdocs for this file.
 
+// creates a percentile predicate for a SQL query
 function percentileContSql(field: string, fraction: number) {
   return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
 }
@@ -15,6 +16,7 @@ function aggregateOpToSql(op: string, field: string) {
   // FixMe: we will need to eventually support the case where
   // the 'field' is actually a vega expression, which would
   // require translating vega expressions into SQL.
+  // FixMe: decide what to do for argmax, argmin, and confidence intervals (ci0, ci1).
   switch (op.toLowerCase()) {
     case "average":
       return `AVG(${field})`;
@@ -245,6 +247,7 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any) {
 
 function hasSourcePathTo(node: any, dest: any) {
   // Returns true iff there is a source path from node to dest.
+  // This means that dest is an ancestor to node along the path.
   if (node.source) {
     if (node.source.id === dest.id) {
       return true;
@@ -365,6 +368,8 @@ export function dataflowRewritePostgres(view: vega.View) {
   // on that node's dependents.
   const nodes = (view as any)._runtime.nodes;
   const pgNodes = [];
+  // leilani: since the later functions are recursive, it seems redundant to
+  // call generatePostgresQueriesForNode on every node in the dataflow.
   for (const idx in nodes) {
     const node = nodes[idx];
     if (isPostgresTransform(node)) {

@@ -1,5 +1,7 @@
 import * as vega from "vega";
+// defines the VTP node type
 import VegaTransformPostgres from "vega-transform-pg";
+// includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
 const querystring = require('querystring');
 const http = require('http');
@@ -20,6 +22,7 @@ function run(spec: vega.Spec) {
     }
   }
   VegaTransformPostgres.setHttpOptions(httpOptions);
+  // leilani: should this be a global setting?
   (vega as any).transforms["postgres"] = VegaTransformPostgres;
   const runtime = vega.parse(spec);
   const view = new vega.View(runtime)
