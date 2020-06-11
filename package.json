@@ -7,20 +7,20 @@
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
-    "@mapd/connector": "^4.4.0",
-    "@types/node": "^7.0.22",
+    "@mapd/connector": "^5.2.0",
+    "@types/node": "^14.0.13",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "express": "^4.15.3",
-    "gh-pages": "^2.0.1",
-    "pg": "^7.11.0",
+    "express": "^4.17.1",
+    "gh-pages": "^3.0.0",
+    "pg": "^8.2.1",
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
-    "vega": "^5.3.2",
-    "vega-encode": "^4.5.0",
-    "vega-transform-omnisci-core": "^0.0.8",
-    "vega-transform-pg": "^1.0.10",
-    "vega-transforms": "4.4.3"
+    "vega": "^5.13.0",
+    "vega-encode": "^4.8.0",
+    "vega-transform-omnisci-core": "^0.0.10",
+    "vega-transform-pg": "^1.0.11",
+    "vega-transforms": "^4.9.0"
   },
   "scripts": {
     "start": "parcel index.html",
@@ -29,10 +29,10 @@
     "start:server": "./node_modules/.bin/tsc-watch server.ts --onSuccess \" node server.js\""
   },
   "devDependencies": {
-    "@types/cors": "^2.8.1",
-    "parcel-bundler": "^1.12.3",
-    "typescript": "^3.3.4000",
-    "tsc-watch": "^3.0.1",
-    "webpack": "^2.2.1"
+    "@types/cors": "^2.8.6",
+    "parcel-bundler": "^1.12.4",
+    "tsc-watch": "^4.2.8",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0"
   }
 }
