@@ -3,6 +3,10 @@ import * as bodyParser from 'body-parser';
 const { Pool } = require('pg');
 const format = require('pg-format');
 
+// load server configuration
+import * as serverConfig from './server.config.json';
+import * as dbmsConfig from serverConfig.dbms-config;
+
 // Postgres connection pools.
 const pools = {};
 
@@ -16,6 +20,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.listen(port, () => console.log(`server listening on port ${port}`));
 
+// TODO: fix to use connection info rather than raw string
 function poolFor(connectionString: string) {
   // create or retrieve the connection pool for the given connection string
   if (!(connectionString in pools)) {
@@ -35,9 +40,6 @@ function handleError(err: any, res: any) {
 app.post('/query', async (req: any, res: any) => {
   let client: any;
   try {
-    if (!req.body.postgresConnectionString) {
-      throw 'request body must define postgresConnectionString property';
-    }
     if (!req.body.query) {
       throw 'request body must define query property'
     }

@@ -6,25 +6,17 @@ import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
 const querystring = require('querystring');
 const http = require('http');
 
-// FixMe: put connection string into vega spec.
-const postgresConnectionString = 'postgres://localhost:5432/scalable_vega';
+// register the new transform with vega
+
+
+(vega as any).transforms["postgres"] = VegaTransformPostgres;
 
 function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
-  VegaTransformPostgres.setPostgresConnectionString(postgresConnectionString);
-  const httpOptions = {
-    hostname: 'localhost',
-    port: 3000,
-    method: 'POST',
-    path: '/query',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
+  import httpOptions from './server-connect.config.json'; // http config data
   VegaTransformPostgres.setHttpOptions(httpOptions);
-  // leilani: should this be a global setting?
-  (vega as any).transforms["postgres"] = VegaTransformPostgres;
+
   // make a vega execution object (runtime) from the spec
   const runtime = vega.parse(spec);
   // bind the execution to a dom element as a view
@@ -55,8 +47,7 @@ function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: 
   const chunk = data.slice(startOffset, endOffset);
   const postData = querystring.stringify({
     name: relationName,
-    data: JSON.stringify(chunk),
-    postgresConnectionString: postgresConnectionString
+    data: JSON.stringify(chunk)
   });
   const httpOptions = {
     hostname: 'localhost',
