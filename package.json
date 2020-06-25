@@ -26,7 +26,7 @@
     "start": "parcel index.html",
     "build": "parcel build --public-url '/scalable-vega/' index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start:server": "./node_modules/.bin/tsc-watch server.ts --onSuccess \" node server.js\""
+    "start:server": "./node_modules/.bin/tsc-watch --onSuccess \" node server.js\""
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",

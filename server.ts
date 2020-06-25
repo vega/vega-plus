@@ -4,8 +4,20 @@ const { Pool } = require('pg');
 const format = require('pg-format');
 
 // load server configuration
-import * as serverConfig from './server.config.json';
-import * as dbmsConfig from serverConfig.dbms-config;
+import serverConfigRaw from './server.config.json';
+const serverConfig = {
+  "port": 3000,
+  "dbms-config": "postgresql.config.json"
+};
+import dbmsConfigRaw from './postgresql.config.json';
+const dbmsConfig = {
+  "dbmsName":"postgresql",
+  "dbname":"scalable_vega",
+  "host":"localhost",
+  "port":5432,
+  "connectionString": "postgres://localhost:5432/scalable_vega"
+};
+console.log(dbmsConfig);
 
 // Postgres connection pools.
 const pools = {};
@@ -20,11 +32,24 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.listen(port, () => console.log(`server listening on port ${port}`));
 
+function getConnectionName() {
+  let name = dbmsConfig.dbmsName+":"+dbmsConfig.dbname;
+  if ("port" in dbmsConfig) {
+    name += ":"+dbmsConfig.port;
+  }
+  return name;
+}
+
 // TODO: fix to use connection info rather than raw string
-function poolFor(connectionString: string) {
+function poolFor() {
+  let connectionString: string = getConnectionName();
   // create or retrieve the connection pool for the given connection string
   if (!(connectionString in pools)) {
-    pools[connectionString] = new Pool({ connectionString: connectionString });
+    let connInfo: any = {host: dbmsConfig.host, database: dbmsConfig.dbname};
+    if ("port" in dbmsConfig) {
+      connInfo.port = dbmsConfig.port;
+    }
+    pools[connectionString] = new Pool(connInfo);
   }
   return pools[connectionString];
 }
@@ -43,11 +68,11 @@ app.post('/query', async (req: any, res: any) => {
     if (!req.body.query) {
       throw 'request body must define query property'
     }
-    console.log(`connected to ${req.body.postgresConnectionString}`);
     const query = req.body.query;
     console.log(`running query: ${query}`);
-    const pool = poolFor(req.body.postgresConnectionString);
+    const pool = poolFor();
     client = await pool.connect();
+    console.log(`connected to ${getConnectionName()}`);
     const results = await client.query(query);
     res.status(200).send(results);
   } catch (err) {
@@ -122,9 +147,6 @@ function listToSQLTuple(l: any[], keepQuotes: boolean): string {
 app.post('/createSql', async (req: any, res: any) => {
   let client: any;
   try {
-    if (!req.body.postgresConnectionString) {
-      throw 'request body must define postgresConnectionString property';
-    }
     if (!req.body.data) {
       throw 'request body must define data property';
     }
@@ -133,7 +155,7 @@ app.post('/createSql', async (req: any, res: any) => {
     }
 
     // Connect to postgres
-    const pool = poolFor(req.body.postgresConnectionString);
+    const pool = poolFor();
     client = await pool.connect();
 
     // Check if table exists yet

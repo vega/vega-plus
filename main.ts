@@ -3,6 +3,8 @@ import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-pg";
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
+import serverConnectRaw from './server-connect.config.json'; // http config data
+const serverConnInfo = (<any>serverConnectRaw);
 const querystring = require('querystring');
 const http = require('http');
 
@@ -14,8 +16,7 @@ const http = require('http');
 function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
-  import httpOptions from './server-connect.config.json'; // http config data
-  VegaTransformPostgres.setHttpOptions(httpOptions);
+  VegaTransformPostgres.setHttpOptions(serverConnInfo);
 
   // make a vega execution object (runtime) from the spec
   const runtime = vega.parse(spec);
