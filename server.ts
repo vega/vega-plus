@@ -1,4 +1,4 @@
-import cors from "cors";
+import cors from 'cors';
 import * as bodyParser from 'body-parser';
 const { Pool } = require('pg');
 const format = require('pg-format');
