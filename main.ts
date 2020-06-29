@@ -3,20 +3,25 @@ import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-pg";
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
-import serverConnectRaw from './server-connect.config.json'; // http config data
-const serverConnInfo = (<any>serverConnectRaw);
 const querystring = require('querystring');
 const http = require('http');
 
 // register the new transform with vega
-
-
 (vega as any).transforms["postgres"] = VegaTransformPostgres;
 
 function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
-  VegaTransformPostgres.setHttpOptions(serverConnInfo);
+  const httpOptions = {
+    "hostname": "localhost",
+    "port": 3000,
+    "method": "POST",
+    "path": "/query",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  };
+  VegaTransformPostgres.setHttpOptions(httpOptions);
 
   // make a vega execution object (runtime) from the spec
   const runtime = vega.parse(spec);

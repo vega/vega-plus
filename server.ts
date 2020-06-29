@@ -1,23 +1,15 @@
-import * as cors from 'cors';
+import cors from "cors";
 import * as bodyParser from 'body-parser';
 const { Pool } = require('pg');
 const format = require('pg-format');
 
 // load server configuration
 import serverConfigRaw from './server.config.json';
-const serverConfig = {
-  "port": 3000,
-  "dbms-config": "postgresql.config.json"
-};
-import dbmsConfigRaw from './postgresql.config.json';
-const dbmsConfig = {
-  "dbmsName":"postgresql",
-  "dbname":"scalable_vega",
-  "host":"localhost",
-  "port":5432,
-  "connectionString": "postgres://localhost:5432/scalable_vega"
-};
-console.log(dbmsConfig);
+const serverConfig = (<any>serverConfigRaw);
+
+// load dbms configuration
+import dbmsConfigRaw from './dbms.config.json';
+const dbmsConfig = (<any>dbmsConfigRaw);
 
 // Postgres connection pools.
 const pools = {};
@@ -25,22 +17,23 @@ const pools = {};
 // Express server
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = serverConfig.port; // 3000;
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.listen(port, () => console.log(`server listening on port ${port}`));
 
+// give this dbms setup a name
 function getConnectionName() {
   let name = dbmsConfig.dbmsName+":"+dbmsConfig.dbname;
   if ("port" in dbmsConfig) {
-    name += ":"+dbmsConfig.port;
+    name += " | "+dbmsConfig.port;
   }
   return name;
 }
 
-// TODO: fix to use connection info rather than raw string
+// get the connection pool for the specified dbms setup
 function poolFor() {
   let connectionString: string = getConnectionName();
   // create or retrieve the connection pool for the given connection string
@@ -69,10 +62,10 @@ app.post('/query', async (req: any, res: any) => {
       throw 'request body must define query property'
     }
     const query = req.body.query;
-    console.log(`running query: ${query}`);
     const pool = poolFor();
     client = await pool.connect();
     console.log(`connected to ${getConnectionName()}`);
+    console.log(`running query: ${query}`);
     const results = await client.query(query);
     res.status(200).send(results);
   } catch (err) {
