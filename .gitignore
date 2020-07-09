@@ -1,3 +1,4 @@
+env
 yarn.lock
 node_modules
 dist
@@ -7,3 +8,4 @@ server.js
 package-lock.json
 *.DS_Store
 *.config.json
+__pycache__
