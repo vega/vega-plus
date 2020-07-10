@@ -18,10 +18,6 @@ class DuckDBConnector(BasicConnector):
     cursor.execute(query)
     raw = cursor.fetchdf()
     results = json.loads(raw.to_json(orient="records"))
-    #print(raw)
-    #results = []
-    #for row in raw:
-    #  results.append(dict(row))
     conn.commit()
     conn.close()
     return results

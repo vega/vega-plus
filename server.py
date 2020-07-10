@@ -43,21 +43,16 @@ def createSqlTable():
     if not name:
       raise "request body must define name property";
 
-
-
     data = json.loads(data)
     schema = dbms.generateSchema(data[0])
 
     # Create table if it doesn't exist yet
-    exists = dbms.checkTableExists(name)
-    if exists:
+    if dbms.checkTableExists(name):
       print("table %s already exists" % (name))
     else:
       print("table %s does not exist" % (name))
-
-    if not exists:
       print("creating table %s" % (name))
-      print("built postgres schema: %s" % (json.dumps(schema)))
+      print("built DBMS schema: %s" % (json.dumps(schema)))
       createTableQuery = dbms.generateCreateTableQuery(name, schema)
       print("running create query: '%s'" % (createTableQuery));
       dbms.executeQueryNoResults(createTableQuery)
