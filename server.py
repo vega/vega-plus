@@ -1,6 +1,7 @@
 import sys
 import json
 from connectors.postgresql import PostgresqlConnector
+from connectors.duckdb import DuckDBConnector
 from flask import Flask,request
 app = Flask(__name__)
 
@@ -8,13 +9,6 @@ serverConfig = None
 dbmsConfig = None
 pools = {}
 dbms = None
-
-# give this dbms setup a name
-def getConnectionName(dbmsConfig):
-  name = dbmsConfig["dbmsName"]+":"+dbmsConfig["dbname"]
-  if "port" in dbmsConfig:
-    name += " | "+str(dbmsConfig["port"])
-  return name
 
 # handle SQL query requests for vega dataflow
 @app.route("/query", methods = ["POST","GET"])
@@ -49,30 +43,24 @@ def createSqlTable():
     if not name:
       raise "request body must define name property";
 
-    # Check if table exists yet
-    exists = False
-    existsQueryStr = "select exists(select 1 from information_schema.tables where table_name=" + "'" + name.lower() + "');"
-      
-    response = dbms.executeQuery(existsQueryStr)
-    print(json.dumps(response))
-    print("testing")
-    if response[0]["exists"]:
-      exists = True
-      print("table %s already exists" % (name))
-    else:
-      exists = False
-      print("table %s does not exist" % (name))
+
 
     data = json.loads(data)
-    schema = dbms.schemaFor(data[0])
+    schema = dbms.generateSchema(data[0])
 
     # Create table if it doesn't exist yet
+    exists = dbms.checkTableExists(name)
+    if exists:
+      print("table %s already exists" % (name))
+    else:
+      print("table %s does not exist" % (name))
+
     if not exists:
       print("creating table %s" % (name))
       print("built postgres schema: %s" % (json.dumps(schema)))
-      createTableQueryStr = dbms.createTableQueryStrFor(name, schema)
-      print("running create query: '%s'" % (createTableQueryStr));
-      dbms.executeQueryNoResults(createTableQueryStr)
+      createTableQuery = dbms.generateCreateTableQuery(name, schema)
+      print("running create query: '%s'" % (createTableQuery));
+      dbms.executeQueryNoResults(createTableQuery)
 
       # Insert values
       # Build attribute list string e.g. (attr1, attr2, attr3)
@@ -80,11 +68,9 @@ def createSqlTable():
 
       insertStatements = []
       for row in data:
-        print(row)
         st = "INSERT INTO " + name + " VALUES ( "
         for a in attrNames:
           out = row[a]
-          print(row,a,out)
           if type(out) == str:
             out = row[a]
             out = out.replace("'", "''")
@@ -96,7 +82,6 @@ def createSqlTable():
           st += "{0},".format(out)
         st = st[:-1] + " );"
         print(st)
-        print(schema)
         insertStatements.append(st)
       print("running insert queries for %s" % (name))
       dbms.executeQueriesNoResults(insertStatements)
@@ -118,5 +103,6 @@ if __name__ == "__main__":
   with open(dcf,"r") as f:
     dbmsConfig = json.load(f)
 
-  dbms = PostgresqlConnector(dbmsConfig,getConnectionName(dbmsConfig))
+  #dbms = PostgresqlConnector(dbmsConfig)
+  dbms = DuckDBConnector(dbmsConfig)
   app.run(debug=True,port=serverConfig["port"])

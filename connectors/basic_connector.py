@@ -1,14 +1,13 @@
 
 class BasicConnector:
-  def __init__(self,dbmsConfig,connectionName):
-    self.dbmsConfig = dbmsConfig
-    self.connectionName = connectionName
+  def __init__(self,dbmsConfig):
+    self.config = dbmsConfig
     self.pool = self.getNewPool()
 
   def typeFor(self, value):
-    # map JavaScript data types to SQL data types
-    # FixMe: want to use INTs too, if possible.
-    # Client needs to send more type data in this case.
+    '''
+    map JavaScript data types to SQL data types
+    '''
     if type(value) == str:
       return "VARCHAR"
     elif type(value) == int:
@@ -18,19 +17,23 @@ class BasicConnector:
     elif type(value) == bool:
       return "BOOLEAN"
     else:
-      raise "undefined type: '"+str(type(value))+"'"
+      raise "undefined mapping for Python type: '"+str(type(value))+"'"
 
-  def schemaFor(self,dataObj):
-    # create an object that maps property names to SQL data types (basically a
-    # schema object)
+  def generateSchema(self,dataObj):
+    '''
+    create an object that maps property names to SQL data types (basically a
+    schema object) using an example data record in JSON format
+    '''
     schema = {}
     for prop in dataObj:
       schema[prop] = self.typeFor(dataObj[prop])
     return schema
 
-  def createTableQueryStrFor(self, tableName, schema):
-    # given a table name and a schema object, make a corresponding "CREATE
-    # TABLE" SQL query
+  def generateCreateTableQuery(self, tableName, schema):
+    '''
+    given a table name and a schema object, make a corresponding "CREATE
+    TABLE" SQL query
+    '''
     out = 'create table ' + tableName + '('
     first = True
     for attrName in schema:
@@ -42,6 +45,10 @@ class BasicConnector:
       out += (attrName + ' ' + attrType)
     out += ')'
     return out
+
+  # override in child class
+  def checkTableExists(self,tableName):
+    return None
 
   # override in child class
   def getNewPool(self):
