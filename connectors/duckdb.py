@@ -1,4 +1,4 @@
-from .basic_connector import BasicConnector
+from .basic import BasicConnector
 import duckdb
 import json
 
