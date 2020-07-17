@@ -7,7 +7,6 @@ server.js
 *.swp
 package-lock.json
 *.DS_Store
-*.config.json
 *.duckdb
 *.wal
 __pycache__
