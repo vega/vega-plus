@@ -315,7 +315,7 @@ function generatePostgresQueriesForNode(pgNode: any) {
   }
 }
 
-function removeNodesFromDataflow(nodes: any, dataflow: any) {
+export function removeNodesFromDataflow(nodes: any, dataflow: any) {
   // Remove given nodes from dataflow.
   for (const entry of nodes) {
     const node = entry.node;
@@ -380,3 +380,4 @@ export function dataflowRewritePostgres(view: vega.View) {
   }
   removeNodesFromDataflow(pgNodes.filter((e: any) => !e.node._query), view);
 }
+

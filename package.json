@@ -19,18 +19,21 @@
     "vega": "^5.13.0",
     "vega-encode": "^4.8.0",
     "vega-transform-omnisci-core": "^0.0.10",
-    "vega-transforms": "^4.9.0",
-    "vega-transform-pg": "file:../vega-transform-pg"
+    "vega-transform-pg": "file:../vega-transform-pg",
+    "vega-transforms": "^4.9.0"
   },
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build --public-url '/scalable-vega/' index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start:server": "./node_modules/.bin/tsc-watch --onSuccess \" node server.js\""
+    "start:server": "./node_modules/.bin/tsc-watch --onSuccess \" node server.js\"",
+    "test": "jest"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
+    "jest": "^26.2.2",
     "parcel-bundler": "^1.12.4",
+    "ts-jest": "^26.1.4",
     "tsc-watch": "^4.2.8",
     "typescript": "^3.9.5",
     "webpack": "^4.43.0"
