@@ -1,13 +1,17 @@
-import * as vega from "vega";
-import {removeNodesFromDataflow} from '../lib/dataflow-rewrite-pg'
+//import * as vega from "vega";
+import {removeNodesFromDataflow, dataflowRewritePostgres, isPostgresTransform} from '../lib/dataflow-rewrite-pg'
+import {run} from '../main'
+
+var dataflow = require('vega-dataflow'),
+util = require('vega-util'),
+transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
+runtime = require('vega-runtime'),
+vega = require('vega'), 
+loader = vega.loader({baseURL: 'test/'})
+import VegaTransformPostgres from "vega-transform-pg";
 
 describe('removeNodesFromDataflow', () => {
-    var dataflow = require('vega-dataflow'),
-    util = require('vega-util'),
-    transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
-    runtime = require('vega-runtime'),
-    vega = require('vega'), 
-    loader = vega.loader({baseURL: 'test/'})
+
     var spec = {
         'signals': [
             { 'name': 'color', 'value': 'steelblue' }
@@ -92,4 +96,27 @@ describe('removeNodesFromDataflow', () => {
             expect(idx in view._runtime.nodes).toBe(false);
         }
     });
+});
+
+
+describe('average', () => { 
+    jest.mock('../../vega-transform-pg');
+    vega.transforms["postgres"] = VegaTransformPostgres;
+
+    let spec = require('../specs/cars_average_sourced.json');
+    const runtime = vega.parse(spec);
+    const view = new vega.View(runtime).logLevel(vega.Info);
+
+    dataflowRewritePostgres(view);
+    const nodes = (view as any)._runtime.nodes;
+    for (const idx in nodes) {
+        const node = nodes[idx];
+        if (node._query) {
+            console.log(node._query, "query")
+        }
+                
+    }
+
+
+
 });

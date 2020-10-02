@@ -358,7 +358,7 @@ export function removeNodesFromDataflow(nodes: any, dataflow: any) {
   }
 }
 
-function isPostgresTransform(node: any) {
+export function isPostgresTransform(node: any) {
   // returns whether the given node is a Postgres transform node
   return node.__proto__.constructor.Definition
     && node.__proto__.constructor.Definition.type === "postgres"
@@ -373,6 +373,7 @@ export function dataflowRewritePostgres(view: vega.View) {
   // call generatePostgresQueriesForNode on every node in the dataflow.
   for (const idx in nodes) {
     const node = nodes[idx];
+
     if (isPostgresTransform(node)) {
       generatePostgresQueriesForNode(node);
       pgNodes.push({ node: node, idx: idx });

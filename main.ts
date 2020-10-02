@@ -9,7 +9,7 @@ const http = require('http');
 // register the new transform with vega
 (vega as any).transforms["postgres"] = VegaTransformPostgres;
 
-function run(spec: vega.Spec) {
+export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
   const httpOptions = {
@@ -34,6 +34,7 @@ function run(spec: vega.Spec) {
   dataflowRewritePostgres(view);
   // execute the rewritten dataflow for the view
   view.runAsync();
+  return view;
 }
 
 function handleVegaSpec() {
