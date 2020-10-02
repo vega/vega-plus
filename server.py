@@ -2,7 +2,7 @@ import sys
 import json
 from connectors.postgresql import PostgresqlConnector
 from connectors.duckdb import DuckDBConnector
-from flask import Flask,request
+from flask import Flask,request,Response
 app = Flask(__name__)
 
 serverConfig = None
@@ -23,7 +23,11 @@ def executeQuery():
     if query is None:
       raise "request body must define query property"
     results = dbms.executeQuery(query)
-    return json.dumps(results)
+    resp = Response(response=json.dumps(results),status=200, mimetype='application/json')
+    h = resp.headers
+    h['Access-Control-Allow-Origin'] = "*"
+    return resp
+
   except Exception as err:
     #print(err)
     #return str(err)
@@ -81,7 +85,11 @@ def createSqlTable():
       print("running insert queries for %s" % (name))
       dbms.executeQueriesNoResults(insertStatements)
       print("insert queries complete")
-    return "success"
+    resp = Response(response="success",status=200)
+    h = resp.headers
+    h['Access-Control-Allow-Origin'] = "*"
+    return resp
+
   except Exception as err:
     #print(err)
     #return str(err)
@@ -96,7 +104,8 @@ if __name__ == "__main__":
   with open(scf,"r") as f:
     serverConfig = json.load(f)
   with open(dcf,"r") as f:
-    dbmsConfig = json.load(f)
+    dcf = json.load(f)
+  dbmsConfig = dcf
 
   #dbms = PostgresqlConnector(dbmsConfig)
   dbms = DuckDBConnector(dbmsConfig)
