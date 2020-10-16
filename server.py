@@ -94,6 +94,14 @@ def createSqlTable():
     #return str(err)
     raise err
 
+def getConnector(dbmsName):
+  if dbmsConfig["dbmsName"]  == "duckdb":
+    return DuckDBConnector(dbmsConfig)
+  elif dbmsConfig["dbmsName"]  == "postgresql":
+    return PostgresqlConnector(dbmsConfig)
+  else:
+    raise "dbms name not recognized: " + dbmsName
+
 if __name__ == "__main__":
   scf = "server.config.json"
   dcf = "dbms.config.json"
@@ -103,9 +111,9 @@ if __name__ == "__main__":
   with open(scf,"r") as f:
     serverConfig = json.load(f)
   with open(dcf,"r") as f:
-    dcf = json.load(f)
-  dbmsConfig = dcf
-
-  #dbms = PostgresqlConnector(dbmsConfig)
-  dbms = DuckDBConnector(dbmsConfig)
+    dbmsConfig = json.load(f)
+  if "dbmsName" in dbmsConfig:
+    dbms = getConnector(dbmsConfig["dbmsName"])
+  else: # DuckDB by default
+    dbms = DuckDBConnector(dbmsConfig)
   app.run(debug=True,port=serverConfig["port"])

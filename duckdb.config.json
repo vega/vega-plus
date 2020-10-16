@@ -1,3 +1,4 @@
 {
+  "dbmsName":"duckdb",
   "dbFilename":"/Users/leibatt/code/scalable-vega/scalable-vega.duckdb"
 }

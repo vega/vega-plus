@@ -3,23 +3,23 @@ class BasicConnector:
   def __init__(self,dbmsConfig):
     self.config = dbmsConfig
     self.pool = self.getNewPool()
+    self.types = {
+      "int": "INTEGER",
+      "float": "DOUBLE PRECISION",
+      "str": "VARCHAR",
+      "bool": "BOOLEAN"
+    }
 
   def typeFor(self, value,prevType=None):
     '''
     map JavaScript data types to SQL data types
     '''
     # if we have previously seen a float type, then stick with float
-    if prevType == "DOUBLE":
+    if prevType == self.types["float"]:
       return prevType
 
-    if type(value) == str:
-      return "VARCHAR"
-    elif type(value) == int:
-      return "INTEGER"
-    elif type(value) == float:
-      return "DOUBLE"
-    elif type(value) == bool:
-      return "BOOLEAN"
+    if type(value) in [str,int,float,bool]:
+      return self.types[type(value).__name__]
     elif value is None:
       if prevType is not None:
         return prevType
