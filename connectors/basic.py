@@ -4,10 +4,14 @@ class BasicConnector:
     self.config = dbmsConfig
     self.pool = self.getNewPool()
 
-  def typeFor(self, value):
+  def typeFor(self, value,prevType=None):
     '''
     map JavaScript data types to SQL data types
     '''
+    # if we have previously seen a float type, then stick with float
+    if prevType == "DOUBLE":
+      return prevType
+
     if type(value) == str:
       return "VARCHAR"
     elif type(value) == int:
@@ -16,17 +20,35 @@ class BasicConnector:
       return "DOUBLE"
     elif type(value) == bool:
       return "BOOLEAN"
+    elif value is None:
+      if prevType is not None:
+        return prevType
+      else:
+        raise "cannot determine type of None, and no previous type was observed."
     else:
       raise "undefined mapping for Python type: '"+str(type(value))+"'"
 
-  def generateSchema(self,dataObj):
+  def generateSchemaFromAllRecords(self,data):
+    '''
+    create an object that maps property names to SQL data types (basically a
+    schema object) using the full dataset, stored in JSON format
+    '''
+    prevSchema = None
+    schema = None
+    for record in data:
+      schema = self.generateSchema(record,prevSchema)
+      prevSchema = schema
+    return schema
+
+  def generateSchema(self,dataObj,prevSchema=None):
     '''
     create an object that maps property names to SQL data types (basically a
     schema object) using an example data record in JSON format
     '''
     schema = {}
     for prop in dataObj:
-      schema[prop] = self.typeFor(dataObj[prop])
+      prevType = prevSchema[prop] if prevSchema is not None else None
+      schema[prop] = self.typeFor(dataObj[prop],prevType)
     return schema
 
   def generateCreateTableQuery(self, tableName, schema):

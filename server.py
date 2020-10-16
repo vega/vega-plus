@@ -48,7 +48,7 @@ def createSqlTable():
       raise "request body must define name property";
 
     data = json.loads(data)
-    schema = dbms.generateSchema(data[0])
+    schema = dbms.generateSchemaFromAllRecords(data)
 
     # Create table if it doesn't exist yet
     if dbms.checkTableExists(name):
@@ -80,7 +80,6 @@ def createSqlTable():
             out = "null"
           st += "{0},".format(out)
         st = st[:-1] + " );"
-        print(st)
         insertStatements.append(st)
       print("running insert queries for %s" % (name))
       dbms.executeQueriesNoResults(insertStatements)
