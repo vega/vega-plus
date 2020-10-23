@@ -3,6 +3,11 @@ import duckdb
 import json
 
 class DuckDBConnector(BasicConnector):
+
+  def __init__(self,dbmsConfig):
+    BasicConnector.__init__(self,dbmsConfig)
+    self.types["float"] = "DOUBLE"
+
   def checkTableExists(self,tableName):
     try:
       self.executeQueryNoResults("select * from "+tableName.lower()+" limit 1;")

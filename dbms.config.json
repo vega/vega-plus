@@ -1,7 +1,4 @@
 {
-  "dbmsName":"postgresql",
-  "dbname":"scalable_vega",
-  "host":"localhost",
-  "port":5432,
-  "totalConnections": 10
+  "dbmsName":"duckdb",
+  "dbFilename":"/Users/leibatt/code/scalable-vega/scalable-vega.duckdb"
 }

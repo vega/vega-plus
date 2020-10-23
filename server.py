@@ -2,7 +2,7 @@ import sys
 import json
 from connectors.postgresql import PostgresqlConnector
 from connectors.duckdb import DuckDBConnector
-from flask import Flask,request
+from flask import Flask,request,Response
 app = Flask(__name__)
 
 serverConfig = None
@@ -23,7 +23,11 @@ def executeQuery():
     if query is None:
       raise "request body must define query property"
     results = dbms.executeQuery(query)
-    return json.dumps(results)
+    resp = Response(response=json.dumps(results),status=200, mimetype='application/json')
+    h = resp.headers
+    h['Access-Control-Allow-Origin'] = "*"
+    return resp
+
   except Exception as err:
     #print(err)
     #return str(err)
@@ -44,7 +48,7 @@ def createSqlTable():
       raise "request body must define name property";
 
     data = json.loads(data)
-    schema = dbms.generateSchema(data[0])
+    schema = dbms.generateSchemaFromAllRecords(data)
 
     # Create table if it doesn't exist yet
     if dbms.checkTableExists(name):
@@ -76,16 +80,27 @@ def createSqlTable():
             out = "null"
           st += "{0},".format(out)
         st = st[:-1] + " );"
-        print(st)
         insertStatements.append(st)
       print("running insert queries for %s" % (name))
       dbms.executeQueriesNoResults(insertStatements)
       print("insert queries complete")
-    return "success"
+    resp = Response(response="success",status=200)
+    h = resp.headers
+    h['Access-Control-Allow-Origin'] = "*"
+    return resp
+
   except Exception as err:
     #print(err)
     #return str(err)
     raise err
+
+def getConnector(dbmsName):
+  if dbmsConfig["dbmsName"]  == "duckdb":
+    return DuckDBConnector(dbmsConfig)
+  elif dbmsConfig["dbmsName"]  == "postgresql":
+    return PostgresqlConnector(dbmsConfig)
+  else:
+    raise "dbms name not recognized: " + dbmsName
 
 if __name__ == "__main__":
   scf = "server.config.json"
@@ -97,7 +112,8 @@ if __name__ == "__main__":
     serverConfig = json.load(f)
   with open(dcf,"r") as f:
     dbmsConfig = json.load(f)
-
-  #dbms = PostgresqlConnector(dbmsConfig)
-  dbms = DuckDBConnector(dbmsConfig)
+  if "dbmsName" in dbmsConfig:
+    dbms = getConnector(dbmsConfig["dbmsName"])
+  else: # DuckDB by default
+    dbms = DuckDBConnector(dbmsConfig)
   app.run(debug=True,port=serverConfig["port"])
