@@ -113,9 +113,55 @@ describe('average', () => {
         const node = nodes[idx];
         if (node._query) {
             console.log(node._query, "query")
+            console.log(node, "query")
         }
                 
     }
+
+
+
+});
+
+test('car_avg_sourced vega', async () => { 
+
+    var vega = require('vega');
+    var spec = require('../specs/cars_avg_sourced.vega.json');
+    var loader = vega.loader();
+
+    var view = new vega.View(vega.parse(spec), {
+        loader: loader,
+        renderer: 'none'
+    }); 
+
+    await view.runAsync();
+    
+    console.log(view.data("cars"));
+    console.log(view._runtime.data);
+
+    vega.transforms["postgres"] = VegaTransformPostgres;
+    const httpOptions = {
+        "hostname": "localhost",
+        "port": 3000,
+        "method": "POST",
+        "path": "/query",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      };
+      VegaTransformPostgres.setHttpOptions(httpOptions);
+      
+    spec = require('../specs/cars_average_sourced.json');
+    runtime = vega.parse(spec);
+    var view_s = new vega.View(runtime)
+        .logLevel(vega.Info);
+      // rewrite the dataflow execution for the view
+      dataflowRewritePostgres(view_s);
+      // execute the rewritten dataflow for the view
+    await view_s.runAsync();
+    console.log(view_s.data("cars"));
+    console.log(view_s._runtime.data);
+
+
 
 
 
