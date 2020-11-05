@@ -1,0 +1,81 @@
+{
+    "$schema": "https:\/\/vega.github.io\/schema\/vega\/v5.json",
+    "width": 400,
+    "height": 200,
+    "padding": 10,
+    "data": [
+      {
+        "name": "table",
+        "url": "data/flights_20k.json",
+        "transform": [
+          {
+            "type": "aggregate",
+            "fields": ["delay"],
+            "ops": ["average"],
+            "as": ["delay"],
+            "groupby": ["distance"]
+          }
+        ]
+      }
+    ],
+    "scales": [
+      {
+        "name": "xscale",
+        "type": "linear",
+        "domain": {
+          "data": "table",
+          "field": "distance"
+        },
+        "range": "width",
+        "round": true
+      },
+      {
+        "name": "yscale",
+        "domain": {
+          "data": "table",
+          "field": "delay"
+        },
+        "nice": true,
+        "range": "height"
+      }
+    ],
+    "axes": [
+      {
+        "orient": "bottom",
+        "scale": "xscale",
+        "title": "Distance"
+      },
+      {
+        "orient": "left",
+        "scale": "yscale",
+        "title": "Average Delay"
+      }
+    ],
+    "marks": [
+      {
+        "type": "symbol",
+        "from": {
+          "data": "table"
+        },
+        "encode": {
+          "enter": {
+            "x": {
+              "scale": "xscale",
+              "field": "distance"
+            },
+            "y": {
+              "scale": "yscale",
+              "field": "delay"
+            }
+          },
+          "update": {
+            "fill": {
+              "value": "steelblue"
+            },
+            "fillOpacity": {"value": 0.5}
+          }
+        }
+      }
+    ]
+  }
+  
