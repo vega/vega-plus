@@ -1,14 +1,67 @@
 //import * as vega from "vega";
-import {removeNodesFromDataflow, dataflowRewritePostgres, isPostgresTransform} from '../lib/dataflow-rewrite-pg'
-import {run} from '../main'
+import { removeNodesFromDataflow, dataflowRewritePostgres, isPostgresTransform } from '../lib/dataflow-rewrite-pg'
+import { run } from '../main'
 
 var dataflow = require('vega-dataflow'),
-util = require('vega-util'),
-transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
-runtime = require('vega-runtime'),
-vega = require('vega'), 
-loader = vega.loader({baseURL: 'test/'})
+    util = require('vega-util'),
+    transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
+    runtime = require('vega-runtime'),
+    vega = require('vega'),
+    loader = vega.loader({ baseURL: 'test/' })
 import VegaTransformPostgres from "vega-transform-pg";
+
+
+function sortObj(list, key) {
+    function compare(a, b) {
+        a = a[key];
+        b = b[key];
+        var type = (typeof (a) === 'string' ||
+            typeof (b) === 'string') ? 'string' : 'number';
+        var result;
+        if (type === 'string') result = a.localeCompare(b);
+        else result = a - b;
+        return result;
+    }
+    return list.sort(compare);
+}
+
+
+function sort_compare(act, mod, a_key, m_key) {
+    var tolerance = 0.0;
+    var i;
+    act = sortObj(act, a_key);
+    mod = sortObj(mod, m_key);
+    for (i = 0; i < act.length; i++) {
+        console.log(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key])));
+        if (Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key])) > tolerance) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function compare_tolerance(actual, modified) {
+    var a_k = Object.keys(actual[0]);
+    var m_k = Object.keys(modified[0]);
+    var i, j;
+
+    for (i = 0; i < a_k.length; i++) {
+        for (j = 0; j < m_k.length; j++) {
+            if (a_k[i].toUpperCase() == m_k[j].toUpperCase()) {
+                if (sort_compare(actual, modified, a_k[i], m_k[j])) {
+                    console.log("Worked");
+                }
+                else {
+                    console.log("Issue");
+                }
+                continue;
+            }
+        }
+    }
+
+
+}
+
 
 describe('removeNodesFromDataflow', () => {
 
@@ -18,54 +71,54 @@ describe('removeNodesFromDataflow', () => {
         ],
         'data': [
             {
-            'name': 'table',
-            'values': [{'x': 0.5}]
+                'name': 'table',
+                'values': [{ 'x': 0.5 }]
             }
         ],
         'scales': [
             {
-            'name': 'xscale',
-            'domain': [0, 1],
-            'range': [0, 500]
+                'name': 'xscale',
+                'domain': [0, 1],
+                'range': [0, 500]
             }
         ],
         'marks': [
             {
-            'type': 'rect',
-            'from': {'data': 'table'},
-            'key': 'k',
-            'sort': {'field': ['x', 'y']},
-            'encode': {
-                'enter': {
-                'fill': {'signal': 'color'},
-                'height': {'field': {'parent': 'h'}},
-                'y': {'value': 0},
-                'x1': {'scale': 'xscale', 'value': 0}
-                },
-                'update': {
-                'x2': {'scale': 'xscale', 'field': 'x'}
+                'type': 'rect',
+                'from': { 'data': 'table' },
+                'key': 'k',
+                'sort': { 'field': ['x', 'y'] },
+                'encode': {
+                    'enter': {
+                        'fill': { 'signal': 'color' },
+                        'height': { 'field': { 'parent': 'h' } },
+                        'y': { 'value': 0 },
+                        'x1': { 'scale': 'xscale', 'value': 0 }
+                    },
+                    'update': {
+                        'x2': { 'scale': 'xscale', 'field': 'x' }
+                    }
                 }
             }
-            }
         ]
-        };
-    
+    };
 
-    it('delete nodes from view one by one', () => {          
+
+    it('delete nodes from view one by one', () => {
         var dfs = vega.parse(spec);
         const view = new vega.View(dfs, {
             loader: loader,
             renderer: 'none'
-            }).finalize(); 
+        }).finalize();
 
-        const nodes = view._runtime.nodes;          
+        const nodes = view._runtime.nodes;
         const copy = Object.keys(nodes);
 
         for (const idx in copy) {
             const toDelete = [];
-            const node = nodes[idx];          
+            const node = nodes[idx];
             toDelete.push({ node: node, idx: idx });
-            
+
             expect(idx in view._runtime.nodes).toBe(true);
             removeNodesFromDataflow(toDelete, view);
             expect(idx in view._runtime.nodes).toBe(false);
@@ -73,33 +126,33 @@ describe('removeNodesFromDataflow', () => {
 
     });
 
-    it('delete array of nodes from view', () => {          
+    it('delete array of nodes from view', () => {
         var dfs = vega.parse(spec);
         const view = new vega.View(dfs, {
             loader: loader,
             renderer: 'none'
-            }).finalize(); 
+        }).finalize();
 
-        const nodes = view._runtime.nodes;          
+        const nodes = view._runtime.nodes;
         const copy = Object.keys(nodes);
         const toDelete = [];
 
-        for (const idx in copy) {      
-            const node = nodes[idx];          
-            toDelete.push({ node: node, idx: idx });           
+        for (const idx in copy) {
+            const node = nodes[idx];
+            toDelete.push({ node: node, idx: idx });
             expect(idx in view._runtime.nodes).toBe(true);
         }
 
         removeNodesFromDataflow(toDelete, view);
 
-        for (const idx in copy) {            
+        for (const idx in copy) {
             expect(idx in view._runtime.nodes).toBe(false);
         }
     });
 });
 
 
-describe('average', () => { 
+describe('average', () => {
     jest.mock('../../vega-transform-pg');
     vega.transforms["postgres"] = VegaTransformPostgres;
 
@@ -115,28 +168,28 @@ describe('average', () => {
             console.log(node._query, "query")
             console.log(node, "query")
         }
-                
+
     }
 
 
 
 });
 
-test('car_avg_sourced vega', async () => { 
+test('car_avg_sourced vega', async () => {
 
     var vega = require('vega');
-    var spec = require('../specs/cars_avg_sourced.vega.json');
+    var spec = require('../vega_specs/cars_avg_sourced.json');
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec), {
         loader: loader,
         renderer: 'none'
-    }); 
+    });
 
     await view.runAsync();
-    
-    console.log(view.data("cars"));
-    console.log(view._runtime.data);
+    var vega_result = view.data("cars");
+    console.log(vega_result);
+    //console.log(view._runtime.data);
 
     vega.transforms["postgres"] = VegaTransformPostgres;
     const httpOptions = {
@@ -145,24 +198,26 @@ test('car_avg_sourced vega', async () => {
         "method": "POST",
         "path": "/query",
         "headers": {
-          "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded"
         }
-      };
-      VegaTransformPostgres.setHttpOptions(httpOptions);
-      
+    };
+    VegaTransformPostgres.setHttpOptions(httpOptions);
+
     spec = require('../specs/cars_average_sourced.json');
     runtime = vega.parse(spec);
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
-      // rewrite the dataflow execution for the view
-      dataflowRewritePostgres(view_s);
-      // execute the rewritten dataflow for the view
+    // rewrite the dataflow execution for the view
+    dataflowRewritePostgres(view_s);
+    // execute the rewritten dataflow for the view
     await view_s.runAsync();
-    console.log(view_s.data("cars"));
-    console.log(view_s._runtime.data);
+
+    var vega_pg_result = view_s.data("cars");
+    console.log(vega_pg_result);
+    // console.log(view_s._runtime.data);
 
 
-
+    compare_tolerance(vega_result, vega_pg_result);
 
 
 });
