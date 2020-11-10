@@ -6,7 +6,7 @@
   "data": [
     {
       "name": "cars",
-      "url": "../data/cars.json",
+      "url": "data/cars.json",
       "transform": [
         {
           "type": "aggregate",
