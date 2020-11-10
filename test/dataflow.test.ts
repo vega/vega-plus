@@ -178,7 +178,7 @@ describe('average', () => {
 test('car_avg_sourced vega', async () => {
 
     var vega = require('vega');
-    var spec = require('../vega_specs/cars_avg_sourced.json');
+    var spec = require('../vega_specs/cars_average_sourced.json');
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec), {
@@ -260,7 +260,6 @@ test('car_avg_count transform', async () => {
     console.log(view_s.data("cars"));
     // console.log(view_s._runtime.data);
 });
-
 test('car_distinct transform', async () => {
 
     var vega = require('vega');
@@ -274,7 +273,7 @@ test('car_distinct transform', async () => {
 
     await view.runAsync();
 
-    console.log(view.data("cars"));
+    console.log(view.data("cars"), "distinct");
     // console.log(view._runtime.data);
 
     vega.transforms["postgres"] = VegaTransformPostgres;
@@ -298,5 +297,44 @@ test('car_distinct transform', async () => {
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
     console.log(view_s.data("cars"));
+    // console.log(view_s._runtime.data);
+});
+test('car_histogram', async () => {
+
+    var vega = require('vega');
+    var spec = require('../vega_specs/cars_histogram.json');
+    var loader = vega.loader();
+
+    var view = new vega.View(vega.parse(spec), {
+        loader: loader,
+        renderer: 'none'
+    });
+
+    await view.runAsync();
+
+    console.log(view.data("binned"), "histogram");
+    // console.log(view._runtime.data);
+
+    vega.transforms["postgres"] = VegaTransformPostgres;
+    const httpOptions = {
+        "hostname": "localhost",
+        "port": 3000,
+        "method": "POST",
+        "path": "/query",
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    };
+    VegaTransformPostgres.setHttpOptions(httpOptions);
+
+    spec = require('../specs/cars_histogram.json');
+    runtime = vega.parse(spec);
+    var view_s = new vega.View(runtime)
+        .logLevel(vega.Info);
+    // rewrite the dataflow execution for the view
+    dataflowRewritePostgres(view_s);
+    // execute the rewritten dataflow for the view
+    await view_s.runAsync();
+    console.log(view_s.data("binned"), "histogram sv");
     // console.log(view_s._runtime.data);
 });
