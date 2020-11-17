@@ -1,0 +1,96 @@
+Worked
+cars_average_sourced
+cars_average_transform_successor
+cars_count_transform_successor
+cars_max_transform_successor
+cars_min_transform_successor
+cars_q1_transform_successor
+cars_q3_transform_successor
+cars_stderr_transform_successor
+cars_stdev_transform_successor
+cars_stdevp_transform_successor
+cars_sum_transform_successor
+cars_valid_transform_successor
+cars_variance_transform_successor
+cars_variancep_transform_successor
+cars_marks
+
+Issue
+cars_distinct_transform_successor
+console.log
+    [ { Cylinders: 8, 'Miles per Gallon': 1, [Symbol(vega_id)]: 416 },
+      { Cylinders: 4, 'Miles per Gallon': 1, [Symbol(vega_id)]: 417 },
+      { Cylinders: 6, 'Miles per Gallon': 1, [Symbol(vega_id)]: 418 },
+      { Cylinders: 3, 'Miles per Gallon': 1, [Symbol(vega_id)]: 419 },
+      { Cylinders: 5, 'Miles per Gallon': 1, [Symbol(vega_id)]: 420 } ]
+
+      at test/dataflow.test.ts:193:13
+
+  console.log
+    [ { miles_per_gallon: 4, cylinders: 3, [Symbol(vega_id)]: 488 },
+      { miles_per_gallon: 87, cylinders: 4, [Symbol(vega_id)]: 489 },
+      { miles_per_gallon: 3, cylinders: 5, [Symbol(vega_id)]: 490 },
+      { miles_per_gallon: 38, cylinders: 6, [Symbol(vega_id)]: 491 },
+      { miles_per_gallon: 27, cylinders: 8, [Symbol(vega_id)]: 492 } ]
+
+
+
+cars_median_transform_successor
+[]
+
+      at test/dataflow.test.ts:193:13
+
+  console.log
+    [ { miles_per_gallon: 20.25, cylinders: 3, [Symbol(vega_id)]: 19 },
+      { miles_per_gallon: 28.25, cylinders: 4, [Symbol(vega_id)]: 20 },
+      { miles_per_gallon: 25.4, cylinders: 5, [Symbol(vega_id)]: 21 },
+      { miles_per_gallon: 19, cylinders: 6, [Symbol(vega_id)]: 22 },
+      { miles_per_gallon: 14, cylinders: 8, [Symbol(vega_id)]: 23 } ]
+
+
+cars_histogram
+    [ { bin0: 15, bin1: 20, count: 98, [Symbol(vega_id)]: 822 },
+      { bin0: 10, bin1: 15, count: 52, [Symbol(vega_id)]: 823 },
+      { bin0: null, bin1: null, count: 8, [Symbol(vega_id)]: 824 },
+      { bin0: 20, bin1: 25, count: 78, [Symbol(vega_id)]: 825 },
+      { bin0: 25, bin1: 30, count: 77, [Symbol(vega_id)]: 826 },
+      { bin0: 5, bin1: 10, count: 1, [Symbol(vega_id)]: 827 },
+      { bin0: 30, bin1: 35, count: 56, [Symbol(vega_id)]: 828 },
+      { bin0: 35, bin1: 40, count: 27, [Symbol(vega_id)]: 829 },
+      { bin0: 40, bin1: 45, count: 8, [Symbol(vega_id)]: 830 },
+      { bin0: 45, bin1: 50, count: 1, [Symbol(vega_id)]: 831 } ]
+
+      at test/dataflow.test.ts:193:13
+
+  console.log
+    [ { bin0: 9, bin1: 12, count: 13, [Symbol(vega_id)]: 900 },
+      { bin0: 13, bin1: 16.5, count: 78, [Symbol(vega_id)]: 901 },
+      { bin0: 16.9, bin1: 20.2, count: 73, [Symbol(vega_id)]: 902 },
+      { bin0: 20.3, bin1: 24, count: 61, [Symbol(vega_id)]: 903 },
+      { bin0: 24.2, bin1: 27.5, count: 54, [Symbol(vega_id)]: 904 },
+      { bin0: 27.9, bin1: 31.5, count: 48, [Symbol(vega_id)]: 905 },
+      { bin0: 31.6, bin1: 35.1, count: 38, [Symbol(vega_id)]: 906 },
+      { bin0: 35.7, bin1: 39, count: 22, [Symbol(vega_id)]: 907 },
+      { bin0: 39.1, bin1: 41.5, count: 5, [Symbol(vega_id)]: 908 },
+      { bin0: 43.1, bin1: 44.6, count: 5, [Symbol(vega_id)]: 909 },
+      { bin0: 46.6, bin1: 46.6, count: 1, [Symbol(vega_id)]: 910 } ]
+
+
+
+
+Compare Function Issue
+cars_missing_transform_successor
+console.log
+    [ { Cylinders: 8, Miles_per_Gallon: 5, [Symbol(vega_id)]: 416 },
+      { Cylinders: 4, Miles_per_Gallon: 3, [Symbol(vega_id)]: 417 },
+      { Cylinders: 6, Miles_per_Gallon: 0, [Symbol(vega_id)]: 418 },
+      { Cylinders: 3, Miles_per_Gallon: 0, [Symbol(vega_id)]: 419 },
+      { Cylinders: 5, Miles_per_Gallon: 0, [Symbol(vega_id)]: 420 } ]
+
+      at test/dataflow.test.ts:193:13
+
+  console.log
+    [ { miles_per_gallon: 3, cylinders: 4, [Symbol(vega_id)]: 488 },
+      { miles_per_gallon: 5, cylinders: 8, [Symbol(vega_id)]: 489 } ]
+
+
