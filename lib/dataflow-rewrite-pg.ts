@@ -23,9 +23,9 @@ function aggregateOpToSql(op: string, field: string) {
     case "count":
     case "valid":
     case "missing":
-      return `COUNT(*)`;
+      return `SUM(CASE WHEN ${field} IS NULL THEN 1 ELSE 0 END)`;
     case "distinct":
-      return `COUNT(DISTINCT ${field})`;
+      return `COUNT(DISTINCT ${field}) + COUNT(DISTINCT CASE WHEN ${field} IS NULL THEN 1 END)`;
     case "sum":
       return `SUM(${field})`;
     case "variance":
@@ -80,7 +80,7 @@ function generatePostgresQueryForAggregateNode(node: any, relation: string) {
         validOpIdxs.push(fieldIdx);
       }
       if (op === "missing") {
-        missingOpIdxs.push(fieldIdx);
+        // missingOpIdxs.push(fieldIdx);
       }
       out += aggregateOpToSql(op, field);
     } else {

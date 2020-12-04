@@ -11,13 +11,13 @@
         {
           "type": "aggregate",
           "fields": [
-            "Miles per Gallon"
+            "Miles_per_Gallon"
           ],
           "ops": [
             "distinct"
           ],
           "as": [
-            "Miles per Gallon"
+            "Miles_per_Gallon"
           ],
           "groupby": [
             "Cylinders"
@@ -42,7 +42,7 @@
       "name": "yscale",
       "domain": {
         "data": "cars",
-        "field": "Miles per Gallon"
+        "field": "Miles_per_Gallon"
       },
       "nice": true,
       "range": "height"
@@ -78,7 +78,7 @@
           },
           "y": {
             "scale": "yscale",
-            "field": "Miles per Gallon"
+            "field": "Miles_per_Gallon"
           },
           "y2": {
             "scale": "yscale",

@@ -1,5 +1,6 @@
 import sys
-import json
+#import json
+import simplejson as json
 from connectors.postgresql import PostgresqlConnector
 from connectors.duckdb import DuckDBConnector
 from flask import Flask,request,Response

@@ -235,6 +235,7 @@ test('car_avg_count transform', async () => {
     await view.runAsync();
 
     console.log(view.data("cars"));
+    var vega_result = view.data("cars");
     // console.log(view._runtime.data);
 
     vega.transforms["postgres"] = VegaTransformPostgres;
@@ -257,8 +258,11 @@ test('car_avg_count transform', async () => {
     dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
+
+    var vega_pg_result = view_s.data("cars");
     console.log(view_s.data("cars"));
     // console.log(view_s._runtime.data);
+    compare_tolerance(vega_result, vega_pg_result);
 });
 test('car_distinct transform', async () => {
 
@@ -336,5 +340,45 @@ test('car_histogram', async () => {
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
     console.log(view_s.data("binned"), "histogram sv");
+    // console.log(view_s._runtime.data);
+});
+
+test('car_missing', async () => {
+
+    var vega = require('vega');
+    var spec = require('../vega_specs/cars_missing_transform_successor.json');
+    var loader = vega.loader();
+
+    var view = new vega.View(vega.parse(spec), {
+        loader: loader,
+        renderer: 'none'
+    });
+
+    await view.runAsync();
+
+    console.log(view.data("cars"), "missing");
+    // console.log(view._runtime.data);
+
+    vega.transforms["postgres"] = VegaTransformPostgres;
+    const httpOptions = {
+        "hostname": "localhost",
+        "port": 3000,
+        "method": "POST",
+        "path": "/query",
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    };
+    VegaTransformPostgres.setHttpOptions(httpOptions);
+
+    spec = require('../specs/cars_missing_transform_successor.json');
+    runtime = vega.parse(spec);
+    var view_s = new vega.View(runtime)
+        .logLevel(vega.Info);
+    // rewrite the dataflow execution for the view
+    dataflowRewritePostgres(view_s);
+    // execute the rewritten dataflow for the view
+    await view_s.runAsync();
+    console.log(view_s.data("cars"), "missing sv");
     // console.log(view_s._runtime.data);
 });

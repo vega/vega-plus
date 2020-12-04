@@ -26,6 +26,7 @@ export function run(spec: vega.Spec) {
   // make a vega execution object (runtime) from the spec
   const runtime = vega.parse(spec);
   // bind the execution to a dom element as a view
+  console.log(runtime);
   const view = new vega.View(runtime)
     .logLevel(vega.Info)
     .renderer("svg")
@@ -34,6 +35,7 @@ export function run(spec: vega.Spec) {
   dataflowRewritePostgres(view);
   // execute the rewritten dataflow for the view
   view.runAsync();
+  console.log(view);
   return view;
 }
 
