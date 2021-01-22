@@ -22,6 +22,7 @@ function aggregateOpToSql(op: string, field: string) {
       return `AVG(${field})`;
     case "count":
     case "valid":
+      return `COUNT(*)`;
     case "missing":
       return `SUM(CASE WHEN ${field} IS NULL THEN 1 ELSE 0 END)`;
     case "distinct":
@@ -217,6 +218,7 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any) {
   if (currentNode instanceof aggregate && currentNode._argval.fields) {
     currentNode._query = generatePostgresQueryForAggregateNode(currentNode, pgNode._argval.relation);
     currentNode.transform = pgNode.__proto__.transform;
+    console.log(currentNode._query)
     return;
   }
 
@@ -382,3 +384,21 @@ export function dataflowRewritePostgres(view: vega.View) {
   removeNodesFromDataflow(pgNodes.filter((e: any) => !e.node._query), view);
 }
 
+export function dataflowRewritePostgres2(view: vega.View) {
+  // For each Postgres transform node in the View's dataflow graph,
+  // generates a Postgres query to be executed at runtime, based
+  // on that node's dependents.
+  const nodes = (view as any)._runtime.nodes;
+  const pgNodes = [];
+  // leilani: since the later functions are recursive, it seems redundant to
+  // call generatePostgresQueriesForNode on every node in the dataflow.
+  for (const idx in nodes) {
+    const node = nodes[idx];
+
+    if (isPostgresTransform(node)) {
+      generatePostgresQueriesForNode(node);
+      pgNodes.push({ node: node, idx: idx });
+    }
+  }
+  //removeNodesFromDataflow(pgNodes.filter((e: any) => !e.node._query), view);
+}

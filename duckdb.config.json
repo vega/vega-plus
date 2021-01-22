@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
-  "dbFilename":"/Users/yangjunran/Desktop/github/scalable-vega/scalable-vega.duckdb"
-=======
   "dbmsName":"duckdb",
-  "dbFilename":"/Users/leibatt/code/scalable-vega/scalable-vega.duckdb"
->>>>>>> 7b232d9d62401f2d6706b5fff2a0d338d412cecf
+  "dbFilename":"/Users/yangjunran/Desktop/github/scalable-vega/scalable-vega.db"
 }
