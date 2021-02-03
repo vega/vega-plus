@@ -19,7 +19,6 @@
     "vega": "^5.13.0",
     "vega-encode": "^4.8.0",
     "vega-transform-omnisci-core": "^0.0.10",
-    "vega-transform-pg": "file:../vega-transform-pg",
     "vega-transforms": "^4.9.0"
   },
   "scripts": {

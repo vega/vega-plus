@@ -13,12 +13,16 @@
       "source": "points",
       "transform": [
         {
+          "type": "extent",
+          "field": "Miles_per_Gallon",
+          "signal": "extent"
+        },
+        {
           "type": "bin",
           "field": "Miles_per_Gallon",
-          "extent": [
-            0,
-            50
-          ],
+          "extent": {
+            "signal": "extent"
+          },
           "maxbins": 10
         },
         {
@@ -46,10 +50,9 @@
       "name": "xscale",
       "type": "linear",
       "range": "width",
-      "domain": [
-        0,
-        50
-      ]
+      "domain": {
+        "signal": "extent"
+      }
     },
     {
       "name": "yscale",

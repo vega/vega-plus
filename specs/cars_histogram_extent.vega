@@ -6,19 +6,28 @@
   "data": [
     {
       "name": "points",
-      "url": "../data/cars.json"
+      "transform": [
+        {
+          "type": "postgres",
+          "relation": "cars"
+        }
+      ]
     },
     {
       "name": "binned",
       "source": "points",
       "transform": [
         {
+          "type": "extent",
+          "field": "miles_per_gallon",
+          "signal": "extent"
+        },
+        {
           "type": "bin",
-          "field": "Miles_per_Gallon",
-          "extent": [
-            0,
-            50
-          ],
+          "field": "miles_per_gallon",
+          "extent": {
+            "signal": "extent"
+          },
           "maxbins": 10
         },
         {

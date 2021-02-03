@@ -1,5 +1,5 @@
 import * as Vega from "vega"
-import { Transforms, AggregateTransform } from "vega"
+import { Transforms, AggregateTransform, None } from "vega"
 import { aggregate, extent, bin } from "vega-transforms";
 
 function percentileContSql(field: string, fraction: number) {
@@ -51,10 +51,16 @@ function aggregateOpToSql(op: string, field: string) {
   }
 }
 
-export const vegaTransformToSql = (tableName: string, transform: Transforms) => {
-  if (transform.type === "aggregate") {
-    return aggregateTransformToSql(tableName, transform)
+function vegaNonTransformToSql(tableName: string, markFields: string[]) {
+  let out = `SELECT `;
+  for (const [fieldIdx, field] of markFields.entries()) {
+    if (fieldIdx !== 0) {
+      out += ", "
+    }
+    out += field;
   }
+  out += ` FROM ${tableName}`;
+  return `'${out}'`;
 }
 
 export const aggregateTransformToSql = (tableName: string, transform: AggregateTransform) => {
@@ -91,39 +97,124 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
   return `'${sql}'`
 }
 
+function collectNonTransformFields(dataName: string, marks: any) {
+  const fields: string[] = []
+  for (const [index, mark] of marks.entries()) {
+    if (mark.encode && mark.encode.enter && mark.from && mark.from.data === dataName) {
+      for (var key of Object.keys(mark.encode.enter)) {
+        if (mark.encode.enter[key].field) { fields.push(mark.encode.enter[key].field) }
+      }
+    }
+  }
+  return fields
+}
+
+export function dataRewrite(tableName: string, transform: Transforms, dbTransforms, newData) {
+
+  if (transform.type === "extent") {
+    // converting signal to a new data item
+    newData.push({
+      name: transform.signal,
+      transform: [{
+        type: "postgres",
+        query: {
+          signal: `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
+        }
+      }]
+    })
+  }
+
+  if (transform.type === "bin") {
+    const maxbins = transform.maxbins ? transform.maxbins : 10
+    let extent = {}
+
+    if (transform.extent.hasOwnProperty("signal")) {
+      // getting "extent" from the data item that converted from signal
+      const name = transform.extent["signal"]
+      extent["signal"] = `[data('${name}')[0]['min'], data('${name}')[0]['max']]`
+    } else {
+      // extent is assigned explicitly as [min, max]
+      extent = transform.extent
+    }
+
+    newData.push({
+      name: "bin",
+      transform: [
+        {
+          type: "bin",
+          field: null,
+          signal: "bins",
+          maxbins: maxbins,
+          extent: extent
+        }
+      ]
+    })
+
+    dbTransforms.push({
+      type: "postgres",
+      query: {
+        signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0'`
+      }
+    })
+    dbTransforms.push({
+      type: "formula",
+      expr: "datum.bin0 + bins.step",
+      as: "bin1"
+    })
+
+    return true
+  }
+
+  if (transform.type === "aggregate") {
+    dbTransforms.push({
+      type: "postgres",
+      query: {
+        signal: aggregateTransformToSql(tableName, transform)
+      }
+    })
+  }
+
+}
+
 export function specRewrite(vgSpec) {
   const dataSpec = vgSpec.data
   const dbTransformInd = []
   var table = ""
+  const newData = []
 
   for (const [index, spec] of dataSpec.entries()) {
-    console.log(dataSpec[index].transform)
     if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "postgres") {
       if (spec.transform.length == 1) {
         dbTransformInd.push(index)
       }
       table = spec.transform[0]["relation"]
 
-      // successor spec
+      // if the data spec doesn't contain any explicit transform, collect all useful fields as data
+      const markFileds: string[] = collectNonTransformFields(spec.name, vgSpec.marks);
+      if (markFileds.length > 0) {
+        spec.transform[0] = {
+          type: "postgres",
+          relation: table,
+          query: {
+            signal: vegaNonTransformToSql(table, markFileds)
+          }
+        }
+      }
+
+      // successor transform
       if (spec.transform.length > 1) {
         const dbTransforms = []
         for (var i = 1; i < spec.transform.length; i++) {
-          dbTransforms.push({
-            type: "postgres",
-            relation: table,
-            query: {
-              signal: vegaTransformToSql(table, spec.transform[i])
-            }
-          })
+          const skip = dataRewrite(table, spec.transform[i], dbTransforms, newData)
+          if (skip) break // skip the aggregate follwing bin
         }
         dataSpec[index].transform = dbTransforms
       }
-
       continue;
 
     }
 
-    // sourced spec
+    // sourced transform
     if (spec.transform && spec.transform.length > 0 && dbTransformInd.length > 0) {
 
       const dbTransforms = []
@@ -137,13 +228,8 @@ export function specRewrite(vgSpec) {
           }
         }
 
-        dbTransforms.push({
-          type: "postgres",
-          relation: table,
-          query: {
-            signal: vegaTransformToSql(table, transform)
-          }
-        })
+        const skip = dataRewrite(table, transform, dbTransforms, newData)
+        if (skip) break
       }
       dataSpec[index].transform = dbTransforms
     }
@@ -151,11 +237,14 @@ export function specRewrite(vgSpec) {
   console.log(dataSpec)
   console.log(dbTransformInd)
 
-  // remove the original db transforms that introduce the schema
-  for (var i = dbTransformInd.length - 1; i >= 0; i--) {
+  // remove the original "postgres" transform that indicating using db
+  for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
     console.log(dataSpec[i])
     dataSpec.splice(i, 1);
   }
+
+  console.log(newData, "newdata")
+  vgSpec.data = newData.concat(dataSpec)
 
   return vgSpec
 }

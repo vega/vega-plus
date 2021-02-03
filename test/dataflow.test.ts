@@ -1,6 +1,9 @@
 //import * as vega from "vega";
 import { removeNodesFromDataflow, dataflowRewritePostgres, isPostgresTransform } from '../lib/dataflow-rewrite-pg'
 import { run } from '../main'
+import { specRewrite } from "../lib/spec_rewrite"
+
+
 
 var dataflow = require('vega-dataflow'),
     util = require('vega-util'),
@@ -152,33 +155,13 @@ describe('removeNodesFromDataflow', () => {
 });
 
 
-describe('average', () => {
-    jest.mock('../../vega-transform-pg');
-    vega.transforms["postgres"] = VegaTransformPostgres;
-
-    let spec = require('../specs/cars_average_sourced.json');
-    const runtime = vega.parse(spec);
-    const view = new vega.View(runtime).logLevel(vega.Info);
-
-    dataflowRewritePostgres(view);
-    const nodes = (view as any)._runtime.nodes;
-    for (const idx in nodes) {
-        const node = nodes[idx];
-        if (node._query) {
-            console.log(node._query, "query")
-            console.log(node, "query")
-        }
-
-    }
-
-
-
-});
 
 test('car_avg_sourced vega', async () => {
 
     var vega = require('vega');
     var spec = require('../vega_specs/cars_average_sourced.json');
+    const pgTransform = require('vega-transform-pg')
+
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec), {
@@ -191,7 +174,7 @@ test('car_avg_sourced vega', async () => {
     console.log(vega_result);
     //console.log(view._runtime.data);
 
-    vega.transforms["postgres"] = VegaTransformPostgres;
+    vega.transforms["postgres"] = pgTransform.VegaTransformPostgres;
     const httpOptions = {
         "hostname": "localhost",
         "port": 3000,
@@ -204,11 +187,11 @@ test('car_avg_sourced vega', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_average_sourced.json');
-    runtime = vega.parse(spec);
+    runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
-    dataflowRewritePostgres(view_s);
+    // dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
 
@@ -225,6 +208,8 @@ test('car_avg_count transform', async () => {
 
     var vega = require('vega');
     var spec = require('../vega_specs/cars_count_transform_successor.json');
+    const pgTransform = require('vega-transform-pg')
+
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec), {
@@ -238,7 +223,7 @@ test('car_avg_count transform', async () => {
     var vega_result = view.data("cars");
     // console.log(view._runtime.data);
 
-    vega.transforms["postgres"] = VegaTransformPostgres;
+    vega.transforms["postgres"] = pgTransform.VegaTransformPostgres;
     const httpOptions = {
         "hostname": "localhost",
         "port": 3000,
@@ -251,11 +236,11 @@ test('car_avg_count transform', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_count_transform_successor.json');
-    runtime = vega.parse(spec);
+    runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
-    dataflowRewritePostgres(view_s);
+    // dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
 
@@ -293,11 +278,11 @@ test('car_distinct transform', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_distinct_transform_successor.json');
-    runtime = vega.parse(spec);
+    runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
-    dataflowRewritePostgres(view_s);
+    // dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
     console.log(view_s.data("cars"));
@@ -332,11 +317,11 @@ test('car_histogram', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_histogram.json');
-    runtime = vega.parse(spec);
+    runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
-    dataflowRewritePostgres(view_s);
+    // dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
     console.log(view_s.data("binned"), "histogram sv");
@@ -372,11 +357,11 @@ test('car_missing', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_missing_transform_successor.json');
-    runtime = vega.parse(spec);
+    runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
-    dataflowRewritePostgres(view_s);
+    // dataflowRewritePostgres(view_s);
     // execute the rewritten dataflow for the view
     await view_s.runAsync();
     console.log(view_s.data("cars"), "missing sv");
