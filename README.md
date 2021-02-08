@@ -9,7 +9,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
 5. Run git clone https://github.com/leibatt/vega-transform-pg.git
 6. Yarn link vega-transform-pg in scalable vega (https://classic.yarnpkg.com/en/docs/cli/link/)
-   a. cd vega-transform-pg
+&nbsp;&nbsp;&nbsp;&nbsp; a. cd vega-transform-pg
    b. yarn link
    c. cd ../scalable-vega
    d. yarn link vega-transform-pg 
