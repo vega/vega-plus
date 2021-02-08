@@ -8,8 +8,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 3. Run `cd /path/to/dev/repos`.
 4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
 5. Run git clone https://github.com/leibatt/vega-transform-pg.git
-6. Yarn link vega-transform-pg in scalable vega (https://classic.yarnpkg.com/en/docs/cli/link/)
-<br>
+6. Yarn link vega-transform-pg in scalable vega (https://classic.yarnpkg.com/en/docs/cli/link/) <br>
 &nbsp;&nbsp;&nbsp;&nbsp; a. cd vega-transform-pg <br>
 &nbsp;&nbsp;&nbsp;&nbsp; b. yarn link <br>
 &nbsp;&nbsp;&nbsp;&nbsp; c. cd ../scalable-vega <br>
@@ -29,12 +28,12 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 ## Unit Tests (Only do it after Installation and Demo)
 1. Close down web and application server. 
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`. 
-3. Switch to the tests branch by running: 
-   a. `git checkout tests`
-   b. `git pull`
+3. Switch to the tests branch by running: <br> 
+&nbsp;&nbsp;&nbsp;&nbsp; a. `git checkout tests` <br>
+&nbsp;&nbsp;&nbsp;&nbsp; b. `git pull` <br>
 4. Follow Steps 1-4 from Demo
 5. Run `jest` or `npm test`
 
 ## Additional Notes
-1. If you face `fe_sendauth: no password supplied error` for postgres in server.py, 
-   a. You might have to update the postgresql config to change the authentication methods for local connections
+1. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
+&nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local connections
