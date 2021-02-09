@@ -13,7 +13,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 &nbsp;&nbsp;&nbsp;&nbsp; b. `yarn link` <br>
 &nbsp;&nbsp;&nbsp;&nbsp; c. `cd ../scalable-vega` <br>
 &nbsp;&nbsp;&nbsp;&nbsp; d. `yarn link vega-transform-pg` <br> 
-7. Install Jest (for running Tests): yarn add --dev jest
+7. Install Jest (for running Tests): `yarn add --dev jest`
 
 ## Demo
 1. Run `cd scalable-vega`.
@@ -36,4 +36,4 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 
 ## Additional Notes
 1. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
-&nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local connections
+&nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local/host connections (change from peer to trust)
