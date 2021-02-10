@@ -82,8 +82,8 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
     sql = [
       `SELECT ${selectionList.join(",")}`,
       `FROM ${tableName}`,
-      `GROUP BY ${groupby.join(",")}`,
-      `WHERE ${validOpIdxs.join(" AND ")}`
+      `WHERE ${validOpIdxs.join(" AND ")}`,
+      `GROUP BY ${groupby.join(",")}`
     ].join(" ")
   } else {
     sql = [
