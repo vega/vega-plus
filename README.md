@@ -18,12 +18,13 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 ## Demo
 1. Run `cd scalable-vega`.
 2. Run `yarn` to install dependences.
-3. Run `python server.py server.config.json postgresql.config.json` to start the application server.
-4. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
-5. Run `yarn start` to start the web server.
-6. Open a browser tab to localhost:1234.
-7. Upload the cars dataset from `/path/to/dev/repos/scalable-vega/data/cars.json`.
-8. Upload the cars Vega spec from `/path/to/dev/repos/scalable-vega/specs/cars_average_transform_successor.json`.
+3. Run `pip install requirements.txt`
+4. Run `python server.py server.config.json postgresql.config.json` to start the application server.
+5. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
+6. Run `yarn start` to start the web server.
+7. Open a browser tab to localhost:1234.
+8. Upload the cars dataset from `/path/to/dev/repos/scalable-vega/data/cars.json`.
+9. Upload the cars Vega spec from `/path/to/dev/repos/scalable-vega/specs/cars_average_transform_successor.json`.
 
 ## Unit Tests (Only do it after Installation and Demo)
 1. Close down web and application server. 
@@ -31,6 +32,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 3. Switch to the tests branch by running: <br> 
 &nbsp;&nbsp;&nbsp;&nbsp; a. `git checkout tests` <br>
 &nbsp;&nbsp;&nbsp;&nbsp; b. `git pull` <br>
+&nbsp;&nbsp;&nbsp;&nbsp; b. In case you come across conflicts just do `git reset --hard origin/tests` <br>
 4. Follow Steps 1-4 from Demo
 5. Run `jest` or `npm test`
 
