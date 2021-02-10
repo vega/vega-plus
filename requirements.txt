@@ -1,0 +1,4 @@
+flask
+duckdb
+psycopg2
+postgres
