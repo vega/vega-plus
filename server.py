@@ -107,7 +107,7 @@ def getConnector(dbmsName):
 
 if __name__ == "__main__":
   scf = "server.config.json"
-  dcf = "dbms.config.json"
+  dcf = "postgresql.config.json"
   if len(sys.argv) == 3:
     scf = sys.argv[1]
     dcf = sys.argv[2]
