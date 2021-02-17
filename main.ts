@@ -40,9 +40,8 @@ export function run(spec: vega.Spec) {
   console.log(runtime, "runtime");
 
 
-
   // bind the execution to a dom element as a view
-  const view = new vega.View(runtime)
+  var view = new vega.View(runtime)
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));

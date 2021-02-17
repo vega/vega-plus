@@ -27,15 +27,15 @@ function aggregateOpToSql(op: string, field: string) {
     case "sum":
       return `SUM(${field})`;
     case "variance":
-      return `VARIANCE(${field})`;
+      return `VAR_SAMP(${field})`;
     case "variancep":
       return `VAR_POP(${field})`;
     case "stdev":
-      return `STDDEV(${field})`;
+      return `STDDEV_SAMP(${field})`;
     case "stdevp":
       return `STDDEV_POP(${field})`;
     case "stderr":
-      return `STDDEV(${field})/SQRT(COUNT(${field}))`;
+      return `STDDEV_SAMP(${field})/SQRT(COUNT(${field}))`;
     case "median":
       return percentileContSql(field, 0.5);
     case "q1":

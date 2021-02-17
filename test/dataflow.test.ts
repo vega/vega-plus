@@ -1,17 +1,19 @@
-//import * as vega from "vega";
-import { removeNodesFromDataflow, dataflowRewritePostgres, isPostgresTransform } from '../lib/dataflow-rewrite-pg'
+import 'regenerator-runtime/runtime'
 import { run } from '../main'
 import { specRewrite } from "../lib/spec_rewrite"
+import * as vega from "vega"
+import VegaTransformPostgres from "vega-transform-pg"
 
 
 
-var dataflow = require('vega-dataflow'),
-    util = require('vega-util'),
-    transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
-    runtime = require('vega-runtime'),
-    vega = require('vega'),
-    loader = vega.loader({ baseURL: 'test/' })
-import VegaTransformPostgres from "vega-transform-pg";
+
+
+// var dataflow = require('vega-dataflow'),
+//     util = require('vega-util'),
+// transforms = util.extend({}, require('vega-transforms'), require('vega-encode')),
+// runtime = require('vega-runtime'),
+// vega = require('vega'),
+// var loader = vega.loader({ baseURL: 'test/' })
 
 
 function sortObj(list, key) {
@@ -66,101 +68,10 @@ function compare_tolerance(actual, modified) {
 }
 
 
-describe('removeNodesFromDataflow', () => {
-
-    var spec = {
-        'signals': [
-            { 'name': 'color', 'value': 'steelblue' }
-        ],
-        'data': [
-            {
-                'name': 'table',
-                'values': [{ 'x': 0.5 }]
-            }
-        ],
-        'scales': [
-            {
-                'name': 'xscale',
-                'domain': [0, 1],
-                'range': [0, 500]
-            }
-        ],
-        'marks': [
-            {
-                'type': 'rect',
-                'from': { 'data': 'table' },
-                'key': 'k',
-                'sort': { 'field': ['x', 'y'] },
-                'encode': {
-                    'enter': {
-                        'fill': { 'signal': 'color' },
-                        'height': { 'field': { 'parent': 'h' } },
-                        'y': { 'value': 0 },
-                        'x1': { 'scale': 'xscale', 'value': 0 }
-                    },
-                    'update': {
-                        'x2': { 'scale': 'xscale', 'field': 'x' }
-                    }
-                }
-            }
-        ]
-    };
-
-
-    it('delete nodes from view one by one', () => {
-        var dfs = vega.parse(spec);
-        const view = new vega.View(dfs, {
-            loader: loader,
-            renderer: 'none'
-        }).finalize();
-
-        const nodes = view._runtime.nodes;
-        const copy = Object.keys(nodes);
-
-        for (const idx in copy) {
-            const toDelete = [];
-            const node = nodes[idx];
-            toDelete.push({ node: node, idx: idx });
-
-            expect(idx in view._runtime.nodes).toBe(true);
-            removeNodesFromDataflow(toDelete, view);
-            expect(idx in view._runtime.nodes).toBe(false);
-        }
-
-    });
-
-    it('delete array of nodes from view', () => {
-        var dfs = vega.parse(spec);
-        const view = new vega.View(dfs, {
-            loader: loader,
-            renderer: 'none'
-        }).finalize();
-
-        const nodes = view._runtime.nodes;
-        const copy = Object.keys(nodes);
-        const toDelete = [];
-
-        for (const idx in copy) {
-            const node = nodes[idx];
-            toDelete.push({ node: node, idx: idx });
-            expect(idx in view._runtime.nodes).toBe(true);
-        }
-
-        removeNodesFromDataflow(toDelete, view);
-
-        for (const idx in copy) {
-            expect(idx in view._runtime.nodes).toBe(false);
-        }
-    });
-});
-
-
-
 test('car_avg_sourced vega', async () => {
 
-    var vega = require('vega');
+    // var vega = require('vega');
     var spec = require('../vega_specs/cars_average_sourced.json');
-    const pgTransform = require('vega-transform-pg')
 
     var loader = vega.loader();
 
@@ -174,7 +85,7 @@ test('car_avg_sourced vega', async () => {
     console.log(vega_result);
     //console.log(view._runtime.data);
 
-    vega.transforms["postgres"] = pgTransform.VegaTransformPostgres;
+    (vega as any).transforms["postgres"] = VegaTransformPostgres;
     const httpOptions = {
         "hostname": "localhost",
         "port": 3000,
@@ -187,8 +98,16 @@ test('car_avg_sourced vega', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_average_sourced.json');
-    runtime = vega.parse(specRewrite(spec));
-    var view_s = new vega.View(runtime)
+    const newspec = specRewrite(spec)
+    console.log(newspec.data[0].transform, "rewrite");
+
+    const runtime = vega.parse(newspec);
+    //console.log(runtime, "runtime");
+
+    var view_s = new vega.View(runtime, {
+        loader: loader,
+        renderer: 'none'
+    })
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
     // dataflowRewritePostgres(view_s);
@@ -208,7 +127,6 @@ test('car_avg_count transform', async () => {
 
     var vega = require('vega');
     var spec = require('../vega_specs/cars_count_transform_successor.json');
-    const pgTransform = require('vega-transform-pg')
 
     var loader = vega.loader();
 
@@ -223,7 +141,7 @@ test('car_avg_count transform', async () => {
     var vega_result = view.data("cars");
     // console.log(view._runtime.data);
 
-    vega.transforms["postgres"] = pgTransform.VegaTransformPostgres;
+    vega.transforms["postgres"] = VegaTransformPostgres;
     const httpOptions = {
         "hostname": "localhost",
         "port": 3000,
@@ -236,7 +154,7 @@ test('car_avg_count transform', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_count_transform_successor.json');
-    runtime = vega.parse(specRewrite(spec));
+    var runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
@@ -245,10 +163,11 @@ test('car_avg_count transform', async () => {
     await view_s.runAsync();
 
     var vega_pg_result = view_s.data("cars");
-    console.log(view_s.data("cars"));
+    console.log(view_s._runtime.data);
     // console.log(view_s._runtime.data);
     compare_tolerance(vega_result, vega_pg_result);
 });
+
 test('car_distinct transform', async () => {
 
     var vega = require('vega');
@@ -278,7 +197,7 @@ test('car_distinct transform', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_distinct_transform_successor.json');
-    runtime = vega.parse(specRewrite(spec));
+    var runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
@@ -317,7 +236,7 @@ test('car_histogram', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_histogram.json');
-    runtime = vega.parse(specRewrite(spec));
+    var runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
@@ -357,7 +276,7 @@ test('car_missing', async () => {
     VegaTransformPostgres.setHttpOptions(httpOptions);
 
     spec = require('../specs/cars_missing_transform_successor.json');
-    runtime = vega.parse(specRewrite(spec));
+    var runtime = vega.parse(specRewrite(spec));
     var view_s = new vega.View(runtime)
         .logLevel(vega.Info);
     // rewrite the dataflow execution for the view
