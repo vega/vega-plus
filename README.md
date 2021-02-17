@@ -19,7 +19,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 1. Run `cd scalable-vega`.
 2. Run `yarn` to install dependences.
 3. Run `pip install requirements.txt`
-4. Run `python server.py server.config.json postgresql.config.json` to start the application server. (For Postgres)
+4. Run `python server.py server.config.json postgresql.config.json` to start the application server. (For Postgres) <br>
 &nbsp;&nbsp;&nbsp;&nbsp; a. To run DuckDB instead of Postgres, set "dbms-config" in `server.config.json` to "duckdb.config.json" and run `python server.py server.config.json duckdb.config.json` <br>
 5. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
 6. Run `yarn start` to start the web server.
