@@ -1,15 +1,22 @@
+import 'regenerator-runtime/runtime'
 import * as vega from "vega";
 // defines the VTP node type
-import VegaTransformPostgres from "vega-transform-pg";
+//import { VegaTransformPostgres } from "./lib/vega-transform-pg";
+import VegaTransformPostgres from "vega-transform-pg"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
-import { dataflowRewritePostgres } from "./lib/dataflow-rewrite-pg";
+import { specRewrite } from "./lib/spec_rewrite"
+
 const querystring = require('querystring');
 const http = require('http');
 
 // register the new transform with vega
-(vega as any).transforms["postgres"] = VegaTransformPostgres;
 
-function run(spec: vega.Spec) {
+// Vega.transforms.duckdb = new VegaDbTransform({
+//   id: "duckdb",
+//   databaseTable: new TestDatabaseTable("cars")
+// });
+
+export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
   const httpOptions = {
@@ -21,19 +28,31 @@ function run(spec: vega.Spec) {
       "Content-Type": "application/x-www-form-urlencoded"
     }
   };
+  (vega as any).transforms["postgres"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
+  //(vega as any).transforms["postgres"] = new VegaTransformPostgres({ id: "postgres", _httpOptions: httpOptions });
 
   // make a vega execution object (runtime) from the spec
-  const runtime = vega.parse(spec);
+  const newspec = specRewrite(spec)
+  console.log(newspec, "rewrite");
+
+  const runtime = vega.parse(newspec);
+  console.log(runtime, "runtime");
+
+
   // bind the execution to a dom element as a view
-  const view = new vega.View(runtime)
+  var view = new vega.View(runtime)
     .logLevel(vega.Info)
     .renderer("svg")
     .initialize(document.querySelector("#view"));
+
+  console.log(view, "df");
+
   // rewrite the dataflow execution for the view
-  dataflowRewritePostgres(view);
+  //dataflowRewritePostgres(view);
   // execute the rewritten dataflow for the view
   view.runAsync();
+  return view;
 }
 
 function handleVegaSpec() {

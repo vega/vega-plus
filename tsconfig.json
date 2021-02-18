@@ -5,12 +5,12 @@
     "moduleResolution": "node",
     "noEmit": true,
     "strict": false,
-    "resolveJsonModule": true,
-    "esModuleInterop": true  
+    "sourceMap": true,
+    "esModuleInterop": true,
   },
   "files": [
     "main.ts",
     "server.ts",
-    "./lib/dataflow-rewrite-pg.ts"
+    "lib/dataflow-rewrite-pg.ts",
   ]
 }
