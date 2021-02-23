@@ -12,20 +12,23 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 &nbsp;&nbsp;&nbsp;&nbsp; a. `cd vega-transform-pg` <br>
 &nbsp;&nbsp;&nbsp;&nbsp; b. `yarn link` <br>
 &nbsp;&nbsp;&nbsp;&nbsp; c. `cd ../scalable-vega` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; d. `yarn link vega-transform-pg` <br> 
+&nbsp;&nbsp;&nbsp;&nbsp; d. `yarn link vega-transform-pg` <br>
+&nbsp;&nbsp;&nbsp;&nbsp; d. Run `pip install requirements.txt` <br>
 7. Install Jest (for running Tests): `yarn add --dev jest`
 
 ## Demo
 1. Run `cd scalable-vega`.
 2. Run `yarn` to install dependences.
-3. Run `pip install requirements.txt`
-4. Run `python server.py server.config.json postgresql.config.json` to start the application server. (For Postgres) <br>
-&nbsp;&nbsp;&nbsp;&nbsp; a. To run DuckDB instead of Postgres, set "dbms-config" in `server.config.json` to "duckdb.config.json" and run `python server.py server.config.json duckdb.config.json` <br>
-5. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
-6. Run `yarn start` to start the web server.
-7. Open a browser tab to localhost:1234.
-8. Upload the cars dataset from `/path/to/dev/repos/scalable-vega/data/cars.json`.
-9. Upload the cars Vega spec from `/path/to/dev/repos/scalable-vega/specs/cars_average_transform_successor.json`.
+3. You can run the demo or tests on either Postgres or DuckDB: <br>
+&nbsp;&nbsp;&nbsp;&nbsp; a. For Postgres, run `python server.py server.config.json postgresql.config.json` to start the application server.
+&nbsp;&nbsp;&nbsp;&nbsp; a. For DuckDB, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Set `dbms-config` in `server.config.json` to `duckdb.config.json` instead of `postgresql.config.json` <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. Run `python server.py server.config.json duckdb.config.json` <br>
+4. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
+5. Run `yarn start` to start the web server.
+6. Open a browser tab to localhost:1234.
+7. Upload the cars dataset from `/path/to/dev/repos/scalable-vega/data/cars.json`.
+8. Upload the cars Vega spec from `/path/to/dev/repos/scalable-vega/specs/cars_average_transform_successor.json`.
 
 ## Unit Tests (Only do it after Installation and Demo)
 1. Close down web and application server. 
