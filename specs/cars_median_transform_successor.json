@@ -8,15 +8,24 @@
       "name": "cars",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
+          "db": "duckdb",
           "relation": "cars"
         },
         {
           "type": "aggregate",
-          "fields": ["miles_per_gallon"],
-          "ops": ["median"],
-          "as": ["miles_per_gallon"],
-          "groupby": ["cylinders"]
+          "fields": [
+            "miles_per_gallon"
+          ],
+          "ops": [
+            "median"
+          ],
+          "as": [
+            "miles_per_gallon"
+          ],
+          "groupby": [
+            "cylinders"
+          ]
         }
       ]
     }

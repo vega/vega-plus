@@ -8,15 +8,23 @@
       "name": "table",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
           "relation": "flights_20k"
         },
         {
           "type": "aggregate",
-          "fields": ["delay"],
-          "ops": ["average"],
-          "as": ["delay"],
-          "groupby": ["distance"]
+          "fields": [
+            "delay"
+          ],
+          "ops": [
+            "average"
+          ],
+          "as": [
+            "delay"
+          ],
+          "groupby": [
+            "distance"
+          ]
         }
       ]
     }
@@ -75,7 +83,9 @@
           "fill": {
             "value": "steelblue"
           },
-          "fillOpacity": {"value": 0.5}
+          "fillOpacity": {
+            "value": 0.5
+          }
         }
       }
     }

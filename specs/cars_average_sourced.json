@@ -8,7 +8,8 @@
       "name": "cars_raw",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
+          "db": "duckdb",
           "relation": "cars"
         }
       ]
