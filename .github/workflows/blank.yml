@@ -55,7 +55,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: sudo -u postgres createdb scalable_vega
+        run: psql -l
 
       - name: Clone Repo and Check
         run: |
