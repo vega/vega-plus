@@ -55,7 +55,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: psql -l
+        run: psql -l postgresql://postgres@localhost/
 
       - name: Clone Repo and Check
         run: |
