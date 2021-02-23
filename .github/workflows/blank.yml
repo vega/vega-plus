@@ -25,7 +25,9 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-      - uses: borales/actions-yarn@v2.0.0
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10'
 
       - name: Install Postgres Requirements
         run: sudo apt-get install postgresql postgresql-contrib libpq-dev
@@ -38,8 +40,8 @@ jobs:
       - name: Setup Database
         run: sudo -u postgres createdb scalable_vega
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Clone Repo and Check
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          cd ..
+          git clone https://github.com/leibatt/vega-transform-pg.git
+          ls
