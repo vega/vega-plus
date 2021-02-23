@@ -42,4 +42,4 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 
 ## Additional Notes
 1. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
-&nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local/host connections (change from scram-sha-256/peer to trust)
+&nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local/host connections (change from scram-sha-256/peer to trust in pga_conf.hba)
