@@ -58,8 +58,7 @@ jobs:
       - name: Setup Database
         run: | 
           psql postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
-          psql -d postgresql://postgres@localhost/scalable_vega
-          \dt
+          psql -d postgresql://postgres@localhost/scalable_vega -c 'SELECT * FROM pie_chart;'
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
