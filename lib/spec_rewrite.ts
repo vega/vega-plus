@@ -1,7 +1,6 @@
 import * as Vega from "vega"
 import { Transforms, AggregateTransform, None } from "vega"
 import { aggregate, extent, bin } from "vega-transforms";
-import { isDbType } from "./dbtype"
 
 function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query

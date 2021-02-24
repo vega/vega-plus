@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'
 import * as vega from "vega";
 // defines the VTP node type
-import { VegaDbTransform } from "./lib/dbtransform";
+import { VegaDbTransform } from "./lib/dbtransform1";
 import VegaTransformPostgres from "vega-transform-pg"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from "./lib/spec_rewrite"
@@ -30,7 +30,9 @@ export function run(spec: vega.Spec) {
   };
   // (vega as any).transforms["postgres"] = VegaTransformPostgres;
   // VegaTransformPostgres.setHttpOptions(httpOptions);
-  (vega as any).transforms["dbtransform"] = new VegaDbTransform({ id: "dbtransform", httpOptions: httpOptions });
+  // (vega as any).transforms["dbtransform"] = new VegaDbTransform({ id: "dbtransform", httpOptions: httpOptions });
+  (vega as any).transforms["dbtransform"] = new VegaDbTransform("dbtransform", httpOptions);
+
 
 
   // make a vega execution object (runtime) from the spec
