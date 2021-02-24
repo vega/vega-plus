@@ -8,7 +8,7 @@
       "name": "cars_postgres",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
           "relation": "cars"
         }
       ]

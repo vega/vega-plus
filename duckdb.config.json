@@ -1,4 +1,4 @@
 {
-  "dbmsName":"duckdb",
-  "dbFilename":"/Users/yangjunran/Desktop/github/scalable-vega/scalable-vega.db"
+  "dbmsName": "duckdb",
+  "dbFilename": "./scalable-vega.db"
 }

@@ -1,7 +1,6 @@
 import 'regenerator-runtime/runtime'
 import * as vega from "vega";
 // defines the VTP node type
-//import { VegaTransformPostgres } from "./lib/vega-transform-pg";
 import VegaTransformPostgres from "vega-transform-pg"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from "./lib/spec_rewrite"
@@ -9,28 +8,22 @@ import { specRewrite } from "./lib/spec_rewrite"
 const querystring = require('querystring');
 const http = require('http');
 
-// register the new transform with vega
-
-// Vega.transforms.duckdb = new VegaDbTransform({
-//   id: "duckdb",
-//   databaseTable: new TestDatabaseTable("cars")
-// });
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
   const httpOptions = {
-    "hostname": "localhost",
-    "port": 3000,
+    "url": 'http://localhost:3000/query',
+    "mode": "cors",
     "method": "POST",
-    "path": "/query",
     "headers": {
       "Content-Type": "application/x-www-form-urlencoded"
     }
   };
-  (vega as any).transforms["postgres"] = VegaTransformPostgres;
+
+  (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
-  //(vega as any).transforms["postgres"] = new VegaTransformPostgres({ id: "postgres", _httpOptions: httpOptions });
+
 
   // make a vega execution object (runtime) from the spec
   const newspec = specRewrite(spec)
@@ -48,8 +41,6 @@ export function run(spec: vega.Spec) {
 
   console.log(view, "df");
 
-  // rewrite the dataflow execution for the view
-  //dataflowRewritePostgres(view);
   // execute the rewritten dataflow for the view
   view.runAsync();
   return view;

@@ -2,12 +2,19 @@ import * as Vega from "vega"
 import { Transforms, AggregateTransform, None } from "vega"
 import { aggregate, extent, bin } from "vega-transforms";
 
-function percentileContSql(field: string, fraction: number) {
+function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query
-  return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
+  switch (db.toLowerCase()) {
+    case "postgres":
+      return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
+    case "duckdb":
+      return `QUANTILE(${field}, ${fraction})`;
+    default:
+      throw Error(`Unsupported database: ${db}`);
+  }
 }
 
-function aggregateOpToSql(op: string, field: string) {
+function aggregateOpToSql(op: string, field: string, db: string) {
   // Converts supported Vega operations to SQL
   // for the given field.
   // FixMe: we will need to eventually support the case where
@@ -37,11 +44,11 @@ function aggregateOpToSql(op: string, field: string) {
     case "stderr":
       return `STDDEV_SAMP(${field})/SQRT(COUNT(${field}))`;
     case "median":
-      return percentileContSql(field, 0.5);
+      return percentileContSql(field, 0.5, db);
     case "q1":
-      return percentileContSql(field, 0.25);
+      return percentileContSql(field, 0.25, db);
     case "q3":
-      return percentileContSql(field, 0.75);
+      return percentileContSql(field, 0.75, db);
     case "min":
       return `MIN(${field})`;
     case "max":
@@ -63,7 +70,7 @@ function vegaNonTransformToSql(tableName: string, markFields: string[]) {
   return `'${out}'`;
 }
 
-export const aggregateTransformToSql = (tableName: string, transform: AggregateTransform) => {
+export const aggregateTransformToSql = (tableName: string, transform: AggregateTransform, db: string) => {
   const groupby = (transform.groupby as string[])
   const selectionList = groupby.slice()
   const validOpIdxs = [];
@@ -74,7 +81,7 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
     if (opt === "valid") {
       validOpIdxs.push(`${field} IS NOT NULL`);
     }
-    selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field) + ` as ${out}`)
+    selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field, db) + ` as ${out}`)
   }
 
   var sql = ''
@@ -109,14 +116,14 @@ function collectNonTransformFields(dataName: string, marks: any) {
   return fields
 }
 
-export function dataRewrite(tableName: string, transform: Transforms, dbTransforms, newData) {
+export function dataRewrite(tableName: string, transform: Transforms, db: string, dbTransforms, newData) {
 
   if (transform.type === "extent") {
     // converting signal to a new data item
     newData.push({
       name: transform.signal,
       transform: [{
-        type: "postgres",
+        type: "dbtransform",
         query: {
           signal: `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
         }
@@ -151,7 +158,7 @@ export function dataRewrite(tableName: string, transform: Transforms, dbTransfor
     })
 
     dbTransforms.push({
-      type: "postgres",
+      type: "dbtransform",
       query: {
         signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0'`
       }
@@ -167,9 +174,9 @@ export function dataRewrite(tableName: string, transform: Transforms, dbTransfor
 
   if (transform.type === "aggregate") {
     dbTransforms.push({
-      type: "postgres",
+      type: "dbtransform",
       query: {
-        signal: aggregateTransformToSql(tableName, transform)
+        signal: aggregateTransformToSql(tableName, transform, db)
       }
     })
   }
@@ -181,20 +188,21 @@ export function specRewrite(vgSpec) {
   const dbTransformInd = []
   var table = ""
   const newData = []
+  var db = "postgres"
 
   for (const [index, spec] of dataSpec.entries()) {
-    if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "postgres") {
+    if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
       if (spec.transform.length == 1) {
         dbTransformInd.push(index)
       }
       table = spec.transform[0]["relation"]
+      db = spec.transform[0].db ? spec.transform[0].db : db
 
       // if the data spec doesn't contain any explicit transform, collect all useful fields as data
       const markFileds: string[] = collectNonTransformFields(spec.name, vgSpec.marks);
       if (markFileds.length > 0) {
         spec.transform[0] = {
-          type: "postgres",
-          relation: table,
+          type: "dbtransform",
           query: {
             signal: vegaNonTransformToSql(table, markFileds)
           }
@@ -205,7 +213,7 @@ export function specRewrite(vgSpec) {
       if (spec.transform.length > 1) {
         const dbTransforms = []
         for (var i = 1; i < spec.transform.length; i++) {
-          const skip = dataRewrite(table, spec.transform[i], dbTransforms, newData)
+          const skip = dataRewrite(table, spec.transform[i], db, dbTransforms, newData)
           if (skip) break // skip the aggregate follwing bin
         }
         dataSpec[index].transform = dbTransforms
@@ -228,7 +236,7 @@ export function specRewrite(vgSpec) {
           }
         }
 
-        const skip = dataRewrite(table, transform, dbTransforms, newData)
+        const skip = dataRewrite(table, transform, db, dbTransforms, newData)
         if (skip) break
       }
       dataSpec[index].transform = dbTransforms
@@ -237,7 +245,7 @@ export function specRewrite(vgSpec) {
   console.log(dataSpec)
   console.log(dbTransformInd)
 
-  // remove the original "postgres" transform that indicating using db
+  // remove the original "dbtransform" transform that indicating using db
   for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
     console.log(dataSpec[i])
     dataSpec.splice(i, 1);

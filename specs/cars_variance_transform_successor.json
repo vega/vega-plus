@@ -8,15 +8,23 @@
       "name": "cars",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
           "relation": "cars"
         },
         {
           "type": "aggregate",
-          "fields": ["miles_per_gallon"],
-          "ops": ["variance"],
-          "as": ["miles_per_gallon"],
-          "groupby": ["cylinders"]
+          "fields": [
+            "miles_per_gallon"
+          ],
+          "ops": [
+            "variance"
+          ],
+          "as": [
+            "miles_per_gallon"
+          ],
+          "groupby": [
+            "cylinders"
+          ]
         }
       ]
     }

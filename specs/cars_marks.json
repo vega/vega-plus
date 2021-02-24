@@ -8,7 +8,7 @@
       "name": "table",
       "transform": [
         {
-          "type": "postgres",
+          "type": "dbtransform",
           "relation": "cars"
         }
       ]
@@ -17,9 +17,7 @@
   "signals": [
     {
       "name": "tooltip",
-      "value": {
-        
-      },
+      "value": {},
       "on": [
         {
           "events": "rect:mouseover",
