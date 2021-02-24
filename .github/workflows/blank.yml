@@ -56,7 +56,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: psql -l postgresql://postgres@localhost/
+        run: psql dbname postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
@@ -64,6 +64,7 @@ jobs:
       - name: Clone Repo and Check
         run: |
           git clone https://github.com/leibatt/vega-transform-pg.git
+          cd vega-transform-pg/
           ls
 
       - name: Test DuckDB
