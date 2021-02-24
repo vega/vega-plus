@@ -56,18 +56,26 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: | 
-          psql postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
-          psql -d postgresql://postgres@localhost/scalable_vega -c 'SELECT * FROM pie_chart;'
+        run: psql postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
           
-      - name: Clone Repo and Check
+      - name: Clone Repo and Resolve Yarn Dependencies
         run: |
+          yarn
           git clone https://github.com/leibatt/vega-transform-pg.git
           cd vega-transform-pg/
-          ls
+          yarn link
+          cd ..
+          yarn link vega-transform-pg
+          yarn add --dev jest
+
+      - name: Test Database
+        run: psql -d postgresql://postgres@localhost/scalable_vega -c 'SELECT * FROM pie_chart;'
+        env:
+          PGUSER: postgres
+          PGPASSWORD: postgres
 
       - name: Test DuckDB
-        run: python server.py server.config.json duckdb.config.json &
+        run: python server.py server.config.json postgres.config.json &
