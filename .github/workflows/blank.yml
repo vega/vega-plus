@@ -56,7 +56,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: psql dbname postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
+        run: psql postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
