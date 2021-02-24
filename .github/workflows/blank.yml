@@ -78,4 +78,4 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Test DuckDB
-        run: python server.py server.config.json postgres.config.json &
+        run: python server.py server.config.json postgresql.config.json &
