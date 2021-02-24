@@ -13,10 +13,11 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "gh-pages": "^3.0.0",
+    "node-fetch": "^2.6.1",
     "pg": "^8.2.1",
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
-    "vega": "^5.13.0",
+    "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
     "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"

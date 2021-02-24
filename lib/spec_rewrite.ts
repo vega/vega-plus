@@ -124,7 +124,6 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
       name: transform.signal,
       transform: [{
         type: "dbtransform",
-        db: db,
         query: {
           signal: `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
         }
@@ -160,7 +159,6 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
 
     dbTransforms.push({
       type: "dbtransform",
-      db: db,
       query: {
         signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0'`
       }
@@ -177,7 +175,6 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
   if (transform.type === "aggregate") {
     dbTransforms.push({
       type: "dbtransform",
-      db: db,
       query: {
         signal: aggregateTransformToSql(tableName, transform, db)
       }
