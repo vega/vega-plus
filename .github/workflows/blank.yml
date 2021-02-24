@@ -58,6 +58,7 @@ jobs:
       - name: Setup Database
         run: psql -l postgresql://postgres@localhost/
         env:
+          PGUSER: postgres
           PGPASSWORD: postgres
           
       - name: Clone Repo and Check
