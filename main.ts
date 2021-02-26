@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'
 import * as vega from "vega";
 // defines the VTP node type
-import VegaTransformPostgres from "vega-transform-pg"
+import VegaTransformPostgres from "vega-transform-db"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from "./lib/spec_rewrite"
 
