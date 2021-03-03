@@ -160,12 +160,12 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     dbTransforms.push({
       type: "dbtransform",
       query: {
-        signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0'`
+        signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0 UNION ALL select NULL as "bin0", count(*) as "count" from ${tableName} where ${transform.field} is null'`
       }
     })
     dbTransforms.push({
       type: "formula",
-      expr: "datum.bin0 + bins.step",
+      expr: "datum.bin0?datum.bin0 + bins.step:null",
       as: "bin1"
     })
 
