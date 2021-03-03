@@ -1,0 +1,38 @@
+{
+  "$schema": "https:\/\/vega.github.io\/schema\/vega\/v5.json",
+  "width": 400,
+  "height": 200,
+  "padding": 10,
+  "data": [
+    {
+      "name": "cars_postgres",
+      "transform": [
+        {
+          "type": "dbtransform",
+          "relation": "cars"
+        }
+      ]
+    },
+    {
+      "name": "cars_avg",
+      "source": "cars_postgres",
+      "transform": [
+        {
+          "type": "aggregate",
+          "fields": [
+            "miles_per_gallon"
+          ],
+          "ops": [
+            "average"
+          ],
+          "as": [
+            "mpg_avg"
+          ],
+          "groupby": [
+            "cylinders"
+          ]
+        }
+      ]
+    }
+  ]
+}

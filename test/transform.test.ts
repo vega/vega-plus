@@ -1,11 +1,18 @@
 import { specRewrite } from "../lib/spec_rewrite"
-var vega = require('vega')
-var VegaTransformPostgres = require('vega-transform-pg')
+import { VegaDbTransform } from "../lib/dbtransform"
+//var vega = require('vega')
+import VegaTransformPostgres from "vega-transform-pg"
+import * as vega from "vega"
+import { transforms } from "vega";
+global.fetch = require("node-fetch");
 
+export const flushPromises = (): Promise<Function> => {
+  return new Promise(resolve => setImmediate(resolve));
+};
 test('car_avg_sourced vega', async () => {
 
   // var vega = require('vega');
-  var spec = require('../vega_specs/cars_average_sourced.json');
+  var spec = require('../Specs/vega_specs/cars_average_sourced.json');
 
   var loader = vega.loader();
 
@@ -19,19 +26,22 @@ test('car_avg_sourced vega', async () => {
   console.log(vega_result);
   //console.log(view._runtime.data);
 
-  (vega as any).transforms["postgres"] = VegaTransformPostgres;
+  //(vega as any).transforms["postgres"] = VegaTransformPostgres;
   const httpOptions = {
-    "hostname": "localhost",
-    "port": 3000,
+    "url": 'http://localhost:3000/query',
+    "mode": "cors",
     "method": "POST",
-    "path": "/query",
     "headers": {
       "Content-Type": "application/x-www-form-urlencoded"
     }
   };
-  VegaTransformPostgres.setHttpOptions(httpOptions);
+  // (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
+  // VegaTransformPostgres.setHttpOptions(httpOptions);
 
-  spec = require('../specs/cars_average_sourced.json');
+  transforms.dbtransform = new VegaDbTransform({ id: "dbtransform", httpOptions: httpOptions })
+
+
+  spec = require('../Specs/specs/cars_histogram.json');
   const newspec = specRewrite(spec)
   console.log(newspec.data[0].transform, "rewrite");
 
@@ -47,7 +57,7 @@ test('car_avg_sourced vega', async () => {
   // execute the rewritten dataflow for the view
   await view_s.runAsync();
 
-
+  //await flushPromises();
   var vega_pg_result = view_s.data("cars");
   console.log(vega_pg_result);
   // console.log(view_s._runtime.data);

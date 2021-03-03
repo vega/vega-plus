@@ -1,9 +1,0 @@
-{
-  "dbmsName":"postgresql",
-  "dbname":"scalable_vega",
-  "user":"postgres",
-  "password":"postgres",
-  "host":"localhost",
-  "port":5432,
-  "totalConnections": 10
-}

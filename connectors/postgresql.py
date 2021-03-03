@@ -13,9 +13,15 @@ class PostgresqlConnector(BasicConnector):
   def getNewPool(self):
     pool = None
     if "port" in self.config:
-      pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],port=self.config["port"],database=self.config["dbname"],host=self.config["host"],user=self.config["user"],password=self.config["password"])
+      if self.config["CI"]:
+        pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],port=self.config["port"],database=self.config["dbname"],host=self.config["host"],user=self.config["user"],password=self.config["password"])
+      else:
+        pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],port=self.config["port"],database=self.config["dbname"],host=self.config["host"])
     else:
-      pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],database=self.config["dbname"],host=self.config["host"])
+      if self.config["CI"]:
+        pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],database=self.config["dbname"],host=self.config["host"],user=self.config["user"],password=self.config["password"])
+      else:
+        pool = psycopg2.pool.ThreadedConnectionPool(1,self.config["totalConnections"],database=self.config["dbname"],host=self.config["host"])
     return pool
 
   def executeQuery(self,query):

@@ -1,4 +1,5 @@
 import sys
+import argparse
 try:
     import simplejson as json
 except ImportError:
@@ -103,20 +104,26 @@ def getConnector(dbmsName):
   elif dbmsConfig["dbmsName"]  == "postgresql":
     return PostgresqlConnector(dbmsConfig)
   else:
-    raise "dbms name not recognized: " + dbmsName
+    raise Exception("dbms name not recognized: " + dbmsName)
 
 if __name__ == "__main__":
-  scf = "server.config.json"
-  dcf = "postgresql.config.json"
-  if len(sys.argv) == 3:
-    scf = sys.argv[1]
-    dcf = sys.argv[2]
-  with open(scf,"r") as f:
-    serverConfig = json.load(f)
-  with open(dcf,"r") as f:
-    dbmsConfig = json.load(f)
-  if "dbmsName" in dbmsConfig:
+    parser = argparse.ArgumentParser('Scalable Vega Version 1.0')
+    parser.add_argument('--CI', action='store_true', default=False, help='Github Action CI Mode/Peer authentication instead of Trust')
+    parser.add_argument('--db', type=str, default='postgresql', help='Database to be used')
+    args = parser.parse_args()
+    config_path = './config/'
+    scf = config_path + "server.config.json"
+    if args.db == 'postgresql':
+      dcf = config_path + "postgresql.config.json"
+    elif args.db == 'duckdb':
+      dcf = config_path + "duckdb.config.json"
+    else:
+      raise Exception("DB not recognized/supported: " + args.db)
+
+    with open(scf,"r") as f:
+      serverConfig = json.load(f)
+    with open(dcf,"r") as f:
+      dbmsConfig = json.load(f)
+    dbmsConfig['CI'] = args.CI
     dbms = getConnector(dbmsConfig["dbmsName"])
-  else: # DuckDB by default
-    dbms = DuckDBConnector(dbmsConfig)
-  app.run(debug=True,port=serverConfig["port"])
+    app.run(debug=True,port=serverConfig["port"])
