@@ -69,7 +69,7 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Run Application Server for Postgres
-        run: python server.py --CI
+        run: python server.py --CI &
         
       - name: Run Yarn Test for Postgres
         run: npm test transform_pg
