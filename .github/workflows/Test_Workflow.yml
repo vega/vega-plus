@@ -50,35 +50,29 @@ jobs:
       - name: Install Postgres Requirements
         run: sudo apt-get install postgresql postgresql-contrib libpq-dev
     
-      - name: Install dependencies
+      - name: Install and resolve dependencies
         run: |
+          yarn
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
       - name: Setup Database
-        run: psql postgresql://postgres@localhost/scalable_vega < scalable_vega.pgsql
+        run: psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
           
-      - name: Clone Repo and Resolve Yarn Dependencies
-        run: |
-          yarn
-          git clone https://github.com/leibatt/vega-transform-pg.git
-          cd vega-transform-pg/
-          yarn link
-          cd ..
-          yarn link vega-transform-pg
-          yarn add --dev jest
-
       - name: Test Database
         run: psql -d postgresql://postgres@localhost/scalable_vega -c 'SELECT * FROM pie_chart;'
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
 
-      - name: Run Postgres
-        run: python server.py server.config.json postgresql.config.json &
+      - name: Run Application Server for Postgres
+        run: python server.py --CI &
+        
+      - name: Run Yarn Test for Postgres
+        run: npm test transform_pg
         
       - name: Run Test
         run: yarn test
