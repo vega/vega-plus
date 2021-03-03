@@ -1,44 +1,30 @@
-# This is a workflow to help scalable-vega get started with Actions
-
 name: Run Tests
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push request events but only for the master branch
   push:
     branches: [ master ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build_postgres:
     runs-on: ubuntu-latest
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: scalable_vega
         ports:
           - 5432:5432
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
           
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
@@ -74,5 +60,33 @@ jobs:
       - name: Run Yarn Test for Postgres
         run: npm test transform_pg
         
-      - name: Run Test
-        run: yarn test
+  build_duckdb:
+    if: success()
+    needs: build_postgres
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+
+      - name: Install Postgres Requirements
+        run: sudo apt-get install postgresql postgresql-contrib libpq-dev
+    
+      - name: Install and resolve dependencies
+        run: |
+          yarn
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+
+      - name: Run Application Server for DuckDB
+        run: python server.py --CI --db duckdb &
+        
+      - name: Run Yarn Test for DuckDB
+        run: npm test transform_duckdb
