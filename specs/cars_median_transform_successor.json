@@ -9,7 +9,6 @@
       "transform": [
         {
           "type": "dbtransform",
-          "db": "duckdb",
           "relation": "cars"
         },
         {

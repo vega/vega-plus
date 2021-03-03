@@ -1,12 +1,12 @@
 {
-  "$schema": "https:\/\/vega.github.io\/schema\/vega\/v5.json",
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
   "width": 400,
   "height": 200,
   "padding": 10,
   "data": [
     {
       "name": "table",
-      "url": "../data/cars.json"
+      "url": "data/cars.json"
     }
   ],
   "signals": [
