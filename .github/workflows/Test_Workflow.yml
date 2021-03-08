@@ -39,6 +39,7 @@ jobs:
       - name: Install and resolve dependencies
         run: |
           yarn
+          yarn add --dev jest
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
@@ -81,6 +82,7 @@ jobs:
       - name: Install and resolve dependencies
         run: |
           yarn
+          yarn add --dev jest
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
