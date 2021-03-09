@@ -7,39 +7,42 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 2. Create a PostgreSQL database named `scalable_vega`, e.g., `createdb scalable_vega`
 3. Run `cd /path/to/dev/repos`.
 4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
-5. Run `git clone https://github.com/leibatt/vega-transform-pg.git`
-6. Yarn link vega-transform-pg in scalable vega (https://classic.yarnpkg.com/en/docs/cli/link/) <br>
-&nbsp;&nbsp;&nbsp;&nbsp; a. `cd vega-transform-pg` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; b. `yarn link` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; c. `cd ../scalable-vega` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; d. `yarn link vega-transform-pg` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; d. Run `pip install requirements.txt` <br>
-7. Install Jest (for running Tests): `yarn add --dev jest`
+5. Run `pip install requirements.txt` to install python dependencies. (Python 3.x is preferable)
+6. Run `yarn` to javacript install dependencies.
+7. Install Jest (for running Tests): `yarn add --dev jest`. <br>
+8. For using prepopulated database, look at additional notes.
 
-## Demo
-1. Run `cd scalable-vega`.
-2. Run `yarn` to install dependences.
-3. You can run the demo or tests on either Postgres or DuckDB: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; a. For Postgres, run `python server.py server.config.json postgresql.config.json` to start the application server. <br>
-&nbsp;&nbsp;&nbsp;&nbsp; b. For DuckDB, <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Set `dbms-config` in `server.config.json` to `duckdb.config.json` instead of `postgresql.config.json` <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. Run `python server.py server.config.json duckdb.config.json` <br>
-4. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
-5. Run `yarn start` to start the web server.
-6. Open a browser tab to localhost:1234.
-7. Upload the cars dataset from `/path/to/dev/repos/scalable-vega/data/cars.json`.
-8. Upload the cars Vega spec from `/path/to/dev/repos/scalable-vega/specs/cars_average_transform_successor.json`.
+## Running Application Server
+1. Run `python server.py --CI --db [postgresql/duckdb]`
+&nbsp;&nbsp;&nbsp; a. `--CI` refers to setup for github actions. Also if you want to connect to postgres using a password, use this flag. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Also if you want to connect to postgres using a password, use this flag. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. If you don't want to use a password (trust connection) don't use this flag. <br>
+&nbsp;&nbsp;&nbsp; b. `--db` refers to the DBMS currently being used, default is PostgreSQL. For DuckDB, use `--db duckdb`<br>
+2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `config` folder and can be customized.
 
-## Unit Tests (Only do it after Installation and Demo)
-1. Close down web and application server. 
+## Running the Web Demo
+1. Make sure you have the application server running.
+2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
+3. Run `yarn start` to start the web server.
+4. Open a browser tab to localhost:1234.
+5. Upload the cars dataset from `./data/cars.json` to the data input.
+6. Upload the cars Vega spec from `./Specs/specs/cars_average_transform_successor.json` to the specs input and see the visualization.
+
+## Running Unit Tests
+1. Again make sure you have the application server running. 
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`. 
-3. Switch to the tests branch by running: <br> 
-&nbsp;&nbsp;&nbsp;&nbsp; a. `git checkout tests` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; b. `git pull` <br>
-&nbsp;&nbsp;&nbsp;&nbsp; b. In case you come across conflicts just do `git reset --hard origin/tests` <br>
-4. Follow Steps 1-4 from Demo
-5. Run `jest` or `npm test`
+3. The Unit Tests assume a prepopulated database, either do so by uploading data using the web demo or use the provided database (look at additional notes).
+4. For running the unit tests: <br> 
+&nbsp;&nbsp;&nbsp; a. For PostgreSQL, `npm test transform_pg` <br>
+&nbsp;&nbsp;&nbsp; b. For DuckDB, `npm test transform_duckdb` <br>
 
 ## Additional Notes
-1. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
+1. Prepopulated Database:
+&nbsp;&nbsp;&nbsp; a. We have provided prepopulated databases for PostgreSQL and DuckDB in `./data/database/` <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. For PostgreSQL, use a command like `psql dbname < infile`. For example, <br>
+`psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql` <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. For DuckDB we by default use the prepopulated database. To change the database file being used, make changes in `./config/duckdb.config.json`. <br>
+2. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
 &nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local/host connections (change from `scram-sha-256/peer` to `trust` in `pga_conf.hba`)
+3. If you face `Cannot find name 'expect'` type error while running tests <br>
+&nbsp;&nbsp;&nbsp;&nbsp; a. Run `yarn add @types/jest -D`
