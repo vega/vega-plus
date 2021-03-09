@@ -16,7 +16,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 1. Run `python server.py --CI --db [postgresql/duckdb]` <br>
 &nbsp;&nbsp;&nbsp; a. `--CI` refers to the setup for github actions. <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Also if you want to connect to postgres using a password (peer/md5/scram-sha-256 connection), use this flag. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. If you don't want to use a password (trust connection) don't use this flag. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. If you don't want to use a password (trust connection), don't use this flag. <br>
 &nbsp;&nbsp;&nbsp; b. `--db` refers to the DBMS currently being used, default is PostgreSQL. For DuckDB, use `--db duckdb`<br>
 2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `config` folder and can be customized.
 
@@ -41,7 +41,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 &nbsp;&nbsp;&nbsp; a. We have provided prepopulated databases for PostgreSQL and DuckDB in `./data/database/` <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. For PostgreSQL, use a command like `psql dbname < infile`. For example, <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql` <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. For DuckDB we by default use the prepopulated database. To change the database file being used, make changes in `./config/duckdb.config.json`. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. For DuckDB we by default use the prepopulated database. To change the database file being used, make changes in <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`./config/duckdb.config.json`. <br>
 2. If you face `fe_sendauth: no password supplied error` for postgres in server.py, <br>
 &nbsp;&nbsp;&nbsp;&nbsp; a. You might have to update the postgresql config to change the authentication methods for local/host connections (change from `scram-sha-256/peer` to `trust` in `pga_conf.hba`)
 3. If you face `Cannot find name 'expect'` type error while running tests <br>
