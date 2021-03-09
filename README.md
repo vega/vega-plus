@@ -14,8 +14,8 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 
 ## Running Application Server
 1. Run `python server.py --CI --db [postgresql/duckdb]` <br>
-&nbsp;&nbsp;&nbsp; a. `--CI` refers to setup for github actions. Also if you want to connect to postgres using a password, use this flag. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Also if you want to connect to postgres using a password, use this flag. <br>
+&nbsp;&nbsp;&nbsp; a. `--CI` refers to the setup for github actions. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i. Also if you want to connect to postgres using a password (peer/md5/scram-sha-256 connection), use this flag. <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ii. If you don't want to use a password (trust connection) don't use this flag. <br>
 &nbsp;&nbsp;&nbsp; b. `--db` refers to the DBMS currently being used, default is PostgreSQL. For DuckDB, use `--db duckdb`<br>
 2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `config` folder and can be customized.
