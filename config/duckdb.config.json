@@ -1,0 +1,4 @@
+{
+  "dbmsName": "duckdb",
+  "dbFilename": "./data/database/scalable-vega.db"
+}
