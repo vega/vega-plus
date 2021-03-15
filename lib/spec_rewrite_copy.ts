@@ -241,7 +241,7 @@ export const componentsToSql = (tableName: string, transform: any, db: string) =
   console.log(transform)
   const groupby = (transform.aggregate[0].groupby as string[])
   const selectionList = groupby.slice()
-  const filters = transform.filter ? transform.fllter.map(x => expr2sql(parse(x.expr))) : []
+  const filters = transform.filter ? transform.filter.map(x => expr2sql(parse(x.expr))) : []
   var whereList = []
 
 
