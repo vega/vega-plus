@@ -6,16 +6,10 @@
     "noEmit": true,
     "strict": false,
     "sourceMap": true,
-    "esModuleInterop": true,
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "esModuleInterop": true
   },
   "files": [
     "main.ts",
-    "server.ts",
-    "lib/dataflow-rewrite-pg.ts",
+    "server.ts"
   ]
 }
