@@ -29,7 +29,7 @@ function sort_compare(act, mod, a_key, m_key) {
   mod = sortObj(mod, m_key);
   for (i = 0; i < act.length; i++) {
     console.log(act[i][a_key])
-    console.log(mod[i][a_key])
+    console.log(mod[i][m_key])
     expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
   }
 }
@@ -63,28 +63,10 @@ beforeAll(() => {
   VegaTransformPostgres.setHttpOptions(httpOptions);
 });
 
-// var test_cases = [
-//   ['cars_average_sourced', 'cars'],
-//   ['cars_count_transform_successor', 'cars'],
-//   ['cars_distinct_transform_successor', 'cars'],
-//   ['cars_histogram_extent', 'binned'],
-//   ['cars_histogram', 'binned'],
-//   ['cars_max_transform_successor', 'cars'],
-//   ['cars_median_transform_successor', 'cars'],
-//   ['cars_min_transform_successor', 'cars'],
-//   ['cars_missing_transform_successor', 'cars'],
-//   ['cars_q1_transform_successor', 'cars'],
-//   ['cars_stderr_transform_successor', 'cars'],
-//   ['cars_stdev_transform_successor', 'cars'],
-//   ['cars_stdevp_transform_successor', 'cars'],
-//   ['cars_sum_transform_successor', 'cars'],
-//   ['cars_valid_transform_successor', 'cars'],
-//   ['cars_variance_transform_successor', 'cars'],
-//   ['cars_variancep_transform_successor', 'cars'],
-// ]
+
 const str_filter = {
   "type": "filter",
-  "expr": " datum.Origin == 'Europe'"
+  "expr": " datum.Origin != 'Europe'"
 }
 const num_filter1 = {
   "type": "filter",
@@ -115,17 +97,17 @@ const aggregate = {
 }
 
 var test_cases = [
-  ['single string filter', [str_filter]],
-  ['single num filter1', [num_filter1]],
+  // ['single string filter', [str_filter]],
+  // ['single num filter1', [num_filter1]],
   ['single null filter', [null_filter]],
-  ['string filter->aggregate', [str_filter, aggregate]],
-  ['num filter1->aggregate', [num_filter1, aggregate]],
-  ['null filter->aggregate', [null_filter, aggregate]],
+  // ['string filter->aggregate', [str_filter, aggregate]],
+  // ['num filter1->aggregate', [num_filter1, aggregate]],
+  //['null filter->aggregate', [null_filter, aggregate]],
 ]
 
 describe.each(test_cases)('successor %s', (name, transform) => {
   test(transform[0]['expr'], async () => {
-    var spec_vg = require(`../vega_specs/cars_average_transform_filter.json`);
+    var spec_vg = require('../Specs/vega_specs/cars_average_transform_filter.json');
     spec_vg.data[0].transform = transform
     var loader = vega.loader();
 
@@ -140,7 +122,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
 
 
 
-    var spec = require(`../specs/cars_average_transform_successor_filter.json`);
+    var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
       "type": "dbtransform",
       "relation": "cars"
@@ -165,40 +147,3 @@ describe.each(test_cases)('successor %s', (name, transform) => {
   })
 });
 
-// describe('comparing filter results', () => {
-
-
-
-
-//   test("sourced", async () => {
-//     var spec_vg = require(`../vega_specs/cars_average_transform_filter.json`);
-//     var loader = vega.loader();
-
-//     var view = new vega.View(vega.parse(spec_vg), {
-//       loader: loader,
-//       renderer: 'none'
-//     });
-//     await view.runAsync();
-
-//     var result_vg = view.data('root');
-//     console.log(result_vg);
-
-
-//     var spec = require(`../specs/cars_average_transform_successor_filter.json`);
-//     const newspec = specRewrite(spec)
-
-//     const runtime = vega.parse(newspec);
-
-//     var view_s = new vega.View(runtime, {
-//       renderer: 'none'
-//     })
-//       .logLevel(vega.Info)
-
-//     await view_s.runAsync();
-
-//     var result_s = view_s.data('cars');
-//     console.log(result_s);
-
-//     compare_tolerance(result_vg, result_s);
-//   });
-// });
