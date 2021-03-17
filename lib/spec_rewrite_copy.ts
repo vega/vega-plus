@@ -248,14 +248,11 @@ function expr2sql(expr) {
 
     BinaryExpression: n => {
       const right = visit(n.right)
-      if (right === 'null') {
+      if (right === null) {
         n.operator = (n.operator === '==' || n.operator === '===') ? 'IS' : 'IS NOT'
       } else {
-        if (n.operoter === '==' || n.operoter === '===') {
-          n.operator = '='
-        } else if (n.operator === '!=' || n.operator === '!==') {
-          n.operator = '!='
-        }
+        n.operator = (n.operoter === '==' || n.operoter === '===') ? "=" : n.operator
+        n.operator = (n.operator === '!=' || n.operator === '!==') ? "!=" : n.operator
       }
       return visit(n.left) + ' ' + n.operator + ' ' + right
     },
