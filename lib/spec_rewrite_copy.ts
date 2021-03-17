@@ -4,6 +4,7 @@ import { aggregate, extent, bin } from "vega-transforms";
 import { parse } from "vega-expression"
 //import expr2sql from "./expr2sql"
 import { error, hasOwnProperty } from 'vega-util';
+import { strict } from "assert";
 
 
 
@@ -75,10 +76,11 @@ function vegaNonTransformToSql(tableName: string, markFields: string[]) {
   return `'${out}'`;
 }
 
-export const aggregateTransformToSql = (tableName: string, transform: any, db: string) => {
+export const aggregateTransformToSql = (tableName: string, transform: any, db: string, prev: any) => {
   const groupby = (transform.groupby as string[])
   const selectionList = groupby.slice()
   const validOpIdxs = [];
+  tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
   for (const [index, field] of (transform.fields as string[]).entries()) {
     const opt: string = transform.ops[index]
@@ -106,7 +108,7 @@ export const aggregateTransformToSql = (tableName: string, transform: any, db: s
   }
 
 
-  return `'${sql}'`
+  return `"${sql}"`
 }
 
 function collectNonTransformFields(dataName: string, marks: any) {
@@ -178,31 +180,44 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
   }
 
   if (transform.type === "aggregate") {
+    var prev = dbTransforms.pop() ?? null // null or a dbtransform
+
     dbTransforms.push({
       type: "dbtransform",
+      name: transform.name,
       query: {
-        signal: aggregateTransformToSql(tableName, transform, db)
+        signal: aggregateTransformToSql(tableName, transform, db, prev)
       }
     })
   }
 
   if (transform.type === "filter") {
-    console.log(parse(transform.expr))
+    var prev = dbTransforms.pop() ?? null // null or a dbtransform
 
-    dbTransforms.push(
-      transform
-    )
-  }
-
-  if (transform.type === "components") {
     dbTransforms.push({
       type: "dbtransform",
+      name: transform.name,
       query: {
-        signal: componentsToSql(tableName, transform, db)
+        signal: filterTransformToSql(tableName, transform, db, prev)
       }
     })
   }
 
+}
+const filterTransformToSql = (tableName: string, transform: any, db: string, prev: any) => {
+  console.log(parse(transform.expr))
+  const filter = expr2sql(parse(transform.expr))
+  tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
+
+
+  var sql = ''
+  sql = [
+    `SELECT *`,
+    `FROM ${tableName}`,
+    `WHERE ${filter}`
+  ].join(" ")
+
+  return `"${sql}"`
 }
 
 function expr2sql(expr) {
@@ -231,55 +246,32 @@ function expr2sql(expr) {
       return p;
     },
 
-    BinaryExpression: n =>
-      visit(n.left) + ' ' + n.operator + ' ' + visit(n.right),
+    BinaryExpression: n => {
+      const right = visit(n.right)
+      if (right === null) {
+        n.operator = (n.operator === '==' || n.operator === '===') ? 'IS' : 'IS NOT'
+      } else {
+        n.operator = (n.operoter === '==' || n.operoter === '===') ? "=" : n.operator
+        n.operator = (n.operator === '!=' || n.operator === '!==') ? "!=" : n.operator
+      }
+      return visit(n.left) + ' ' + n.operator + ' ' + right
+    },
+
+    LogicalExpression: n => {
+      n.operator = n.operator === '&&' ? 'AND' : 'OR'
+      return visit(n.left) + ' ' + n.operator + ' ' + visit(n.right)
+    },
   }
   return visit(expr)
 }
 
-export const componentsToSql = (tableName: string, transform: any, db: string) => {
-  console.log(transform)
-  const groupby = (transform.aggregate[0].groupby as string[])
-  const selectionList = groupby.slice()
-  const filters = transform.filter ? transform.filter.map(x => expr2sql(parse(x.expr))) : []
-  var whereList = []
-
-
-  for (const [index, field] of (transform.aggregate[0].fields as string[]).entries()) {
-    const opt: string = transform.aggregate[0].ops[index]
-    const out: string = transform.aggregate[0].as[index]
-    if (opt === "valid") {
-      whereList.push(`${field} IS NOT NULL`);
-    }
-    selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field, db) + ` as ${out}`)
-  }
-  whereList = whereList.concat(filters)
-
-  var sql = ''
-  if (whereList.length > 0) {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `WHERE ${whereList.join(" AND ")}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
-  } else {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
-  }
-
-
-  return `'${sql}'`
-}
 export function specRewrite(vgSpec) {
   const dataSpec = vgSpec.data
   const dbTransformInd = []   //the data item to be removed
   var table = ""
   const newData = []
   var db = "postgres"
+  var transformCounter = 0    // to generate a unique name for the transform in case we need it in nested sql
 
   for (const [index, spec] of dataSpec.entries()) {
     if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
@@ -303,21 +295,14 @@ export function specRewrite(vgSpec) {
       // successor transform
       if (spec.transform.length > 1) {
         const dbTransforms = []
-        console.log("here >1")
-        const components = { type: "components" }
         var skip = false;
         for (var i = 1; i < spec.transform.length; i++) {
-          if (!skip && (spec.transform[i].type === 'filter' || spec.transform[i].type === 'aggregate')) {
-            console.log(spec.transform[i], "check")
-            if (!components[spec.transform[i].type]) components[spec.transform[i].type] = []
-            components[spec.transform[i].type].push(spec.transform[i])
-            continue
-          }
+
+          spec.transform[i].name = spec.transform[i].type + transformCounter++
           skip = dataRewrite(table, spec.transform[i], db, dbTransforms, newData)
           if (skip) break // skip the aggregate follwing bin
         }
 
-        dataRewrite(table, components, db, dbTransforms, newData)
         dataSpec[index].transform = dbTransforms
       }
       continue;
@@ -328,10 +313,10 @@ export function specRewrite(vgSpec) {
     if (spec.transform && spec.transform.length > 0 && dbTransformInd.length > 0) {
 
       const dbTransforms = []
-      const components = { type: "components" }
       var skip = false;
       for (const transform of spec.transform) {
 
+        spec.transform.name = spec.transform.type + transformCounter++
         for (const ind of dbTransformInd) {
           if (spec.source && spec.source === dataSpec[ind].name) {
             console.log(dataSpec[ind].transform[0])
@@ -340,18 +325,10 @@ export function specRewrite(vgSpec) {
           }
         }
 
-        if (!skip && (transform.type === 'filter' || transform.type === 'aggregate')) {
-          console.log(transform, "check")
-          if (!components[transform.type]) components[transform.type] = []
-          components[transform.type].push(transform)
-          continue
-        }
-
         skip = dataRewrite(table, transform, db, dbTransforms, newData)
         if (skip) break
       }
 
-      dataRewrite(table, components, db, dbTransforms, newData)
       dataSpec[index].transform = dbTransforms
     }
   }
