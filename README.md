@@ -45,8 +45,3 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
     1. You might have to update the postgresql config to change the authentication methods for local/host connections (change from `scram-sha-256/peer` to `trust` in `pga_conf.hba`)
 3. If you face `Cannot find name 'expect'` type error while running tests
     1. Run `yarn add @types/jest -D`
-
-1. A numbered list
-A nested numbered list
-    2. Which is numbered
-2. Which is numbered
