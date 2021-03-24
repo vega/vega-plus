@@ -28,9 +28,10 @@ function sort_compare(act, mod, a_key, m_key) {
   act = sortObj(act, a_key);
   mod = sortObj(mod, m_key);
   for (i = 0; i < act.length; i++) {
-    console.log(act[i][a_key])
-    console.log(mod[i][m_key])
-    expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
+
+    if (mod[i][m_key] != act[i][a_key]) {
+      expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
+    }
   }
 }
 
@@ -97,12 +98,13 @@ const aggregate = {
 }
 
 var test_cases = [
-  // ['single string filter', [str_filter]],
-  // ['single num filter1', [num_filter1]],
+  ['single string filter', [str_filter]],
+  ['single num filter1', [num_filter1]],
   ['single null filter', [null_filter]],
-  // ['string filter->aggregate', [str_filter, aggregate]],
-  // ['num filter1->aggregate', [num_filter1, aggregate]],
-  //['null filter->aggregate', [null_filter, aggregate]],
+  ['string filter->aggregate', [str_filter, aggregate]],
+  ['num filter1->aggregate', [num_filter1, aggregate]],
+  ['null filter->aggregate', [null_filter, aggregate]],
+  ['null filter->num filter1->aggregate', [null_filter, num_filter1, aggregate]],
 ]
 
 describe.each(test_cases)('successor %s', (name, transform) => {
@@ -118,7 +120,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view.runAsync();
 
     var result_vg = view.data('cars');
-    console.log(result_vg);
+    // console.log(result_vg);
 
 
 
@@ -141,7 +143,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view_s.runAsync();
 
     var result_s = view_s.data('cars');
-    console.log(result_s);
+    // console.log(result_s);
 
     compare_tolerance(result_vg, result_s);
   })
