@@ -5,23 +5,42 @@
   "padding": 10,
   "data": [
     {
-      "name": "cars",
-      "url": "data/cars.json",
+      "name": "cars_raw",
+      "transform": [
+        {
+          "type": "dbtransform",
+          "relation": "cars"
+        }
+      ]
+    },
+    {
+      "name": "cars_2",
+      "source": "cars_raw",
       "transform": [
         {
           "type": "aggregate",
           "fields": [
-            "Miles_per_Gallon"
+            "miles_per_gallon"
           ],
           "ops": [
-            "distinct"
+            "average"
           ],
           "as": [
-            "Miles_per_Gallon"
+            "miles_per_gallon"
           ],
           "groupby": [
-            "Cylinders"
+            "cylinders"
           ]
+        }
+      ]
+    },
+    {
+      "name": "cars",
+      "source": "cars_2",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.cylinders > 4"
         }
       ]
     }
@@ -32,7 +51,7 @@
       "type": "band",
       "domain": {
         "data": "cars",
-        "field": "Cylinders"
+        "field": "cylinders"
       },
       "range": "width",
       "padding": 0.05,
@@ -42,7 +61,7 @@
       "name": "yscale",
       "domain": {
         "data": "cars",
-        "field": "Miles_per_Gallon"
+        "field": "miles_per_gallon"
       },
       "nice": true,
       "range": "height"
@@ -70,7 +89,7 @@
         "enter": {
           "x": {
             "scale": "xscale",
-            "field": "Cylinders"
+            "field": "cylinders"
           },
           "width": {
             "scale": "xscale",
@@ -78,7 +97,7 @@
           },
           "y": {
             "scale": "yscale",
-            "field": "Miles_per_Gallon"
+            "field": "miles_per_gallon"
           },
           "y2": {
             "scale": "yscale",

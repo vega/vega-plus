@@ -5,8 +5,8 @@
   "padding": 10,
   "data": [
     {
-      "name": "cars",
-      "url": "data/cars.json",
+      "name": "cars_o",
+      "url": "../data/cars.json",
       "transform": [
         {
           "type": "aggregate",
@@ -14,7 +14,7 @@
             "Miles_per_Gallon"
           ],
           "ops": [
-            "distinct"
+            "average"
           ],
           "as": [
             "Miles_per_Gallon"
@@ -22,6 +22,16 @@
           "groupby": [
             "Cylinders"
           ]
+        }
+      ]
+    },
+    {
+      "name": "cars",
+      "source": "cars_o",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.Cylinders > 4"
         }
       ]
     }
