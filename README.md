@@ -10,8 +10,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
 5. Run `pip install -r requirements.txt` to install python dependencies. (Python 3.x is preferable)
 6. Run `yarn` to javacript install dependencies.
-7. Install Jest (for running Tests): `yarn add --dev jest`.
-8. For using prepopulated database, look at additional notes.
+7. For using prepopulated database, look at additional notes.
 
 ## Running Application Server
 1. Run `python server.py --peer --db [postgresql/duckdb]` 

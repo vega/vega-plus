@@ -9,13 +9,11 @@
     "esModuleInterop": true,
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "files": [
     "main.ts",
-    "server.ts",
-    "lib/dataflow-rewrite-pg.ts",
+    "server.ts"
   ]
 }

@@ -39,10 +39,6 @@ jobs:
       - name: Install and resolve dependencies
         run: |
           yarn
-          yarn add --dev jest
-          yarn add @types/jest -D
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
       
       - name: Setup Database
         run: psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql
@@ -57,10 +53,10 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Run Application Server for Postgres
-        run: python server.py --CI &
+        run: node server.js pg &
         
       - name: Run Yarn Test for Postgres
-        run: npm test transform_pg
+        run: yarn test transform_pg
         
   build_duckdb:
     if: success()
@@ -83,14 +79,10 @@ jobs:
       - name: Install and resolve dependencies
         run: |
           yarn
-          yarn add --dev jest
-          yarn add @types/jest -D
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
+	  node testing.js
 
       - name: Run Application Server for DuckDB
-        run: python server.py --CI --db duckdb &
+        run: node server.js db &
         
       - name: Run Yarn Test for DuckDB
-        run: npm test transform_duckdb
+        run: yarn test transform_duckdb
