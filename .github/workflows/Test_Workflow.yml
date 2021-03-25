@@ -78,7 +78,7 @@ jobs:
       - name: Install and resolve dependencies
         run: |
           yarn
-	  node testing.js
+          node testing.js
 
       - name: Run Application Server for DuckDB
         run: node server.js db &
