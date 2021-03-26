@@ -4,6 +4,5 @@ node_modules
 dist
 .cache
 *.swp
-package-lock.json
 *.DS_Store
 __pycache__
