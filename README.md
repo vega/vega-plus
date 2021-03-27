@@ -12,7 +12,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 
 ## Running Application Server
 1. Run `node server.js` 
-    1. Default database used is DuckDB, if you want to use postgres as your database run `node server.js pg`
+    1. The default database used is DuckDB. If you want to use postgres as your database run `node server.js pg`.
 2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `server.js` file and can be customized.
 
 ## Running the Web Demo
