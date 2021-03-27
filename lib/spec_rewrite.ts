@@ -2,7 +2,6 @@ import * as Vega from "vega"
 import { Transforms, AggregateTransform, None } from "vega"
 import { aggregate, extent, bin } from "vega-transforms";
 import { parse } from "vega-expression"
-//import expr2sql from "./expr2sql"
 import { error, hasOwnProperty } from 'vega-util';
 import { strict } from "assert";
 
