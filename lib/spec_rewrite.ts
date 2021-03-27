@@ -1,12 +1,6 @@
 import * as Vega from "vega"
-import { Transforms, AggregateTransform, None } from "vega"
-import { aggregate, extent, bin } from "vega-transforms";
-import { parse } from "vega-expression"
-//import expr2sql from "./expr2sql"
-import { error, hasOwnProperty } from 'vega-util';
-import { strict } from "assert";
-
-
+import { AggregateTransform, FilterTransform } from "vega"
+import { parse, ASTNode } from "vega-expression"
 
 function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query
@@ -32,7 +26,7 @@ function aggregateOpToSql(op: string, field: string, db: string) {
       return `AVG(${field})`;
     case "count":
     case "valid":
-      return `COUNT(*)`;
+      return `SUM(CASE WHEN ${field} IS NULL THEN 0 ELSE 1 END)`;
     case "missing":
       return `SUM(CASE WHEN ${field} IS NULL THEN 1 ELSE 0 END)`;
     case "distinct":
@@ -76,7 +70,7 @@ function vegaNonTransformToSql(tableName: string, markFields: string[]) {
   return `'${out}'`;
 }
 
-export const aggregateTransformToSql = (tableName: string, transform: any, db: string, prev: any) => {
+export const aggregateTransformToSql = (tableName: string, transform: AggregateTransform, db: string, prev: any) => {
   const groupby = (transform.groupby as string[])
   const selectionList = groupby.slice()
   const validOpIdxs = [];
@@ -85,13 +79,11 @@ export const aggregateTransformToSql = (tableName: string, transform: any, db: s
   for (const [index, field] of (transform.fields as string[]).entries()) {
     const opt: string = transform.ops[index]
     const out: string = transform.as[index]
-    if (opt === "valid") {
-      validOpIdxs.push(`${field} IS NOT NULL`);
-    }
+
     selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field, db) + ` as ${out}`)
   }
 
-  var sql = ''
+  let sql = ''
   if (validOpIdxs.length > 0) {
     sql = [
       `SELECT ${selectionList.join(",")}`,
@@ -138,7 +130,7 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
     })
   }
 
-  if (transform.type === "bin") {
+  else if (transform.type === "bin") {
     const maxbins = transform.maxbins ? transform.maxbins : 10
     let extent = {}
 
@@ -179,7 +171,7 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
     return true // skip the next aggregate transform
   }
 
-  if (transform.type === "aggregate") {
+  else if (transform.type === "aggregate") {
     var prev = dbTransforms.pop() ?? null // null or a dbtransform
 
     dbTransforms.push({
@@ -191,7 +183,7 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
     })
   }
 
-  if (transform.type === "filter") {
+  else if (transform.type === "filter") {
     var prev = dbTransforms.pop() ?? null // null or a dbtransform
 
     dbTransforms.push({
@@ -204,13 +196,13 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
   }
 
 }
-const filterTransformToSql = (tableName: string, transform: any, db: string, prev: any) => {
-  console.log(parse(transform.expr))
+
+const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
   const filter = expr2sql(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
 
-  var sql = ''
+  let sql = ''
   sql = [
     `SELECT *`,
     `FROM ${tableName}`,
@@ -220,7 +212,7 @@ const filterTransformToSql = (tableName: string, transform: any, db: string, pre
   return `"${sql}"`
 }
 
-function expr2sql(expr) {
+function expr2sql(expr: string) {
   var memberDepth = 0
   function visit(ast) {
     const generator = Generators[ast.type];
