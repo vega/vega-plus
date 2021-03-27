@@ -4,8 +4,7 @@ A demo of how to run Vega with a PostgreSQL backend. This is a fork of [this pro
 
 ## Installation
 1. Install and start PostgreSQL.
-2. Create a PostgreSQL database named `scalable_vega`, e.g., `createdb scalable_vega`
-    1. You don't need to install or setup for DuckDB
+2. Create a PostgreSQL database named `scalable_vega`, e.g., `createdb scalable_vega`. You don't need to do anything if you use DuckDB.
 3. Run `cd /path/to/dev/repos`.
 4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
 5. Run `yarn` to javacript install dependencies.
