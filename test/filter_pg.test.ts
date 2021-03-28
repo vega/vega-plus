@@ -118,8 +118,6 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view.runAsync();
 
     var result_vg = view.data('cars');
-    // console.log(result_vg);
-
 
 
     var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
