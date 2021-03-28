@@ -9,12 +9,16 @@
       "url": "data/cars.json",
       "transform": [
         {
+          "type": "filter",
+          "expr": " datum.Origin != 'Europe'"
+        },
+        {
           "type": "aggregate",
           "fields": [
             "Miles_per_Gallon"
           ],
           "ops": [
-            "distinct"
+            "average"
           ],
           "as": [
             "Miles_per_Gallon"
