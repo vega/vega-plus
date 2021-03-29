@@ -2,6 +2,7 @@ env
 yarn.lock
 node_modules
 dist
+package-lock.json
 .cache
 *.swp
 *.DS_Store
