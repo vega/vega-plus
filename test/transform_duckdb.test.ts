@@ -1,6 +1,4 @@
 import { specRewrite } from "../lib/spec_rewrite"
-//import { VegaDbTransform } from "../lib/dbtransform"
-//var vega = require('vega')
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 import { transforms } from "vega";
@@ -70,7 +68,6 @@ var test_cases = [
     ['cars_max_transform_successor', 'cars'],
     ['cars_median_transform_successor', 'cars'],
     ['cars_min_transform_successor', 'cars'],
-    ['cars_missing_transform_successor', 'cars'],
     ['cars_q1_transform_successor', 'cars'],
     ['cars_stderr_transform_successor', 'cars'],
     ['cars_stdev_transform_successor', 'cars'],
@@ -111,8 +108,6 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
         await view_s.runAsync();
 
         var result_s = view_s.data(data_name);
-        // console.log(result_s, spec_file);
 
-        // compare_tolerance(result_vg, result_s);
     });
 });

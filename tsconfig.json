@@ -6,7 +6,11 @@
     "noEmit": true,
     "strict": false,
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "files": [
     "main.ts",

@@ -3,10 +3,6 @@ yarn.lock
 node_modules
 dist
 .cache
-server.js
 *.swp
-package-lock.json
 *.DS_Store
-*.duckdb
-*.wal
 __pycache__
