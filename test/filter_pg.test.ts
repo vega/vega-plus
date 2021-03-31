@@ -120,7 +120,6 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view.runAsync();
 
     var result_vg = view.data('cars');
-    // console.log(result_vg);
 
 
 
@@ -143,7 +142,6 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view_s.runAsync();
 
     var result_s = view_s.data('cars');
-    // console.log(result_s);
 
     compare_tolerance(result_vg, result_s);
   })
