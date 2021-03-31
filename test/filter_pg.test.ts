@@ -1,6 +1,4 @@
 import { specRewrite } from "../lib/spec_rewrite"
-//import { VegaDbTransform } from "../lib/dbtransform"
-//var vega = require('vega')
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 import { array, transforms } from "vega";
@@ -120,8 +118,6 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     await view.runAsync();
 
     var result_vg = view.data('cars');
-
-
 
     var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
