@@ -69,7 +69,6 @@ var test_cases = [
     ['cars_max_transform_successor', 'cars'],
     ['cars_median_transform_successor', 'cars'],
     ['cars_min_transform_successor', 'cars'],
-    ['cars_missing_transform_successor', 'cars'],
     ['cars_q1_transform_successor', 'cars'],
     ['cars_stderr_transform_successor', 'cars'],
     ['cars_stdev_transform_successor', 'cars'],

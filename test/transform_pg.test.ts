@@ -109,8 +109,6 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     await view_s.runAsync();
 
     var result_s = view_s.data(data_name);
-    console.log(result_s, spec_file);
-
     compare_tolerance(result_vg, result_s);
   });
 });

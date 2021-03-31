@@ -118,8 +118,6 @@ describe.each(test_cases)('successor %s', (name, transform) => {
 
     var result_vg = view.data('cars');
 
-
-
     var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
       "type": "dbtransform",
