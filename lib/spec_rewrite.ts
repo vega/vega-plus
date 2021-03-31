@@ -237,37 +237,32 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     })
     dbTransforms.push({
       type: "formula",
-      expr: "datum.y1 - datum.y",
-      as: "y0"
+      expr: `datum.y1 - datum.${transform.field}`,
+      as: transform.as ? transform.as[0] : "y0"
     })
   }
 
 }
 
 const stackTransformToSql = (tableName: string, transform: StackTransform, db: string) => {
-  const groupby = (transform.groupby as string[])[0]
-  const selectionList = groupby.slice()
+  const groupby = (transform.groupby as string[])
   const as = transform.as ? transform.as : ['y0', 'y1']
   const sort = array(transform.sort.field)
   const order = array(transform.sort.order)
   order.map(x => x === 'descending' ? 'DESC' : 'ASC')
-  const fromList = [`S2.${groupby} = S1.${groupby}`];
-  const orderList = [groupby]
+  const orderList = []
 
 
   for (const [index, field] of (sort as string[]).entries()) {
 
     orderList.push(index < order.length ? (order[index] === 'descending' ? `${field} DESC` : `${field}`) : `${field}`)
 
-    fromList.push(`S2.${field} <= S1.${field}`)
-
   }
 
   const sql = [
     `SELECT *, `,
-    `(SELECT SUM(${transform.field}) FROM ${tableName} S2 WHERE ${fromList.join(" AND ")}) ${as[1]}`,
-    `FROM ${tableName} S1`,
-    `ORDER BY ${orderList.join(",")}`,
+    `SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]}`,
+    `FROM ${tableName}`,
   ].join(" ")
 
   return `"${sql}"`
