@@ -26,6 +26,7 @@ function aggregateOpToSql(op: string, field: string, db: string) {
     case "average":
       return `AVG(${field})`;
     case "count":
+      return `COUNT(*)`;
     case "valid":
       return `SUM(CASE WHEN ${field} IS NULL THEN 0 ELSE 1 END)`;
     case "missing":
@@ -272,9 +273,7 @@ const filterTransformToSql = (tableName: string, transform: FilterTransform, db:
   const filter = expr2sql(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
-
-  let sql = ''
-  sql = [
+  const sql = [
     `SELECT *`,
     `FROM ${tableName}`,
     `WHERE ${filter}`
@@ -333,7 +332,7 @@ function expr2sql(expr: string) {
 
 export function specRewrite(vgSpec) {
   const dataSpec = vgSpec.data
-  const dbTransformInd = []   //the data item to be removed
+  const dbTransformInd = []   //the data item to be removed(the one only indicating using db and not succeed by other transforms )
   var table = ""
   const newData = []
   var db = "postgres"
