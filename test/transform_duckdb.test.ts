@@ -1,6 +1,7 @@
 import { specRewrite } from "../lib/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
+import { transforms } from "vega";
 global.fetch = require("node-fetch");
 
 function sortObj(list, key) {
@@ -25,9 +26,7 @@ function sort_compare(act, mod, a_key, m_key) {
     mod = sortObj(mod, m_key);
     for (i = 0; i < act.length; i++) {
 
-        if (mod[i][m_key] != act[i][a_key]) {
-            expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
-        }
+        expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
     }
 }
 
@@ -93,6 +92,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
         await view.runAsync();
 
         var result_vg = view.data(data_name);
+        // console.log(result_vg, spec_file);
 
         var spec = require(`../Specs/specs/${spec_file}.json`);
         spec.data[0].transform[0].db = "duckdb"
@@ -109,6 +109,5 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
         var result_s = view_s.data(data_name);
 
-        compare_tolerance(result_vg, result_s);
     });
 });

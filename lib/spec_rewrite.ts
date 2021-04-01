@@ -1,7 +1,6 @@
-import { Transforms, AggregateTransform, FilterTransform, ProjectTransform, StackTransform } from "vega"
-import { parse } from "vega-expression"
-import { array } from "vega-util"
-
+import * as Vega from "vega"
+import { AggregateTransform, FilterTransform } from "vega"
+import { parse, ASTNode } from "vega-expression"
 
 function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query
@@ -26,7 +25,6 @@ function aggregateOpToSql(op: string, field: string, db: string) {
     case "average":
       return `AVG(${field})`;
     case "count":
-      return `COUNT(*)`;
     case "valid":
       return `SUM(CASE WHEN ${field} IS NULL THEN 0 ELSE 1 END)`;
     case "missing":
@@ -87,35 +85,20 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
 
   let sql = ''
   if (validOpIdxs.length > 0) {
-    sql =
-      `SELECT ${selectionList.join(",")}
-      FROM ${tableName}
-      WHERE ${validOpIdxs.join(" AND ")}
-      GROUP BY ${groupby.join(",")}`
+    sql = [
+      `SELECT ${selectionList.join(",")}`,
+      `FROM ${tableName}`,
+      `WHERE ${validOpIdxs.join(" AND ")}`,
+      `GROUP BY ${groupby.join(",")}`
+    ].join(" ")
   } else {
-    sql =
-      `SELECT ${selectionList.join(",")}
-      FROM ${tableName}
-      GROUP BY ${groupby.join(",")}`
+    sql = [
+      `SELECT ${selectionList.join(",")}`,
+      `FROM ${tableName}`,
+      `GROUP BY ${groupby.join(",")}`
+    ].join(" ")
   }
 
-
-  return `"${sql}"`
-}
-
-function projectTransformToSql(tableName: string, transform: ProjectTransform, db: string, prev: any) {
-  const selectionList = [];
-  const validOpIdxs = [];
-  tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
-
-  for (const [index, field] of (transform.fields as string[]).entries()) {
-    const out: string = transform.as[index]
-    selectionList.push(`${field} as ${out}`)
-  }
-
-  const sql =
-    `SELECT ${selectionList.join(",")}
-    FROM ${tableName}`
 
   return `"${sql}"`
 }
@@ -132,7 +115,7 @@ function collectNonTransformFields(dataName: string, marks: any) {
   return fields
 }
 
-export function dataRewrite(tableName: string, transform: Transforms, db: string, dbTransforms, newData) {
+export function dataRewrite(tableName: string, transform: any, db: string, dbTransforms, newData) {
 
   if (transform.type === "extent") {
     // converting signal to a new data item
@@ -193,7 +176,7 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
 
     dbTransforms.push({
       type: "dbtransform",
-      name: transform['name'],
+      name: transform.name,
       query: {
         signal: aggregateTransformToSql(tableName, transform, db, prev)
       }
@@ -205,74 +188,26 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
 
     dbTransforms.push({
       type: "dbtransform",
-      name: transform['name'],
+      name: transform.name,
       query: {
         signal: filterTransformToSql(tableName, transform, db, prev)
       }
     })
   }
 
-  else if (transform.type === 'project') {
-    var prev = dbTransforms.pop() ?? null // null or a dbtransform
-
-    dbTransforms.push({
-      type: "dbtransform",
-      name: transform['name'],
-      query: {
-        signal: projectTransformToSql(tableName, transform, db, prev)
-      }
-    })
-
-  }
-
-  else if (transform.type === 'stack') {
-    dbTransforms.push({
-      type: "dbtransform",
-      name: transform['name'],
-      query: {
-        signal: stackTransformToSql(tableName, transform, db)
-      }
-    })
-    dbTransforms.push({
-      type: "formula",
-      expr: `datum.y1 - datum.${transform.field}`,
-      as: transform.as ? transform.as[0] : "y0"
-    })
-  }
-
-}
-
-const stackTransformToSql = (tableName: string, transform: StackTransform, db: string) => {
-  const groupby = (transform.groupby as string[])
-  const as = transform.as ? transform.as : ['y0', 'y1']
-  const sort = array(transform.sort.field)
-  const order = array(transform.sort.order)
-  order.map(x => x === 'descending' ? 'DESC' : 'ASC')
-  const orderList = []
-
-
-  for (const [index, field] of (sort as string[]).entries()) {
-
-    orderList.push(index < order.length ? (order[index] === 'descending' ? `${field} DESC` : `${field}`) : `${field}`)
-
-  }
-
-  const sql =
-    `SELECT *,
-    SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]}
-    FROM ${tableName}`
-
-  return `"${sql}"`
 }
 
 const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
   const filter = expr2sql(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
-  const sql =
-    `SELECT *
-    FROM ${tableName}
-    WHERE ${filter}`
+
+  let sql = ''
+  sql = [
+    `SELECT *`,
+    `FROM ${tableName}`,
+    `WHERE ${filter}`
+  ].join(" ")
 
   return `"${sql}"`
 }
@@ -327,12 +262,11 @@ function expr2sql(expr: string) {
 
 export function specRewrite(vgSpec) {
   const dataSpec = vgSpec.data
-  const dbTransformInd = []   //the data item to be removed(the one only indicating using db and not succeed by other transforms )
+  const dbTransformInd = []   //the data item to be removed
   var table = ""
   const newData = []
   var db = "postgres"
   var transformCounter = 0    // to generate a unique name for the transform in case we need it in nested sql
-
 
   for (const [index, spec] of dataSpec.entries()) {
     if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
@@ -407,4 +341,3 @@ export function specRewrite(vgSpec) {
 
   return vgSpec
 }
-
