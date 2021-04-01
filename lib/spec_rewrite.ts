@@ -87,18 +87,16 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
 
   let sql = ''
   if (validOpIdxs.length > 0) {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `WHERE ${validOpIdxs.join(" AND ")}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
+    sql =
+      `SELECT ${selectionList.join(",")}
+      FROM ${tableName}
+      WHERE ${validOpIdxs.join(" AND ")}
+      GROUP BY ${groupby.join(",")}`
   } else {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
+    sql =
+      `SELECT ${selectionList.join(",")}
+      FROM ${tableName}
+      GROUP BY ${groupby.join(",")}`
   }
 
 
@@ -115,10 +113,9 @@ function projectTransformToSql(tableName: string, transform: ProjectTransform, d
     selectionList.push(`${field} as ${out}`)
   }
 
-  const sql = [
-    `SELECT ${selectionList.join(",")}`,
-    `FROM ${tableName}`,
-  ].join(" ")
+  const sql =
+    `SELECT ${selectionList.join(",")}
+    FROM ${tableName}`
 
   return `"${sql}"`
 }
@@ -260,11 +257,10 @@ const stackTransformToSql = (tableName: string, transform: StackTransform, db: s
 
   }
 
-  const sql = [
-    `SELECT *, `,
-    `SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]}`,
-    `FROM ${tableName}`,
-  ].join(" ")
+  const sql =
+    `SELECT *,
+    SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]}
+    FROM ${tableName}`
 
   return `"${sql}"`
 }
@@ -273,11 +269,10 @@ const filterTransformToSql = (tableName: string, transform: FilterTransform, db:
   const filter = expr2sql(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
-  const sql = [
-    `SELECT *`,
-    `FROM ${tableName}`,
-    `WHERE ${filter}`
-  ].join(" ")
+  const sql =
+    `SELECT *
+    FROM ${tableName}
+    WHERE ${filter}`
 
   return `"${sql}"`
 }
