@@ -88,14 +88,14 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
   let sql = ''
   if (validOpIdxs.length > 0) {
     sql =
-      `SELECT ${selectionList.join(",")}
-      FROM ${tableName}
-      WHERE ${validOpIdxs.join(" AND ")}
+      `SELECT ${selectionList.join(",")} \
+      FROM ${tableName} \
+      WHERE ${validOpIdxs.join(" AND ")} \
       GROUP BY ${groupby.join(",")}`
   } else {
     sql =
-      `SELECT ${selectionList.join(",")}
-      FROM ${tableName}
+      `SELECT ${selectionList.join(",")} \
+      FROM ${tableName} \
       GROUP BY ${groupby.join(",")}`
   }
 
@@ -114,7 +114,7 @@ function projectTransformToSql(tableName: string, transform: ProjectTransform, d
   }
 
   const sql =
-    `SELECT ${selectionList.join(",")}
+    `SELECT ${selectionList.join(",")} \
     FROM ${tableName}`
 
   return `"${sql}"`
@@ -258,8 +258,8 @@ const stackTransformToSql = (tableName: string, transform: StackTransform, db: s
   }
 
   const sql =
-    `SELECT *,
-    SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]}
+    `SELECT *, \
+    SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]} \
     FROM ${tableName}`
 
   return `"${sql}"`
@@ -270,8 +270,8 @@ const filterTransformToSql = (tableName: string, transform: FilterTransform, db:
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
   const sql =
-    `SELECT *
-    FROM ${tableName}
+    `SELECT * \
+    FROM ${tableName} \
     WHERE ${filter}`
 
   return `"${sql}"`
