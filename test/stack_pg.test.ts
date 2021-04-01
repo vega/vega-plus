@@ -25,6 +25,7 @@ function sort_compare(act, mod, a_key, m_key) {
   act = sortObj(act, a_key);
   mod = sortObj(mod, m_key);
   for (i = 0; i < act.length; i++) {
+
     if (mod[i][m_key] != act[i][a_key]) {
       expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
     }
@@ -60,31 +61,9 @@ beforeAll(() => {
   VegaTransformPostgres.setHttpOptions(httpOptions);
 });
 
-var test_cases = [
-  ['cars_average_sourced', 'cars'],
-  ['cars_count_transform_successor', 'cars'],
-  ['cars_distinct_transform_successor', 'cars'],
-  ['cars_histogram_extent', 'binned'],
-  ['cars_histogram', 'binned'],
-  ['cars_max_transform_successor', 'cars'],
-  ['cars_median_transform_successor', 'cars'],
-  ['cars_min_transform_successor', 'cars'],
-  ['cars_missing_transform_successor', 'cars'],
-  ['cars_q1_transform_successor', 'cars'],
-  ['cars_stderr_transform_successor', 'cars'],
-  ['cars_stdev_transform_successor', 'cars'],
-  ['cars_stdevp_transform_successor', 'cars'],
-  ['cars_sum_transform_successor', 'cars'],
-  ['cars_valid_transform_successor', 'cars'],
-  ['cars_variance_transform_successor', 'cars'],
-  ['cars_variancep_transform_successor', 'cars'],
-
-]
-
-describe.each(test_cases)('comparing results', (spec_file, data_name) => {
-
-  test(spec_file, async () => {
-    var spec_vg = require(`../Specs/vega_specs/${spec_file}.json`);
+describe("simple stack transform example", () => {
+  test("stack", async () => {
+    var spec_vg = require(`../Specs/vega_specs/stack.json`);
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec_vg), {
@@ -93,10 +72,9 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     });
     await view.runAsync();
 
-    var result_vg = view.data(data_name);
-    console.log(result_vg, spec_file);
+    var result_vg = view.data('table');
 
-    var spec = require(`../Specs/specs/${spec_file}.json`);
+    var spec = require(`../Specs/specs/stack.json`);
     const newspec = specRewrite(spec)
 
     const runtime = vega.parse(newspec);
@@ -108,7 +86,69 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
     await view_s.runAsync();
 
-    var result_s = view_s.data(data_name);
+    var result_s = view_s.data('table');
+
     compare_tolerance(result_vg, result_s);
   });
 });
+
+const stack_transform1 = {
+  "type": "stack",
+  "groupby": ["region"],
+  "field": "sale",
+  "sort": { "field": ["product", "Q"], "order": ["descending"] }
+}
+
+const stack_transform2 = {
+  "type": "stack",
+  "groupby": ["region", "product"],
+  "field": "sale",
+  "sort": { "field": ["Q"], "order": ["descending"] }
+}
+
+var test_cases = [
+  ['sort by array 1', stack_transform1],
+  ['sort by array 2', stack_transform2],
+
+]
+
+describe.each(test_cases)('stack transform with table product', (name, transform) => {
+  test(`${name}`, async () => {
+    var spec_vg = require('../Specs/vega_specs/product.json');
+    spec_vg.data[0].transform[0] = transform
+    var loader = vega.loader();
+
+    var view = new vega.View(vega.parse(spec_vg), {
+      loader: loader,
+      renderer: 'none'
+    });
+    await view.runAsync();
+
+    var result_vg = view.data('table');
+
+
+
+    var spec = require('../Specs/specs/product.json');
+    const dbtransform = {
+      "type": "dbtransform",
+      "relation": "product"
+    }
+
+    spec.data[0].transform = [dbtransform, transform]
+
+    const newspec = specRewrite(spec)
+    const runtime = vega.parse(newspec);
+
+    var view_s = new vega.View(runtime, {
+      renderer: 'none'
+    })
+      .logLevel(vega.Info)
+
+    await view_s.runAsync();
+
+    var result_s = view_s.data('table');
+
+    compare_tolerance(result_vg, result_s);
+  })
+});
+
