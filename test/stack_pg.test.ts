@@ -11,7 +11,7 @@ function sortObj(list, key) {
     var type = (typeof (a) === 'string' ||
       typeof (b) === 'string') ? 'string' : 'number';
     var result;
-    if (type === 'string') result = a.localeCompare(b);
+    if (type === 'string') result = parseFloat(a) - parseFloat(b);
     else result = a - b;
     return result;
   }

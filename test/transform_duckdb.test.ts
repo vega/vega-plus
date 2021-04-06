@@ -10,7 +10,7 @@ function sortObj(list, key) {
         var type = (typeof (a) === 'string' ||
             typeof (b) === 'string') ? 'string' : 'number';
         var result;
-        if (type === 'string') result = a.localeCompare(b);
+        if (type === 'string') result = parseFloat(a) - parseFloat(b);
         else result = a - b;
         return result;
     }
@@ -35,7 +35,7 @@ function compare_tolerance(actual, modified) {
     var a_k = Object.keys(actual[0]);
     var m_k = Object.keys(modified[0]);
     var i, j;
-
+    console.log(a_k,m_k);
     for (i = 0; i < a_k.length; i++) {
         for (j = 0; j < m_k.length; j++) {
             if (a_k[i].toUpperCase() == m_k[j].toUpperCase()) {
