@@ -26,19 +26,13 @@ jobs:
           
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
       - uses: actions/setup-node@v1
-        with:
-          node-version: '10'
 
       - name: Install Postgres Requirements
         run: sudo apt-get install postgresql postgresql-contrib libpq-dev
     
       - name: Install and resolve dependencies
-        run: |
-          yarn
+        run: yarn  --frozen-lockfile
       
       - name: Setup Database
         run: psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql
@@ -65,23 +59,15 @@ jobs:
     
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
       - uses: actions/setup-node@v1
-        with:
-          node-version: '10'
-
-      - name: Install Postgres Requirements
-        run: sudo apt-get install postgresql postgresql-contrib libpq-dev
     
       - name: Install and resolve dependencies
         run: |
-          yarn
+          yarn --frozen-lockfile
           node testing.js
 
       - name: Run Application Server for DuckDB
-        run: node server.js db &
+        run: node server.js db
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
