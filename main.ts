@@ -30,6 +30,7 @@ export function run(spec: vega.Spec) {
   console.log(newspec, "rewrite");
 
   const runtime = vega.parse(newspec);
+  // const runtime = vega.parse(spec);
   console.log(runtime, "runtime");
 
 
