@@ -7,3 +7,36 @@ body {
 .vega-bind-name {
   margin-right: 1em;
 }
+
+html {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    pre {
+      border-width: 0 !important;
+      font-size: 1em;
+      max-width: 500px;
+      max-height: 800px;
+      overflow:auto;
+    }
+    .prettyprint pre {
+      max-width: 500px;
+    }
+
+    body {
+      padding: 2em;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .container div {
+      margin-right: 1em;
+      max-width: 500px;
+
+    }

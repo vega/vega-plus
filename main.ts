@@ -4,7 +4,6 @@ import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-db"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from "./lib/spec_rewrite"
-
 const querystring = require('querystring');
 const http = require('http');
 
@@ -24,6 +23,7 @@ export function run(spec: vega.Spec) {
   (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
 
+  loadOriginalSpec(spec, "Original Specification");
 
   // make a vega execution object (runtime) from the spec
   const newspec = specRewrite(spec)
@@ -44,7 +44,23 @@ export function run(spec: vega.Spec) {
 
   // execute the rewritten dataflow for the view
   view.runAsync();
+
+  loadOriginalSpec(spec.data, "Rewritten Transforms With SQL");
   return view;
+}
+
+function loadOriginalSpec(spec, title) {
+
+  const container = document.getElementById("spec-container");
+  // Insert original vega spec
+  const ogSpecContainer = <HTMLDivElement>document.createElement("div");
+  const ogSpecCode = <HTMLElement>document.createElement("pre");
+  ogSpecCode.classList.add("prettyprint");
+  ogSpecCode.innerHTML = JSON.stringify(spec, null, 4);
+
+  ogSpecContainer.innerHTML = `<h3>${title}</h3>`;
+  ogSpecContainer.appendChild(ogSpecCode);
+  container.appendChild(ogSpecContainer);
 }
 
 function handleVegaSpec() {
@@ -53,6 +69,8 @@ function handleVegaSpec() {
   reader.onload = function (e: any) {
     const spec = JSON.parse(e.target.result);
     run(spec);
+
+
   };
   reader.readAsText(this.files[0]);
   (<HTMLInputElement>document.getElementById("vega-spec")).value = "";
