@@ -67,7 +67,7 @@ jobs:
           node testing.js
 
       - name: Run Application Server for DuckDB
-        run: node server.js db
+        run: node server.js db &
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
