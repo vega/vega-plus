@@ -4,6 +4,8 @@ import * as vega from "vega";
 import VegaTransformPostgres from "vega-transform-db"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from "./lib/spec_rewrite"
+import { view2dot } from './lib/view2dot'
+var hpccWasm = window["@hpcc-js/wasm"];
 const querystring = require('querystring');
 const http = require('http');
 
@@ -23,7 +25,7 @@ export function run(spec: vega.Spec) {
   (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
 
-  loadOriginalSpec(spec, "Original Specification");
+  loadOriginalSpec("original", spec, "Original Specification");
 
   // make a vega execution object (runtime) from the spec
   const newspec = specRewrite(spec)
@@ -45,22 +47,33 @@ export function run(spec: vega.Spec) {
   // execute the rewritten dataflow for the view
   view.runAsync();
 
-  loadOriginalSpec(spec.data, "Rewritten Transforms With SQL");
+  loadOriginalSpec("rewrite", spec.data, "Rewritten Transforms With SQL");
+
+  view.runAfter(view => {
+    console.log(view2dot(view));
+    const dot = `${view2dot(view)}`
+    hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
+      const placeholder = document.getElementById("graph-placeholder");
+      placeholder.innerHTML = svg;
+    });
+  })
+
   return view;
 }
 
-function loadOriginalSpec(spec, title) {
+function loadOriginalSpec(id, spec, title) {
 
-  const container = document.getElementById("spec-container");
+  const container = document.getElementById(id);
   // Insert original vega spec
-  const ogSpecContainer = <HTMLDivElement>document.createElement("div");
-  const ogSpecCode = <HTMLElement>document.createElement("pre");
+  const ogSpecContainer = document.createElement("div");
+  ogSpecContainer.id = id;
+  const ogSpecCode = document.createElement("pre");
   ogSpecCode.classList.add("prettyprint");
   ogSpecCode.innerHTML = JSON.stringify(spec, null, 4);
 
   ogSpecContainer.innerHTML = `<h3>${title}</h3>`;
   ogSpecContainer.appendChild(ogSpecCode);
-  container.appendChild(ogSpecContainer);
+  container.parentNode.replaceChild(ogSpecContainer, container)
 }
 
 function handleVegaSpec() {

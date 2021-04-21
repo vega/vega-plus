@@ -7,8 +7,7 @@ function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query
   switch (db.toLowerCase()) {
     case "postgres":
-      //return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
-      return `QUANTILE(${field}, ${fraction})`;
+      return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
     case "duckdb":
       return `approx_QUANTILE(${field}, ${fraction})`;
     default:

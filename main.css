@@ -1,7 +1,7 @@
 body {
   font-family: sans-serif;
   margin: 0 auto;
-  max-width: 800px;
+  max-width: 1000px;
 }
 
 .vega-bind-name {
@@ -13,7 +13,7 @@ html {
     }
 
     pre {
-      border-width: 0 !important;
+      border-width: 1 !important;
       font-size: 1em;
       max-width: 500px;
       max-height: 800px;
@@ -38,5 +38,9 @@ html {
     .container div {
       margin-right: 1em;
       max-width: 500px;
+      padding: 5px;
+    }
 
+    .placeholder{
+      overflow: auto;
     }
