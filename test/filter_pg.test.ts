@@ -1,7 +1,6 @@
 import { specRewrite } from "../lib/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
-import { array, transforms } from "vega";
 global.fetch = require("node-fetch");
 
 function sortObj(list, key) {
@@ -12,7 +11,7 @@ function sortObj(list, key) {
     var type = (typeof (a) === 'string' ||
       typeof (b) === 'string') ? 'string' : 'number';
     var result;
-    if (type === 'string') result = a.localeCompare(b);
+    if (type === 'string') result = parseFloat(a) - parseFloat(b);
     else result = a - b;
     return result;
   }
@@ -28,7 +27,7 @@ function sort_compare(act, mod, a_key, m_key) {
   for (i = 0; i < act.length; i++) {
 
     if (mod[i][m_key] != act[i][a_key]) {
-      expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
+      expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 3);
     }
   }
 }
@@ -107,7 +106,7 @@ var test_cases = [
 
 describe.each(test_cases)('successor %s', (name, transform) => {
   test(transform[0]['expr'], async () => {
-    var spec_vg = require('../Specs/vega_specs/cars_average_transform_filter.json');
+    var spec_vg = require('./specs/vega_specs/cars_average_transform_filter.json');
     spec_vg.data[0].transform = transform
     var loader = vega.loader();
 
@@ -119,7 +118,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
 
     var result_vg = view.data('cars');
 
-    var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
+    var spec = require('./specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
       "type": "dbtransform",
       "relation": "cars"

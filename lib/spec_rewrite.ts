@@ -1,6 +1,7 @@
-import * as Vega from "vega"
-import { AggregateTransform, FilterTransform } from "vega"
-import { parse, ASTNode } from "vega-expression"
+import { Transforms, AggregateTransform, FilterTransform, ProjectTransform, StackTransform, CollectTransform } from "vega"
+import { parse } from "vega-expression"
+import { array } from "vega-util"
+
 
 function percentileContSql(field: string, fraction: number, db: string) {
   // creates a percentile predicate for a SQL query
@@ -8,7 +9,7 @@ function percentileContSql(field: string, fraction: number, db: string) {
     case "postgres":
       return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
     case "duckdb":
-      return `QUANTILE(${field}, ${fraction})`;
+      return `approx_QUANTILE(${field}, ${fraction})`;
     default:
       throw Error(`Unsupported database: ${db}`);
   }
@@ -25,6 +26,7 @@ function aggregateOpToSql(op: string, field: string, db: string) {
     case "average":
       return `AVG(${field})`;
     case "count":
+      return `COUNT(*)`;
     case "valid":
       return `SUM(CASE WHEN ${field} IS NULL THEN 0 ELSE 1 END)`;
     case "missing":
@@ -85,22 +87,37 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
 
   let sql = ''
   if (validOpIdxs.length > 0) {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `WHERE ${validOpIdxs.join(" AND ")}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
+    sql =
+      `'SELECT ${selectionList.join(",")} \
+      FROM ${tableName} \
+      WHERE ${validOpIdxs.join(" AND ")} \
+      GROUP BY ${groupby.join(",")}'`
   } else {
-    sql = [
-      `SELECT ${selectionList.join(",")}`,
-      `FROM ${tableName}`,
-      `GROUP BY ${groupby.join(",")}`
-    ].join(" ")
+    sql =
+      `'SELECT ${selectionList.join(",")} \
+      FROM ${tableName} \
+      GROUP BY ${groupby.join(",")}'`
   }
 
 
-  return `"${sql}"`
+  return sql
+}
+
+function projectTransformToSql(tableName: string, transform: ProjectTransform, db: string, prev: any) {
+  const selectionList = [];
+  const validOpIdxs = [];
+  tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
+
+  for (const [index, field] of (transform.fields as string[]).entries()) {
+    const out: string = transform.as[index]
+    selectionList.push(`${field} as ${out}`)
+  }
+
+  const sql =
+    `'SELECT ${selectionList.join(",")} \
+    FROM ${tableName}'`
+
+  return sql
 }
 
 function collectNonTransformFields(dataName: string, marks: any) {
@@ -115,19 +132,27 @@ function collectNonTransformFields(dataName: string, marks: any) {
   return fields
 }
 
-export function dataRewrite(tableName: string, transform: any, db: string, dbTransforms, newData) {
+export function dataRewrite(tableName: string, transform: Transforms, db: string, dbTransforms, newData) {
 
   if (transform.type === "extent") {
     // converting signal to a new data item
+    var query = null;
+
+    if (transform.field.hasOwnProperty("signal")) {
+      query = `'select min(' + ${transform.field['signal']} + ') as "min", max(' + ${transform.field['signal']} + ') as "max" from ${tableName}'`
+    } else {
+      query = `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
+    }
     newData.push({
       name: transform.signal,
       transform: [{
         type: "dbtransform",
         query: {
-          signal: `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
+          signal: query
         }
       }]
     })
+
   }
 
   else if (transform.type === "bin") {
@@ -141,6 +166,18 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
     } else {
       // extent is assigned explicitly as [min, max]
       extent = transform.extent
+    }
+
+    var query = null;
+
+    if (transform.field.hasOwnProperty("signal")) {
+
+      query = `' select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ' + ${transform.field['signal']} + ' as float)/' + bins.step + ') as bin0, * from ${tableName} where ' + ${transform.field['signal']} + ' between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ' + ${transform.field['signal']} + ' is null'`
+
+    } else {
+
+      query = `' select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ${transform.field} as float)/' + bins.step + ') as bin0, * from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null'`
+
     }
 
     newData.push({
@@ -158,17 +195,12 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
 
     dbTransforms.push({
       type: "dbtransform",
+      name: transform['name'],
       query: {
-        signal: `'select ' + bins.step + ' * floor(cast(${transform.field} as float)/' + bins.step + ') as "bin0", count(*) as "count" from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ' group by bin0 UNION ALL select NULL as "bin0", count(*) as "count" from ${tableName} where ${transform.field} is null'`
+        signal: query
       }
     })
-    dbTransforms.push({
-      type: "formula",
-      expr: "datum.bin0?datum.bin0 + bins.step:null",
-      as: "bin1"
-    })
 
-    return true // skip the next aggregate transform
   }
 
   else if (transform.type === "aggregate") {
@@ -176,7 +208,7 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
 
     dbTransforms.push({
       type: "dbtransform",
-      name: transform.name,
+      name: transform['name'],
       query: {
         signal: aggregateTransformToSql(tableName, transform, db, prev)
       }
@@ -188,28 +220,109 @@ export function dataRewrite(tableName: string, transform: any, db: string, dbTra
 
     dbTransforms.push({
       type: "dbtransform",
-      name: transform.name,
+      name: transform['name'],
       query: {
         signal: filterTransformToSql(tableName, transform, db, prev)
       }
     })
   }
 
+  else if (transform.type === 'project') {
+    var prev = dbTransforms.pop() ?? null // null or a dbtransform
+
+    dbTransforms.push({
+      type: "dbtransform",
+      name: transform['name'],
+      query: {
+        signal: projectTransformToSql(tableName, transform, db, prev)
+      }
+    })
+
+  }
+
+  else if (transform.type === 'stack') {
+    var prev = dbTransforms.pop() ?? null // null or a dbtransform
+
+    dbTransforms.push({
+      type: "dbtransform",
+      name: transform['name'],
+      query: {
+        signal: stackTransformToSql(tableName, transform, db)
+      }
+    })
+    dbTransforms.push({
+      type: "formula",
+      expr: `datum.y1 - datum.${transform.field}`,
+      as: transform.as ? transform.as[0] : "y0"
+    })
+  }
+
+  else if (transform.type === 'collect') {
+    dbTransforms.push({
+      type: "dbtransform",
+      name: transform['name'],
+      query: {
+        signal: CollectTransformToSql(tableName, transform, db)
+      }
+    })
+  }
+
+}
+
+const CollectTransformToSql = (tableName: string, transform: CollectTransform, db: string) => {
+  const sort = array(transform.sort.field)
+  const order = array(transform.sort.order)
+  order.map(x => x === 'descending' ? 'DESC' : 'ASC')
+  const orderList = []
+
+
+  for (const [index, field] of (sort as string[]).entries()) {
+
+    orderList.push(index < order.length ? (order[index] === 'descending' ? `${field} DESC` : `${field}`) : `${field}`)
+
+  }
+
+  const sql =
+    `'SELECT * \
+    FROM ${tableName} \
+    ORDER BY ${orderList.join(",")}'`
+
+  return sql
+}
+
+const stackTransformToSql = (tableName: string, transform: StackTransform, db: string) => {
+  const groupby = (transform.groupby as string[])
+  const as = transform.as ? transform.as : ['y0', 'y1']
+  const sort = array(transform.sort.field)
+  const order = array(transform.sort.order)
+  order.map(x => x === 'descending' ? 'DESC' : 'ASC')
+  const orderList = []
+
+
+  for (const [index, field] of (sort as string[]).entries()) {
+
+    orderList.push(index < order.length ? (order[index] === 'descending' ? `${field} DESC` : `${field}`) : `${field}`)
+
+  }
+
+  const sql =
+    `'SELECT *, \
+    SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]} \
+    FROM ${tableName}'`
+
+  return sql
 }
 
 const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
   const filter = expr2sql(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
+  const sql =
+    `'SELECT * \
+    FROM ${tableName} \
+    WHERE ${filter}'`
 
-  let sql = ''
-  sql = [
-    `SELECT *`,
-    `FROM ${tableName}`,
-    `WHERE ${filter}`
-  ].join(" ")
-
-  return `"${sql}"`
+  return sql
 }
 
 function expr2sql(expr: string) {
@@ -262,11 +375,12 @@ function expr2sql(expr: string) {
 
 export function specRewrite(vgSpec) {
   const dataSpec = vgSpec.data
-  const dbTransformInd = []   //the data item to be removed
+  const dbTransformInd = []   //the data item to be removed(the one only indicating using db and not succeed by other transforms )
   var table = ""
   const newData = []
   var db = "postgres"
   var transformCounter = 0    // to generate a unique name for the transform in case we need it in nested sql
+
 
   for (const [index, spec] of dataSpec.entries()) {
     if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
@@ -293,8 +407,8 @@ export function specRewrite(vgSpec) {
         var skip = false;
         for (var i = 1; i < spec.transform.length; i++) {
 
-          spec.transform[i].name = spec.transform[i].type + transformCounter++
-          skip = dataRewrite(table, spec.transform[i], db, dbTransforms, newData)
+          spec.transform[i].name = spec.transform[i].type + 'Transform' + transformCounter++
+          dataRewrite(table, spec.transform[i], db, dbTransforms, newData)
           if (skip) break // skip the aggregate follwing bin
         }
 
@@ -310,8 +424,9 @@ export function specRewrite(vgSpec) {
       const dbTransforms = []
       var skip = false;
       for (const transform of spec.transform) {
+        console.log(transform, "transform")
 
-        spec.transform.name = spec.transform.type + transformCounter++
+        transform.name = transform.type + 'Transform' + transformCounter++
         for (const ind of dbTransformInd) {
           if (spec.source && spec.source === dataSpec[ind].name) {
             console.log(dataSpec[ind].transform[0])
@@ -320,7 +435,7 @@ export function specRewrite(vgSpec) {
           }
         }
 
-        skip = dataRewrite(table, transform, db, dbTransforms, newData)
+        dataRewrite(table, transform, db, dbTransforms, newData)
         if (skip) break
       }
 
@@ -341,3 +456,4 @@ export function specRewrite(vgSpec) {
 
   return vgSpec
 }
+
