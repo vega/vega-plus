@@ -1,5 +1,5 @@
 var duckdb = require('duckdb');
-var db = new duckdb.Database('./database/scalable-vega.db');
+var db = new duckdb.Database('./data/database/scalable-vega.db');
 const format = require('pg-format');
 
 global.fetch = require("node-fetch");
