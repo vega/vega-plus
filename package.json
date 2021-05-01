@@ -12,7 +12,7 @@
     "apache-arrow": "^3.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "duckdb": "0.2.5",
+    "duckdb": "^0.2.5",
     "express": "^4.17.1",
     "gh-pages": "^3.0.0",
     "node-fetch": "^2.6.1",
@@ -27,11 +27,11 @@
   },
   "scripts": {
     "cleanup": "rm -rf .cache dist",
-    "dev": "npm run cleanup && parcel ./app/index.html",
-    "start": "parcel ./app/index.html",
-    "build": "parcel build --public-url '/scalable-vega/' ./app/index.html",
+    "dev": "npm run cleanup && parcel ./package/demo/index.html",
+    "start": "parcel ./package/demo/index.html",
+    "build": "parcel build --public-url '/scalable-vega/' ./package/demo/index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start:server": "./node_modules/.bin/tsc-watch --onSuccess \" node ./app/server.js\"",
+    "start:server": "./node_modules/.bin/tsc-watch --onSuccess \" node ./package/server/server.js\"",
     "test": "jest"
   },
   "devDependencies": {

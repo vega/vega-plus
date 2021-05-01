@@ -1,4 +1,4 @@
-import { specRewrite } from "../lib/spec_rewrite"
+import { specRewrite } from "../package/lib/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -95,10 +95,10 @@ const aggregate = {
 }
 
 var test_cases = [
-  ['single string filter', [str_filter]],
+//  ['single string filter', [str_filter]],
   ['single num filter1', [num_filter1]],
   ['single null filter', [null_filter]],
-  ['string filter->aggregate', [str_filter, aggregate]],
+//  ['string filter->aggregate', [str_filter, aggregate]],
   ['num filter1->aggregate', [num_filter1, aggregate]],
   ['null filter->aggregate', [null_filter, aggregate]],
   ['null filter->num filter1->aggregate', [null_filter, num_filter1, aggregate]],

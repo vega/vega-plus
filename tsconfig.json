@@ -13,7 +13,7 @@
     ]
   },
   "files": [
-    "./app/main.ts",
-    "./app/server.ts"
+    "./package/demo/main.ts",
+    "./package/server/server.ts"
   ]
 }

@@ -6,7 +6,7 @@
   "data": [
     {
       "name": "table",
-      "url": "data/cars.json"
+      "url": "sample_data/cars.json"
     }
   ],
   "signals": [

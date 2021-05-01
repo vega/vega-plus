@@ -1,4 +1,4 @@
-import { specRewrite } from "../lib/spec_rewrite"
+import { specRewrite } from "../package/lib/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");

@@ -3438,9 +3438,9 @@ dotenv@^5.0.0:
   resolved "https://registry.npmjs.org/dotenv/-/dotenv-5.0.1.tgz"
   integrity sha512-4As8uPrjfwb7VXC+WnLCbXK7y+Ueb2B3zgNCePYfhxS1PYeaO1YTeplffTEcbfLhvFNGLAz90VvJs9yomG7bow==
 
-duckdb@0.2.5:
+duckdb@^0.2.5:
   version "0.2.5"
-  resolved "https://registry.npmjs.org/duckdb/-/duckdb-0.2.5.tgz"
+  resolved "https://registry.yarnpkg.com/duckdb/-/duckdb-0.2.5.tgz#75e7fab1398aeba8769aa6579cb945a62604e2eb"
   integrity sha512-AhFg+OihIEI86RWSDubtEe1Wbl105MHimrWshNkEjkdxm/8WzwOuHn5X4cPy9BbM9ic5+c5h/qpuTcbYBAO4vw==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.0"
