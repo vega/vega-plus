@@ -26,22 +26,16 @@ jobs:
           
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
       - uses: actions/setup-node@v1
-        with:
-          node-version: '10'
 
       - name: Install Postgres Requirements
         run: sudo apt-get install postgresql postgresql-contrib libpq-dev
     
       - name: Install and resolve dependencies
-        run: |
-          yarn
+        run: yarn  --frozen-lockfile
       
       - name: Setup Database
-        run: psql postgresql://postgres@localhost/scalable_vega < ./data/database/scalable_vega.pgsql
+        run: psql postgresql://postgres@localhost/scalable_vega < ./package/server/database/scalable_vega.sql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
@@ -53,10 +47,13 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Run Application Server for Postgres
-        run: node server.js pg &
+        run: node ./package/server/server.js pg &
         
       - name: Run Yarn Test for Postgres
-        run: yarn test transform_pg
+        run: |
+          yarn test transform_pg
+          yarn test stack_pg
+          yarn test filter_pg
         
   build_duckdb:
     if: success()
@@ -65,23 +62,15 @@ jobs:
     
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
       - uses: actions/setup-node@v1
-        with:
-          node-version: '10'
-
-      - name: Install Postgres Requirements
-        run: sudo apt-get install postgresql postgresql-contrib libpq-dev
     
       - name: Install and resolve dependencies
         run: |
-          yarn
-          node testing.js
+          yarn --frozen-lockfile
+          node ./package/server/database/duckdb_insertion.js
 
       - name: Run Application Server for DuckDB
-        run: node server.js db &
+        run: node ./package/server/server.js &
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
