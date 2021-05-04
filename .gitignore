@@ -3,6 +3,7 @@ yarn.lock
 node_modules
 dist
 yarn-error.log
+package-lock.json
 .cache
 scalable-vega.db
 scalable-vega.db.wal
