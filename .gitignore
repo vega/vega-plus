@@ -4,6 +4,9 @@ node_modules
 dist
 yarn-error.log
 .cache
+scalable-vega.db
+scalable-vega.db.wal
+scalable-vega.db.tmp
 *.swp
 *.DS_Store
 __pycache__
