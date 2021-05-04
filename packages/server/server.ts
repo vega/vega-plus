@@ -9,12 +9,12 @@ const { MapdCon } = require("@mapd/connector/dist/node-connector.js");
 const express = require('express');
 const app = express();
 const port = 3000;
-app.use(cors());
+//app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Setup Databases
-var db = new duckdb.Database('./package/server/database/scalable-vega.db');
+var db = new duckdb.Database('./database/scalable-vega.db');
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',

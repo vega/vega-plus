@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var cors = require("cors");
 var bodyParser = require("body-parser");
 var Pool = require('pg').Pool;
 var format = require('pg-format');
@@ -45,11 +44,11 @@ var MapdCon = require("@mapd/connector/dist/node-connector.js").MapdCon;
 var express = require('express');
 var app = express();
 var port = 3000;
-app.use(cors());
+//app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // Setup Databases
-var db = new duckdb.Database('./package/server/database/scalable-vega.db');
+var db = new duckdb.Database('./database/scalable-vega.db');
 var pool = new Pool({
     user: 'postgres',
     host: 'localhost',
