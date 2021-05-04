@@ -30,12 +30,9 @@ jobs:
 
       - name: Install Postgres Requirements
         run: sudo apt-get install postgresql postgresql-contrib libpq-dev
-    
-      - name: Install and resolve dependencies
-        run: yarn  --frozen-lockfile
-      
+          
       - name: Setup Database
-        run: psql postgresql://postgres@localhost/scalable_vega < ./package/server/database/scalable_vega.sql
+        run: psql postgresql://postgres@localhost/scalable_vega < ./packages/server/database/scalable_vega.sql
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
@@ -47,7 +44,7 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Run Application Server for Postgres
-        run: node ./package/server/server.js pg &
+        run: yarn start:server_pg &
         
       - name: Run Yarn Test for Postgres
         run: |
@@ -65,12 +62,10 @@ jobs:
       - uses: actions/setup-node@v1
     
       - name: Install and resolve dependencies
-        run: |
-          yarn --frozen-lockfile
-          node ./package/server/database/duckdb_insertion.js
-
+        run: yarn start:duckdb-sample 
+        
       - name: Run Application Server for DuckDB
-        run: node ./package/server/server.js &
+        run: yarn start:server_duck &
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
