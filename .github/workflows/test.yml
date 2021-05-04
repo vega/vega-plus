@@ -42,6 +42,9 @@ jobs:
         env:
           PGUSER: postgres
           PGPASSWORD: postgres
+  
+      - name: Install and resolve dependencies
+        run: yarn  --frozen-lockfile
 
       - name: Run Application Server for Postgres
         run: yarn start:server_pg &
@@ -62,7 +65,9 @@ jobs:
       - uses: actions/setup-node@v1
     
       - name: Install and resolve dependencies
-        run: yarn start:duckdb-sample 
+        run: |
+          yarn  --frozen-lockfile
+          yarn start:duckdb-sample 
         
       - name: Run Application Server for DuckDB
         run: yarn start:server_duck &
