@@ -9,7 +9,7 @@ function percentileContSql(field: string, fraction: number, db: string) {
     case "postgres":
       return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
     case "duckdb":
-      return `approx_QUANTILE(${field}, ${fraction})`;
+      return `QUANTILE(${field}, ${fraction})`;
     default:
       throw Error(`Unsupported database: ${db}`);
   }
@@ -69,7 +69,7 @@ function vegaNonTransformToSql(tableName: string, markFields: string[]) {
     out += field;
   }
   out += ` FROM ${tableName}`;
-  return `'${out}'`;
+  return `"${out}"`;
 }
 
 export const aggregateTransformToSql = (tableName: string, transform: AggregateTransform, db: string, prev: any) => {
@@ -88,15 +88,15 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
   let sql = ''
   if (validOpIdxs.length > 0) {
     sql =
-      `'SELECT ${selectionList.join(",")} \
+      `"SELECT ${selectionList.join(",")} \
       FROM ${tableName} \
       WHERE ${validOpIdxs.join(" AND ")} \
-      GROUP BY ${groupby.join(",")}'`
+      GROUP BY ${groupby.join(",")}"`
   } else {
     sql =
-      `'SELECT ${selectionList.join(",")} \
+      `"SELECT ${selectionList.join(",")} \
       FROM ${tableName} \
-      GROUP BY ${groupby.join(",")}'`
+      GROUP BY ${groupby.join(",")}"`
   }
 
 
@@ -114,8 +114,8 @@ function projectTransformToSql(tableName: string, transform: ProjectTransform, d
   }
 
   const sql =
-    `'SELECT ${selectionList.join(",")} \
-    FROM ${tableName}'`
+    `"SELECT ${selectionList.join(",")} \
+    FROM ${tableName}"`
 
   return sql
 }
@@ -139,9 +139,9 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     var query = null;
 
     if (transform.field.hasOwnProperty("signal")) {
-      query = `'select min(' + ${transform.field['signal']} + ') as "min", max(' + ${transform.field['signal']} + ') as "max" from ${tableName}'`
+      query = `"select min(' + ${transform.field['signal']} + ') as "min", max(' + ${transform.field['signal']} + ') as "max" from ${tableName}"`
     } else {
-      query = `'select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}'`
+      query = `"select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}"`
     }
     newData.push({
       name: transform.signal,
@@ -172,11 +172,11 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
 
     if (transform.field.hasOwnProperty("signal")) {
 
-      query = `' select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ' + ${transform.field['signal']} + ' as float)/' + bins.step + ') as bin0, * from ${tableName} where ' + ${transform.field['signal']} + ' between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ' + ${transform.field['signal']} + ' is null'`
+      query = `" select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ' + ${transform.field['signal']} + ' as float)/' + bins.step + ') as bin0, * from ${tableName} where ' + ${transform.field['signal']} + ' between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ' + ${transform.field['signal']} + ' is null"`
 
     } else {
 
-      query = `' select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ${transform.field} as float)/' + bins.step + ') as bin0, * from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null'`
+      query = `" select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ${transform.field} as float)/' + bins.step + ') as bin0, * from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null"`
 
     }
 
@@ -283,9 +283,9 @@ const CollectTransformToSql = (tableName: string, transform: CollectTransform, d
   }
 
   const sql =
-    `'SELECT * \
+    `"SELECT * \
     FROM ${tableName} \
-    ORDER BY ${orderList.join(",")}'`
+    ORDER BY ${orderList.join(",")}"`
 
   return sql
 }
@@ -306,21 +306,22 @@ const stackTransformToSql = (tableName: string, transform: StackTransform, db: s
   }
 
   const sql =
-    `'SELECT *, \
+    `"SELECT *, \
     SUM(${transform.field}) OVER ( PARTITION BY ${groupby.join(",")} ORDER BY ${orderList.join(",")}) ${as[1]} \
-    FROM ${tableName}'`
+    FROM ${tableName}"`
 
   return sql
 }
 
 const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
   const filter = expr2sql(parse(transform.expr))
+  console.log(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
   const sql =
-    `'SELECT * \
+    `"SELECT * \
     FROM ${tableName} \
-    WHERE ${filter}'`
+    WHERE ${filter}"`
 
   return sql
 }
