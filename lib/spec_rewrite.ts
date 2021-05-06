@@ -139,9 +139,9 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     var query = null;
 
     if (transform.field.hasOwnProperty("signal")) {
-      query = `"select min(' + ${transform.field['signal']} + ') as "min", max(' + ${transform.field['signal']} + ') as "max" from ${tableName}"`
+      query = `"select min(" + ${transform.field['signal']} + ") as min, max(" + ${transform.field['signal']} + ") as max from ${tableName}"`
     } else {
-      query = `"select min(${transform.field}) as "min", max(${transform.field}) as "max" from ${tableName}"`
+      query = `"select min(${transform.field}) as min, max(${transform.field}) as max from ${tableName}"`
     }
     newData.push({
       name: transform.signal,
@@ -172,11 +172,11 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
 
     if (transform.field.hasOwnProperty("signal")) {
 
-      query = `" select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ' + ${transform.field['signal']} + ' as float)/' + bins.step + ') as bin0, * from ${tableName} where ' + ${transform.field['signal']} + ' between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ' + ${transform.field['signal']} + ' is null"`
+      query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where " + ${transform.field['signal']} + " is null"`
 
     } else {
 
-      query = `" select bin0 +' + bins.step + ' as bin1 , * from (select ' + bins.step + ' * floor(cast( ${transform.field} as float)/' + bins.step + ') as bin0, * from ${tableName} where ${transform.field} between ' + bins.start + ' and ' + bins.stop + ') as sub '+ ' UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null"`
+      query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast(${transform.field} as float)/" + bins.step + ") as bin0, * from ${tableName} where ${transform.field} between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null"`
 
     }
 

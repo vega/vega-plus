@@ -28,9 +28,8 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec("original", spec, "Original Specification");
 
   // make a vega execution object (runtime) from the spec
-  // const newspec = specRewrite(spec)
-  // console.log(newspec, "rewrite");
-  const newspec = spec
+  const newspec = specRewrite(spec)
+  console.log(newspec, "rewrite");
 
   const runtime = vega.parse(newspec);
   // const runtime = vega.parse(spec);
