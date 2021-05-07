@@ -98,7 +98,7 @@ var test_cases = [
   // ['single string filter', [str_filter]],
   // ['single num filter1', [num_filter1]],
   // ['single null filter', [null_filter]],
-  ['string filter->aggregate', [str_filter, aggregate]],
+  // ['string filter->aggregate', [str_filter, aggregate]],
   ['num filter1->aggregate', [num_filter1, aggregate]],
   ['null filter->aggregate', [null_filter, aggregate]],
   ['null filter->num filter1->aggregate', [null_filter, num_filter1, aggregate]],
@@ -106,7 +106,7 @@ var test_cases = [
 
 describe.each(test_cases)('successor %s', (name, transform) => {
   test(transform[0]['expr'], async () => {
-    var spec_vg = require('../Specs/vega_specs/cars_average_transform_filter.json');
+    var spec_vg = require('../specs/vega_specs/cars_average_transform_filter.json');
     spec_vg.data[0].transform = transform
     var loader = vega.loader();
 
@@ -118,7 +118,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
 
     var result_vg = view.data('cars');
 
-    var spec = require('../Specs/specs/cars_average_transform_successor_filter.json');
+    var spec = require('../specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
       "type": "dbtransform",
       "relation": "cars"
