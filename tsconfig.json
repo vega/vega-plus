@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "es2015",
+    "module": "es2020",
     "moduleResolution": "node",
     "noEmit": true,
     "strict": false,
@@ -13,7 +13,7 @@
     ]
   },
   "files": [
-    "main.ts",
-    "server.ts"
+    "./packages/demo/main.ts",
+    "./packages/server/server.ts"
   ]
 }

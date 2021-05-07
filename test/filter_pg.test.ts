@@ -1,4 +1,4 @@
-import { specRewrite } from "../lib/spec_rewrite"
+import { specRewrite } from "../scalable_vega/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -106,7 +106,7 @@ var test_cases = [
 
 describe.each(test_cases)('successor %s', (name, transform) => {
   test(transform[0]['expr'], async () => {
-    var spec_vg = require('../specs/vega_specs/cars_average_transform_filter.json');
+    var spec_vg = require('./specs/vega_specs/cars_average_transform_filter.json');
     spec_vg.data[0].transform = transform
     var loader = vega.loader();
 
@@ -118,7 +118,7 @@ describe.each(test_cases)('successor %s', (name, transform) => {
 
     var result_vg = view.data('cars');
 
-    var spec = require('../specs/specs/cars_average_transform_successor_filter.json');
+    var spec = require('./specs/specs/cars_average_transform_successor_filter.json');
     const dbtransform = {
       "type": "dbtransform",
       "relation": "cars"

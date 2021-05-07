@@ -1,4 +1,4 @@
-import { specRewrite } from "../lib/spec_rewrite"
+import { specRewrite } from "../scalable_vega/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -63,7 +63,7 @@ beforeAll(() => {
 
 describe("simple stack transform example", () => {
   test("stack", async () => {
-    var spec_vg = require(`../specs/vega_specs/stack.json`);
+    var spec_vg = require(`./specs/vega_specs/stack.json`);
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec_vg), {
@@ -74,7 +74,7 @@ describe("simple stack transform example", () => {
 
     var result_vg = view.data('table');
 
-    var spec = require(`../specs/specs/stack.json`);
+    var spec = require(`./specs/specs/stack.json`);
     const newspec = specRewrite(spec)
 
     const runtime = vega.parse(newspec);
@@ -114,7 +114,7 @@ var test_cases = [
 
 describe.each(test_cases)('stack transform with table product', (name, transform) => {
   test(`${name}`, async () => {
-    var spec_vg = require('../specs/vega_specs/product.json');
+    var spec_vg = require('./specs/vega_specs/product.json');
     spec_vg.data[0].transform[0] = transform
     var loader = vega.loader();
 
@@ -128,7 +128,7 @@ describe.each(test_cases)('stack transform with table product', (name, transform
 
 
 
-    var spec = require('../specs/specs/product.json');
+    var spec = require('./specs/specs/product.json');
     const dbtransform = {
       "type": "dbtransform",
       "relation": "product"

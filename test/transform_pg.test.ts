@@ -1,4 +1,4 @@
-import { specRewrite } from "../lib/spec_rewrite"
+import { specRewrite } from "../scalable_vega/spec_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -84,7 +84,7 @@ var test_cases = [
 describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
   test(spec_file, async () => {
-    var spec_vg = require(`../specs/vega_specs/${spec_file}.json`);
+    var spec_vg = require(`./specs/vega_specs/${spec_file}.json`);
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec_vg), {
@@ -96,7 +96,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     var result_vg = view.data(data_name);
     console.log(result_vg, spec_file);
 
-    var spec = require(`../specs/specs/${spec_file}.json`);
+    var spec = require(`./specs/specs/${spec_file}.json`);
     const newspec = specRewrite(spec)
 
     const runtime = vega.parse(newspec);

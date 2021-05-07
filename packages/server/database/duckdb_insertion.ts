@@ -1,5 +1,5 @@
 var duckdb = require('duckdb');
-var db = new duckdb.Database('./data/database/scalable-vega.db');
+var db = new duckdb.Database('./packages/server/database/scalable-vega.db');
 const format = require('pg-format');
 
 global.fetch = require("node-fetch");
@@ -72,7 +72,7 @@ var i;
 for (i = 0; i < test_cases.length; i++) {
 	var data_name = test_cases[i];
 	var client = db.connect();
-	const data = require('./data/' + data_name + '.json');
+	const data = require('../../../sample_data/' + data_name + '.json');
 	const schema: any = postgresSchemaFor(data[0]);
 	console.log('creating table ' + data_name);
 	console.log('built postgres schema: ' + JSON.stringify(schema));
