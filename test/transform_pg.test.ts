@@ -26,7 +26,7 @@ function sort_compare(act, mod, a_key, m_key) {
   mod = sortObj(mod, m_key);
   for (i = 0; i < act.length; i++) {
     if (mod[i][m_key] != act[i][a_key]) {
-      expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 5);
+      expect(Math.abs(parseFloat(act[i][a_key]) - parseFloat(mod[i][m_key]))).toBeCloseTo(0, 3);
     }
   }
 }
