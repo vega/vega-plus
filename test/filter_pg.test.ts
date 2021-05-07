@@ -98,7 +98,7 @@ var test_cases = [
   // ['single string filter', [str_filter]],
   // ['single num filter1', [num_filter1]],
   // ['single null filter', [null_filter]],
-  // ['string filter->aggregate', [str_filter, aggregate]],
+  ['string filter->aggregate', [str_filter, aggregate]],
   ['num filter1->aggregate', [num_filter1, aggregate]],
   ['null filter->aggregate', [null_filter, aggregate]],
   ['null filter->num filter1->aggregate', [null_filter, num_filter1, aggregate]],
