@@ -21,23 +21,23 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: cars; Type: TABLE; Schema: public; Owner: sai
+-- Name: cars; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.cars (
-    name character varying,
+    name character varying(256),
     miles_per_gallon double precision,
-    cylinders integer,
+    cylinders double precision,
     displacement double precision,
-    horsepower integer,
-    weight_in_lbs integer,
+    horsepower double precision,
+    weight_in_lbs double precision,
     acceleration double precision,
-    year character varying,
-    origin character varying
+    year character varying(256),
+    origin character varying(256)
 );
 
 
-ALTER TABLE public.cars OWNER TO sai;
+ALTER TABLE public.cars OWNER TO postgres;
 
 --
 -- Name: flights_20k; Type: TABLE; Schema: public; Owner: sai
@@ -91,7 +91,35 @@ CREATE TABLE public.pie_chart (
 ALTER TABLE public.pie_chart OWNER TO sai;
 
 --
--- Data for Name: cars; Type: TABLE DATA; Schema: public; Owner: sai
+-- Name: product; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.product (
+    id double precision,
+    region character varying(256),
+    product character varying(256),
+    q character varying(256),
+    sale double precision
+);
+
+
+ALTER TABLE public.product OWNER TO postgres;
+
+--
+-- Name: stack; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.stack (
+    x double precision,
+    y double precision,
+    c double precision
+);
+
+
+ALTER TABLE public.stack OWNER TO postgres;
+
+--
+-- Data for Name: cars; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.cars (name, miles_per_gallon, cylinders, displacement, horsepower, weight_in_lbs, acceleration, year, origin) FROM stdin;
@@ -21059,6 +21087,54 @@ COPY public.pie_chart (id, field) FROM stdin;
 4	3
 5	7
 6	8
+\.
+
+
+--
+-- Data for Name: product; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.product (id, region, product, q, sale) FROM stdin;
+1	E	printer	Q1	57
+2	E	printer	Q2	87
+3	E	printer	Q3	94
+4	E	scanner	Q1	87
+5	E	scanner	Q2	90
+6	E	scanner	Q3	87
+7	N	printer	Q1	93
+8	N	printer	Q2	86
+9	N	printer	Q3	95
+10	N	scanner	Q1	75
+11	N	scanner	Q2	66
+12	N	scanner	Q3	87
+\.
+
+
+--
+-- Data for Name: stack; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.stack (x, y, c) FROM stdin;
+0	28	0
+0	55	1
+1	43	0
+1	91	1
+2	81	0
+2	53	1
+3	19	0
+3	87	1
+4	52	0
+4	48	1
+5	24	0
+5	49	1
+6	87	0
+6	66	1
+7	17	0
+7	27	1
+8	68	0
+8	16	1
+9	49	0
+9	15	1
 \.
 
 
