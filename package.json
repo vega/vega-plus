@@ -17,7 +17,7 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
-    "build": "yarn build && yarn workspace scalable-vega build",
+    "build": "yarn --frozen-lockfile && yarn workspace scalable-vega build",
     "build:app": "yarn workspace scalable-vega-demo build",
     "build:server": "yarn workspace scalable-vega-server build",
     "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/scalable_vega/node_modules ./packages/scalable_vega/dist ./packages/scalable_vega/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",
