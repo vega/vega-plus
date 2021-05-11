@@ -1,6 +1,6 @@
 {
-  "name": "scalable-vega-lib",
-  "version": "0.0.0",
+  "name": "scalable-vega",
+  "version": "1.0.0",
   "main": "index.js",
   "repository": "git@github.com:vega/scalable-vega.git",
   "author": "Dominik Moritz <domoritz@gmail.com>",
@@ -17,9 +17,10 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
+    "prebuild": "rm -rf ./dist",
     "build": "yarn --frozen-lockfile",
-    "lib:cleanup": "rm -rf .cache dist node_modules",
-    "dev": "npm run cleanup"
+    "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release"
   },
   "devDependencies": {
     "@types/jest": "^26.0.21",

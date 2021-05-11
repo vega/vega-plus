@@ -1,5 +1,5 @@
 {
-  "name": "scalable-vega",
+  "name": "scalable-vega-monorepo",
   "version": "0.0.1",
   "main": "index.js",
   "repository": "git@github.com:vega/scalable-vega.git",
@@ -17,18 +17,21 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
-    "build": "yarn --frozen-lockfile && cd ./packages/scalable_vega && yarn --frozen-lockfile",
-    "build:app": "cd packages/demo && yarn --frozen-lockfile",
-    "build:server": "cd packages/server && yarn --frozen-lockfile ",
+    "build": "yarn workspace scalable-vega build",
+    "build:app": "yarn workspace scalable-vega-demo build",
+    "build:server": "yarn workspace scalable-vega-server build",
     "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/scalable_vega/node_modules ./packages/scalable_vega/dist ./packages/scalable_vega/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",
     "dev": "npm run cleanup && parcel ./packages/demo/index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start:app": "cd packages/demo && yarn demo:start",
-    "start:server_pg": "cd packages/server && yarn server:start_pg",
-    "start:server_duck": "cd packages/server && yarn server:start_duck",
+    "start:app": "yarn workspace scalable-vega-server demo:start",
+    "start:server_pg": "yarn workspace scalable-vega-server server:start_pg",
+    "start:server_duck": "yarn workspace scalable-vega-server server:start_duck",
     "start:duckdb-sample": "cd packages/server && cd ../.. && node packages/server/database/duckdb_insertion.js",
     "test": "jest"
   },
+  "workspaces": [
+    "./packages/*"
+  ],
   "devDependencies": {
     "@types/jest": "^26.0.21",
     "express": "^4.17.1",

@@ -240,7 +240,7 @@ async function create_table(req, client, exists, res){
 		if (flag==1){
 			await client.query(createTableQueryStr);
 		}
-		else if (flag==2){
+/*		else if (flag==2){
 			await connector.connectAsync()
 			.then(session =>
 			Promise.all([
@@ -253,7 +253,7 @@ async function create_table(req, client, exists, res){
 			  .catch((error) => {
 			    console.error("Something bad happened: ", error)
 			  })
-		}
+		} */
 		else{
 			await client.run(createTableQueryStr);
 		}
@@ -289,7 +289,7 @@ async function create_table(req, client, exists, res){
 	if (flag==1){
 		await client.query(queryStr);
 	}
-	else if(flag==2){
+/*	else if(flag==2){
 	
 	for (let i: number = 0; i < data.length; i++) {
 		const item: any = data[i];
@@ -315,7 +315,7 @@ async function create_table(req, client, exists, res){
 	}
 	
 	
-	}
+	} */
 	else{
 		await client.run(queryStr);
 	}
