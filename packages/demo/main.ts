@@ -3,8 +3,8 @@ import * as vega from "vega";
 // defines the VTP node type
 import VegaTransformPostgres from "vega-transform-db"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
-import { specRewrite } from "../scalable-vega/spec_rewrite"
-import { view2dot } from '../scalable-vega/view2dot'
+import { specRewrite } from "../vega-db/spec_rewrite"
+import { view2dot } from '../vega-db/view2dot'
 var hpccWasm = window["@hpcc-js/wasm"];
 const querystring = require('querystring');
 const http = require('http');

@@ -1,8 +1,8 @@
 {
-  "name": "scalable-vega-monorepo",
+  "name": "vega-db-monorepo",
   "version": "0.0.1",
   "main": "index.js",
-  "repository": "git@github.com:vega/scalable-vega.git",
+  "repository": "git@github.com:leibatt/scalable-vega.git",
   "author": "Dominik Moritz <domoritz@gmail.com>",
   "license": "BSD-3-Clause",
   "private": true,
@@ -17,15 +17,15 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
-    "build": "yarn --frozen-lockfile && yarn workspace scalable-vega build",
-    "build:app": "yarn workspace scalable-vega-demo build",
-    "build:server": "yarn workspace scalable-vega-server build",
-    "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/scalable_vega/node_modules ./packages/scalable_vega/dist ./packages/scalable_vega/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",
+    "build": "yarn --frozen-lockfile && yarn workspace vega-db build",
+    "build:app": "yarn workspace vega-db-demo build",
+    "build:server": "yarn workspace vega-db-server build",
+    "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/vega-db/node_modules ./packages/vega-db/dist ./packages/vega-db/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",
     "dev": "npm run cleanup && parcel ./packages/demo/index.html",
     "deploy": "npm run build && gh-pages -d dist",
-    "start:app": "yarn workspace scalable-vega-server demo:start",
-    "start:server_pg": "yarn workspace scalable-vega-server server:start_pg",
-    "start:server_duck": "yarn workspace scalable-vega-server server:start_duck",
+    "start:app": "yarn workspace vega-db-server demo:start",
+    "start:server_pg": "yarn workspace vega-db-server server:start_pg",
+    "start:server_duck": "yarn workspace vega-db-server server:start_duck",
     "start:duckdb-sample": "cd packages/server && cd ../.. && node packages/server/database/duckdb_insertion.js",
     "test": "jest"
   },
