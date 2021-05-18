@@ -1,0 +1,36 @@
+{
+  "name": "vega-db-demo",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:leibatt/scalable-vega.git",
+  "author": "Dominik Moritz <domoritz@gmail.com>",
+  "license": "BSD-3-Clause",
+  "private": true,
+  "dependencies": {
+    "@hpcc-js/wasm": "^1.5.1",
+    "@observablehq/graphviz": "0.2.1",
+    "@types/node": "^14.0.13",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1",
+    "vega": "^5.19.1",
+    "vega-encode": "^4.8.0",
+    "vega-transform-db": "^1.0.0",
+    "vega-transform-omnisci-core": "^0.0.10",
+    "vega-transforms": "^4.9.0"
+  },
+  "scripts": {
+    "demo:cleanup": "rm -rf .cache dist",
+    "dev": "npm run cleanup && parcel ./index.html",
+    "demo:start": "parcel index.html",
+    "build": "yarn --frozen-lockfile",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^3.0.0",
+    "parcel-bundler": "^1.12.3",
+    "tsc-watch": "^4.2.8",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0"
+  }
+}
