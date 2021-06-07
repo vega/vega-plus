@@ -1,0 +1,45 @@
+{
+  "name": "vega-db-server",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:leibatt/scalable-vega.git",
+  "author": "Dominik Moritz <domoritz@gmail.com>",
+  "license": "BSD-3-Clause",
+  "private": true,
+  "dependencies": {
+    "@types/node": "^14.0.13",
+    "apache-arrow": "^3.0.0",
+    "body-parser": "^1.19.0",
+    "vega": "^5.19.1",
+    "vega-encode": "^4.8.0",
+    "vega-transform-db": "^1.0.0",
+    "vega-transform-omnisci-core": "^0.0.10",
+    "vega-transforms": "^4.9.0"
+  },
+  "scripts": {
+    "server:cleanup": "rm -rf .cache dist",
+    "dev": "npm run cleanup",
+    "build": "yarn --frozen-lockfile",
+    "server:start_pg": "./node_modules/.bin/tsc-watch --onSuccess \" node server.js pg\"",
+    "server:start_duck": "./node_modules/.bin/tsc-watch --onSuccess \" node server.js\""
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.6",
+    "@types/jest": "^26.0.21",
+    "@mapd/connector": "^5.5.1",
+    "cors": "^2.8.5",
+    "duckdb": "^0.2.5",
+    "express": "^4.17.1",
+    "gh-pages": "^3.0.0",
+    "node-fetch": "^2.6.1",
+    "pg": "^8.2.1",
+    "pg-format": "^1.0.4",
+    "pg-native": "^3.0.0",
+    "jest": "^26.6.3",
+    "parcel-bundler": "^1.12.3",
+    "ts-jest": "^26.1.4",
+    "tsc-watch": "^4.2.8",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0"
+  }
+}
