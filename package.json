@@ -7,6 +7,9 @@
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
+    "@hpcc-js/wasm": "^1.5.1",
+    "@mapd/connector": "^5.5.2",
+    "@observablehq/graphviz": "0.2.1",
     "@types/node": "^14.0.13",
     "apache-arrow": "^3.0.0",
     "body-parser": "^1.19.0",
