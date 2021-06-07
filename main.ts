@@ -9,7 +9,6 @@ var hpccWasm = window["@hpcc-js/wasm"];
 const querystring = require('querystring');
 const http = require('http');
 
-
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
@@ -32,7 +31,6 @@ export function run(spec: vega.Spec) {
   console.log(newspec, "rewrite");
 
   const runtime = vega.parse(newspec);
-  // const runtime = vega.parse(spec);
   console.log(runtime, "runtime");
 
 

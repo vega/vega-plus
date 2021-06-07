@@ -79,9 +79,15 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
   for (const [index, field] of (transform.fields as string[]).entries()) {
+
     const opt: string = transform.ops[index]
     const out: string = transform.as[index]
-
+    if (transform.ops[index].hasOwnProperty('signal')) {
+      const opt = transform.ops[index]['signal']
+      console.log(opt)
+      selectionList.push(field === null ? `${opt}(*) as ${out}` : `" + ${transform.ops[index]['signal']} + " (${field}) as ${out}`)
+      continue;
+    }
     selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field, db) + ` as ${out}`)
   }
 
@@ -173,6 +179,8 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     if (transform.field.hasOwnProperty("signal")) {
 
       query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where " + ${transform.field['signal']} + " is null"`
+
+      query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "`
 
     } else {
 
@@ -425,7 +433,6 @@ export function specRewrite(vgSpec) {
       const dbTransforms = []
       var skip = false;
       for (const transform of spec.transform) {
-        console.log(transform, "transform")
 
         transform.name = transform.type + 'Transform' + transformCounter++
         for (const ind of dbTransformInd) {
@@ -448,11 +455,11 @@ export function specRewrite(vgSpec) {
 
   // remove the original "dbtransform" transform that indicating using db
   for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
-    console.log(dataSpec[i])
+    //console.log(dataSpec[i])
     dataSpec.splice(i, 1);
   }
 
-  console.log(newData, "newdata")
+  //console.log(newData, "newdata")
   vgSpec.data = newData.concat(dataSpec)
 
   return vgSpec
