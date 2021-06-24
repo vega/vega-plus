@@ -9,9 +9,16 @@ const { MapdCon } = require("@mapd/connector/dist/node-connector.js");
 const express = require('express');
 const app = express();
 const port = 3000;
-//app.use(cors());
+// app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+
+// Cache Work
+var cache_map = new Map();
+var queries = [];
+var count_queries = 0;
+var max_cache = 8;
 
 // Setup Databases
 var db = new duckdb.Database('./database/scalable-vega.db');
@@ -28,26 +35,26 @@ const defaultQueryOptions = {};
 // User Preference for DB
 var myArgs = process.argv;
 if (myArgs.length > 2 && myArgs[2] == 'pg') {
-    var flag = 1;
+	var flag = 1;
 }
 else if (myArgs.length > 2 && myArgs[2] == 'omni'){
-var flag = 2;
-const hostname = "localhost";
-const protocol = "http";
-const port = "6278";
-const database = "omnisci";
-const username = "admin";
-const password = "HyperInteractive";
-connector
-.protocol(protocol)
-.host(hostname)
-.port(port)
-.dbName(database)
-.user(username)
-.password(password);
+	var flag = 2;
+	const hostname = "localhost";
+	const protocol = "http";
+	const port = "6278";
+	const database = "omnisci";
+	const username = "admin";
+	const password = "HyperInteractive";
+	connector
+	.protocol(protocol)
+	.host(hostname)
+	.port(port)
+	.dbName(database)
+	.user(username)
+	.password(password);
 }
 else{
-    var flag = 0;
+	var flag = 0;
 }
 
 app.listen(port, () => console.log(`server listening on port ${port}`));
@@ -59,53 +66,72 @@ function handleError(err: any, res: any) {
 	res.status(400).send(msg);
 }
 
+
+async function cache_storage(key, value){
+	if (count_queries<max_cache){
+		queries.push(key);
+		cache_map.set(key, value);
+		count_queries += 1;
+	}
+	else{
+		cache_map.delete(queries[0]);
+		queries = queries.slice(1, max_cache+2);
+		queries.push(key);
+		cache_map.set(key, value);
+	}
+}
+
+
+
 app.post('/query', async (req: any, res: any) => {
 	let client: any;
 	try {
 		if (!req.body.query) {
 			throw 'request body must define query property'
 		}
-		console.log(`connected to ${req.body.postgresConnectionString}`);
+		// console.log(`connected to ${req.body.postgresConnectionString}`);
 		const query = req.body.query;
-		console.log(`running query: ${query}`);
-		if (flag == 1){
-			client = await pool.connect();
-			const results = await client.query(query);
-			console.log("Hello", results['rows']);
-			res.status(200).send(results['rows']);
-		}
-		else if(flag == 2){
-			await connector
-			.connectAsync().then(session =>
-				Promise.all([
-				session.queryAsync(query, defaultQueryOptions)
-				])).then((values) => {
-
-					console.log(query,values);
-					console.log("OmniSciDB", values[0])
-					res.status(200).send(values[0]);
-				}).catch((error) => {
-				    console.error("Something bad happened: ", error)
-				})
+		// console.log(`running query: ${query}`);
+		var results_q = cache_map.get(query);
+		if (queries.includes(query)){
+			console.log('Cache in play');
+			res.status(200).send(results_q);
 		}
 		else {
-			client = await db.connect();
-			await client.all(query, function(err, results) {
-			if (err) {
-				throw err;
+			console.log('Cache not in play');
+			if (flag == 1){
+				client = await pool.connect();
+				const results = await client.query(query);
+				cache_storage(query, results['rows']);
+				res.status(200).send(results['rows']);
+				client.release();
 			}
-			console.log("DuckDb", results)
-			res.status(200).send(results);
-		});
-		}
+			else if(flag == 2){
+				await connector
+				.connectAsync().then(session =>
+					Promise.all([
+					session.queryAsync(query, defaultQueryOptions)
+					])).then((values) => {
+						cache_storage(query, values[0]);
+						res.status(200).send(values[0]);
+					}).catch((error) => {
+					    console.error("Something bad happened: ", error)
+					})
+			}
+			else {
+				client = await db.connect();
+				await client.all(query, function(err, results) {
+				if (err) {
+					throw err;
+				}
+				cache_storage(query, results);
+				res.status(200).send(results);
+			});
+			}
+		}		
 		} catch (err) {
 			handleError(err, res);
 		} finally {
-			if (flag){
-				if (client) {
-					client.release();
-				}
-			}
 			console.log("Final");
 	}
 });
