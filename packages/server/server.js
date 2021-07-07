@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var cors = require("cors");
 var bodyParser = require("body-parser");
 var Pool = require('pg').Pool;
 var format = require('pg-format');
@@ -44,7 +45,7 @@ var MapdCon = require("@mapd/connector/dist/node-connector.js").MapdCon;
 var express = require('express');
 var app = express();
 var port = 3000;
-// app.use(cors());
+app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // Cache Work
@@ -96,17 +97,6 @@ function handleError(err, res) {
 function cache_storage(key, value) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (count_queries < max_cache) {
-                queries.push(key);
-                cache_map.set(key, value);
-                count_queries += 1;
-            }
-            else {
-                cache_map["delete"](queries[0]);
-                queries = queries.slice(1, max_cache + 2);
-                queries.push(key);
-                cache_map.set(key, value);
-            }
             return [2 /*return*/];
         });
     });
@@ -122,7 +112,6 @@ app.post('/query', function (req, res) { return __awaiter(void 0, void 0, void 0
                 }
                 query_1 = req.body.query;
                 results_q = cache_map.get(query_1);
-                console.log(results_q);
                 if (!queries.includes(query_1)) return [3 /*break*/, 1];
                 console.log('Cache in play');
                 res.status(200).send(results_q);

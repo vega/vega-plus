@@ -68,7 +68,8 @@ function handleError(err: any, res: any) {
 
 
 async function cache_storage(key, value){
-	if (count_queries<max_cache){
+
+/*	if (count_queries<max_cache){
 		queries.push(key);
 		cache_map.set(key, value);
 		count_queries += 1;
@@ -79,6 +80,7 @@ async function cache_storage(key, value){
 		queries.push(key);
 		cache_map.set(key, value);
 	}
+*/
 }
 
 
