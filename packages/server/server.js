@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var cors = require("cors");
 var bodyParser = require("body-parser");
 var Pool = require('pg').Pool;
 var format = require('pg-format');
@@ -44,9 +45,14 @@ var MapdCon = require("@mapd/connector/dist/node-connector.js").MapdCon;
 var express = require('express');
 var app = express();
 var port = 3000;
-//app.use(cors());
+app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+// Cache Work
+var cache_map = new Map();
+var queries = [];
+var count_queries = 0;
+var max_cache = 8;
 // Setup Databases
 var db = new duckdb.Database('./database/scalable-vega.db');
 var pool = new Pool({
@@ -88,72 +94,79 @@ function handleError(err, res) {
     console.error(msg);
     res.status(400).send(msg);
 }
+function cache_storage(key, value) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
+}
 app.post('/query', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var client, query_1, results, err_1;
+    var client, query_1, results_q, results, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 9, 10, 11]);
+                _a.trys.push([0, 10, 11, 12]);
                 if (!req.body.query) {
                     throw 'request body must define query property';
                 }
-                console.log("connected to " + req.body.postgresConnectionString);
                 query_1 = req.body.query;
-                console.log("running query: " + query_1);
-                if (!(flag == 1)) return [3 /*break*/, 3];
-                return [4 /*yield*/, pool.connect()];
+                results_q = cache_map.get(query_1);
+                if (!queries.includes(query_1)) return [3 /*break*/, 1];
+                console.log('Cache in play');
+                res.status(200).send(results_q);
+                return [3 /*break*/, 9];
             case 1:
+                console.log('Cache not in play');
+                if (!(flag == 1)) return [3 /*break*/, 4];
+                return [4 /*yield*/, pool.connect()];
+            case 2:
                 client = _a.sent();
                 return [4 /*yield*/, client.query(query_1)];
-            case 2:
-                results = _a.sent();
-                console.log("Hello", results['rows']);
-                res.status(200).send(results['rows']);
-                return [3 /*break*/, 8];
             case 3:
-                if (!(flag == 2)) return [3 /*break*/, 5];
+                results = _a.sent();
+                cache_storage(query_1, results['rows']);
+                res.status(200).send(results['rows']);
+                client.release();
+                return [3 /*break*/, 9];
+            case 4:
+                if (!(flag == 2)) return [3 /*break*/, 6];
                 return [4 /*yield*/, connector
                         .connectAsync().then(function (session) {
                         return Promise.all([
                             session.queryAsync(query_1, defaultQueryOptions)
                         ]);
                     }).then(function (values) {
-                        console.log(query_1, values);
-                        console.log("OmniSciDB", values[0]);
+                        cache_storage(query_1, values[0]);
                         res.status(200).send(values[0]);
                     })["catch"](function (error) {
                         console.error("Something bad happened: ", error);
                     })];
-            case 4:
+            case 5:
                 _a.sent();
-                return [3 /*break*/, 8];
-            case 5: return [4 /*yield*/, db.connect()];
-            case 6:
+                return [3 /*break*/, 9];
+            case 6: return [4 /*yield*/, db.connect()];
+            case 7:
                 client = _a.sent();
                 return [4 /*yield*/, client.all(query_1, function (err, results) {
                         if (err) {
                             throw err;
                         }
-                        console.log("DuckDb", results);
+                        cache_storage(query_1, results);
                         res.status(200).send(results);
                     })];
-            case 7:
+            case 8:
                 _a.sent();
-                _a.label = 8;
-            case 8: return [3 /*break*/, 11];
-            case 9:
+                _a.label = 9;
+            case 9: return [3 /*break*/, 12];
+            case 10:
                 err_1 = _a.sent();
                 handleError(err_1, res);
-                return [3 /*break*/, 11];
-            case 10:
-                if (flag) {
-                    if (client) {
-                        client.release();
-                    }
-                }
+                return [3 /*break*/, 12];
+            case 11:
                 console.log("Final");
                 return [7 /*endfinally*/];
-            case 11: return [2 /*return*/];
+            case 12: return [2 /*return*/];
         }
     });
 }); });
@@ -284,43 +297,27 @@ app.post('/createSql', function (req, res) { return __awaiter(void 0, void 0, vo
 }); });
 function create_table(req, client, exists, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, schema, createTableQueryStr_1, attrNames, attrName, attrNamesStr, rows, i, item, row, j, queryStr, i, item, row, j, queryStr1;
+        var data, schema, createTableQueryStr, attrNames, attrName, attrNamesStr, rows, i, item, row, j, queryStr;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     data = JSON.parse(req.body.data);
                     schema = postgresSchemaFor(data[0]);
-                    if (!!exists) return [3 /*break*/, 15];
+                    if (!!exists) return [3 /*break*/, 8];
                     console.log('creating table ' + req.body.name);
                     console.log('built postgres schema: ' + JSON.stringify(schema));
-                    createTableQueryStr_1 = createTableQueryStrFor(req.body.name, schema);
-                    console.log('running create query: ' + createTableQueryStr_1);
+                    createTableQueryStr = createTableQueryStrFor(req.body.name, schema);
+                    console.log('running create query: ' + createTableQueryStr);
                     if (!(flag == 1)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, client.query(createTableQueryStr_1)];
+                    return [4 /*yield*/, client.query(createTableQueryStr)];
                 case 1:
                     _a.sent();
-                    return [3 /*break*/, 6];
-                case 2:
-                    if (!(flag == 2)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, connector.connectAsync()
-                            .then(function (session) {
-                            return Promise.all([
-                                session.queryAsync(createTableQueryStr_1, defaultQueryOptions),
-                            ]);
-                        })
-                            .then(function (values) {
-                            console.log(values[0]);
-                        })["catch"](function (error) {
-                            console.error("Something bad happened: ", error);
-                        })];
+                    return [3 /*break*/, 4];
+                case 2: return [4 /*yield*/, client.run(createTableQueryStr)];
                 case 3:
                     _a.sent();
-                    return [3 /*break*/, 6];
-                case 4: return [4 /*yield*/, client.run(createTableQueryStr_1)];
-                case 5:
-                    _a.sent();
-                    _a.label = 6;
-                case 6:
+                    _a.label = 4;
+                case 4:
                     attrNames = [];
                     for (attrName in schema) {
                         if (!schema.hasOwnProperty(attrName)) {
@@ -340,47 +337,16 @@ function create_table(req, client, exists, res) {
                     }
                     queryStr = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', rows);
                     console.log('running insert queries for ' + req.body.name);
-                    if (!(flag == 1)) return [3 /*break*/, 8];
+                    if (!(flag == 1)) return [3 /*break*/, 6];
                     return [4 /*yield*/, client.query(queryStr)];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 8];
+                case 6: return [4 /*yield*/, client.run(queryStr)];
                 case 7:
                     _a.sent();
-                    return [3 /*break*/, 15];
+                    _a.label = 8;
                 case 8:
-                    if (!(flag == 2)) return [3 /*break*/, 13];
-                    i = 0;
-                    _a.label = 9;
-                case 9:
-                    if (!(i < data.length)) return [3 /*break*/, 12];
-                    item = data[i];
-                    row = [];
-                    for (j = 0; j < attrNames.length; j++) {
-                        row.push(item[attrNames[j]]);
-                    }
-                    queryStr1 = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', [row]);
-                    console.log(queryStr1);
-                    return [4 /*yield*/, connector.connectAsync()
-                            .then(function (session) {
-                            return Promise.all([
-                                session.queryAsync(queryStr1, defaultQueryOptions),
-                            ]);
-                        })
-                            .then(function (values) {
-                            console.log(values[0]);
-                        })["catch"](function (error) {
-                            console.error("Something bad happened: ", error);
-                        })];
-                case 10:
-                    _a.sent();
-                    _a.label = 11;
-                case 11:
-                    i++;
-                    return [3 /*break*/, 9];
-                case 12: return [3 /*break*/, 15];
-                case 13: return [4 /*yield*/, client.run(queryStr)];
-                case 14:
-                    _a.sent();
-                    _a.label = 15;
-                case 15:
                     console.log('insert queries complete');
                     res.status(200).send();
                     return [2 /*return*/];
