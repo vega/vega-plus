@@ -35,9 +35,6 @@ export function run(spec: vega.Spec) {
   const runtime = vega.parse(spec);
   console.log(runtime, "runtime");
 
-  runtime.operators[17].something = "blabla"
-  rawdf_scan(runtime)
-
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
     .logLevel(vega.Info)
