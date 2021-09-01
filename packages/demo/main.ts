@@ -8,6 +8,8 @@ import { view2dot } from '../vega-db/view2dot'
 var hpccWasm = window["@hpcc-js/wasm"];
 const querystring = require('querystring');
 const http = require('http');
+import { dataflowRewritePostgres } from "../vega-db/post_rewrite"
+
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
@@ -27,12 +29,14 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec("original", spec, "Original Specification");
 
   // make a vega execution object (runtime) from the spec
-  const newspec = specRewrite(spec)
-  console.log(newspec, "rewrite");
+  // const newspec = specRewrite(spec)
+  // console.log(newspec, "rewrite");
 
-  const runtime = vega.parse(newspec);
+  const runtime = vega.parse(spec);
   console.log(runtime, "runtime");
 
+  runtime.operators[17].something = "blabla"
+  rawdf_scan(runtime)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
@@ -40,6 +44,7 @@ export function run(spec: vega.Spec) {
     .renderer("svg")
     .initialize(document.querySelector("#view"));
 
+  dataflowRewritePostgres(view);
   console.log(view, "df");
 
   // execute the rewritten dataflow for the view
@@ -48,7 +53,6 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec("rewrite", spec.data, "Rewritten Transforms With SQL");
 
   view.runAfter(view => {
-    console.log(view2dot(view));
     const dot = `${view2dot(view)}`
     hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
       const placeholder = document.getElementById("graph-placeholder");
