@@ -8,6 +8,8 @@ import { view2dot } from '../vega-db/view2dot'
 var hpccWasm = window["@hpcc-js/wasm"];
 const querystring = require('querystring');
 const http = require('http');
+import { dataflowRewritePostgres } from "../vega-db/post_rewrite"
+
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
@@ -17,6 +19,8 @@ export function run(spec: vega.Spec) {
     "mode": "cors",
     "method": "POST",
     "headers": {
+      //'Access-Control-Allow-Origin': '*',
+      //'Content-Type': 'application/json'
       "Content-Type": "application/x-www-form-urlencoded"
     }
   };
@@ -27,11 +31,13 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec("original", spec, "Original Specification");
 
   // make a vega execution object (runtime) from the spec
-  const newspec = specRewrite(spec)
-  console.log(newspec, "rewrite");
+  // const newspec = specRewrite(spec)
+  // console.log(newspec, "rewrite");
 
-  const runtime = vega.parse(newspec);
-  console.log(runtime, "runtime");
+  // const runtime = vega.parse(newspec);
+  // console.log(runtime, "runtime");
+
+  const runtime = vega.parse(spec)
 
 
   // bind the execution to a dom element as a view
@@ -40,6 +46,7 @@ export function run(spec: vega.Spec) {
     .renderer("svg")
     .initialize(document.querySelector("#view"));
 
+  dataflowRewritePostgres(view)
   console.log(view, "df");
 
   // execute the rewritten dataflow for the view
