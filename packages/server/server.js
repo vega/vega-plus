@@ -36,17 +36,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+//import * as cors from 'cors';
 var bodyParser = require("body-parser");
 var Pool = require('pg').Pool;
 var format = require('pg-format');
 var duckdb = require('duckdb');
 var MapdCon = require("@mapd/connector/dist/node-connector.js").MapdCon;
+var cors = require('cors');
 var express = require('express');
 var app = express();
 var port = 3000;
-//app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(cors());
+app.options('*', cors());
+var allowCrossDomain = function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+};
+app.use(allowCrossDomain);
 // Setup Databases
 var db = new duckdb.Database('./database/scalable-vega.db');
 var pool = new Pool({
@@ -284,43 +294,27 @@ app.post('/createSql', function (req, res) { return __awaiter(void 0, void 0, vo
 }); });
 function create_table(req, client, exists, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, schema, createTableQueryStr_1, attrNames, attrName, attrNamesStr, rows, i, item, row, j, queryStr, i, item, row, j, queryStr1;
+        var data, schema, createTableQueryStr, attrNames, attrName, attrNamesStr, rows, i, item, row, j, queryStr;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     data = JSON.parse(req.body.data);
                     schema = postgresSchemaFor(data[0]);
-                    if (!!exists) return [3 /*break*/, 15];
+                    if (!!exists) return [3 /*break*/, 8];
                     console.log('creating table ' + req.body.name);
                     console.log('built postgres schema: ' + JSON.stringify(schema));
-                    createTableQueryStr_1 = createTableQueryStrFor(req.body.name, schema);
-                    console.log('running create query: ' + createTableQueryStr_1);
+                    createTableQueryStr = createTableQueryStrFor(req.body.name, schema);
+                    console.log('running create query: ' + createTableQueryStr);
                     if (!(flag == 1)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, client.query(createTableQueryStr_1)];
+                    return [4 /*yield*/, client.query(createTableQueryStr)];
                 case 1:
                     _a.sent();
-                    return [3 /*break*/, 6];
-                case 2:
-                    if (!(flag == 2)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, connector.connectAsync()
-                            .then(function (session) {
-                            return Promise.all([
-                                session.queryAsync(createTableQueryStr_1, defaultQueryOptions),
-                            ]);
-                        })
-                            .then(function (values) {
-                            console.log(values[0]);
-                        })["catch"](function (error) {
-                            console.error("Something bad happened: ", error);
-                        })];
+                    return [3 /*break*/, 4];
+                case 2: return [4 /*yield*/, client.run(createTableQueryStr)];
                 case 3:
                     _a.sent();
-                    return [3 /*break*/, 6];
-                case 4: return [4 /*yield*/, client.run(createTableQueryStr_1)];
-                case 5:
-                    _a.sent();
-                    _a.label = 6;
-                case 6:
+                    _a.label = 4;
+                case 4:
                     attrNames = [];
                     for (attrName in schema) {
                         if (!schema.hasOwnProperty(attrName)) {
@@ -340,47 +334,16 @@ function create_table(req, client, exists, res) {
                     }
                     queryStr = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', rows);
                     console.log('running insert queries for ' + req.body.name);
-                    if (!(flag == 1)) return [3 /*break*/, 8];
+                    if (!(flag == 1)) return [3 /*break*/, 6];
                     return [4 /*yield*/, client.query(queryStr)];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 8];
+                case 6: return [4 /*yield*/, client.run(queryStr)];
                 case 7:
                     _a.sent();
-                    return [3 /*break*/, 15];
+                    _a.label = 8;
                 case 8:
-                    if (!(flag == 2)) return [3 /*break*/, 13];
-                    i = 0;
-                    _a.label = 9;
-                case 9:
-                    if (!(i < data.length)) return [3 /*break*/, 12];
-                    item = data[i];
-                    row = [];
-                    for (j = 0; j < attrNames.length; j++) {
-                        row.push(item[attrNames[j]]);
-                    }
-                    queryStr1 = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', [row]);
-                    console.log(queryStr1);
-                    return [4 /*yield*/, connector.connectAsync()
-                            .then(function (session) {
-                            return Promise.all([
-                                session.queryAsync(queryStr1, defaultQueryOptions),
-                            ]);
-                        })
-                            .then(function (values) {
-                            console.log(values[0]);
-                        })["catch"](function (error) {
-                            console.error("Something bad happened: ", error);
-                        })];
-                case 10:
-                    _a.sent();
-                    _a.label = 11;
-                case 11:
-                    i++;
-                    return [3 /*break*/, 9];
-                case 12: return [3 /*break*/, 15];
-                case 13: return [4 /*yield*/, client.run(queryStr)];
-                case 14:
-                    _a.sent();
-                    _a.label = 15;
-                case 15:
                     console.log('insert queries complete');
                     res.status(200).send();
                     return [2 /*return*/];
