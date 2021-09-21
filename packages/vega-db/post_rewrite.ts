@@ -1,7 +1,7 @@
 import { Transforms, AggregateTransform, FilterTransform, ProjectTransform, StackTransform, CollectTransform, View } from "vega"
 import { aggregate, extent, bin } from "vega-transforms";
 import { encode, pie } from "vega-encode";
-import { parse } from "vega-expression"
+import { parseExpression } from "vega-expression"
 
 
 // FixMe: write JSdocs for this file.
@@ -120,6 +120,9 @@ function generatePostgresQueryForExtentNode(node: any, from) {
 }
 
 function generatePostgresQueryForFilterNode(node: any, from) {
+  function parse(str) {
+    return JSON.stringify(parseExpression(str));
+  }
   const filter = expr2sql(parse(node._argval.expr_str))
 
   return `select * from ${from} where ${filter}`
@@ -260,7 +263,7 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any, dataOut
   if (currentNode._query) {
     // output position for a data item that's not followed by any transform
     // or has been visited and rewritten
-    console.log(currentNode.id, "visited")
+    //console.log(currentNode.id, "visited")
     return;
   }
 
@@ -301,7 +304,7 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any, dataOut
   // understand.
 
   else if (typeCheck(currentNode, "Bin")) {
-    console.log(currentNode)
+    //console.log(currentNode)
 
     for (const target of currentNode._targets.filter(t => typeCheck(t, "Aggregate"))) {
       target._argval.from = from !== null ? from : pgNode._argval.relation
@@ -341,7 +344,7 @@ function rewriteTopLevelTransformNodesFor(currentNode: any, pgNode: any, dataOut
 
   for (const target of currentNode._targets) {
     if (isDbTransform(currentNode) || !dataOutputs.includes(currentNode.id)) {
-      console.log(currentNode, "source")
+      //console.log(currentNode, "source")
       rewriteTopLevelTransformNodesFor(target, pgNode, dataOutputs, from);
     }
 

@@ -1,19 +1,25 @@
-//import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 const { Pool } = require('pg');
 const format = require('pg-format');
 const duckdb = require('duckdb');
 const { MapdCon } = require("@mapd/connector/dist/node-connector.js");
-const cors = require('cors')
+const cors = require('cors');
 
 
 const express = require('express');
 const app = express();
 const port = 3000;
-app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
+app.use(cors());
+app.options('*', cors());
+var allowCrossDomain = function (req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+	res.header('Access-Control-Allow-Headers', 'Content-Type');
+	next();
+}
+app.use(allowCrossDomain);
 // Setup Databases
 var db = new duckdb.Database('./database/scalable-vega.db');
 const pool = new Pool({
@@ -291,7 +297,6 @@ async function create_table(req, client, exists, res) {
 			await client.query(queryStr);
 		}
 		/*	else if(flag==2){
-
 			for (let i: number = 0; i < data.length; i++) {
 				const item: any = data[i];
 				const row: any[] = [];
@@ -300,7 +305,6 @@ async function create_table(req, client, exists, res) {
 				}
 				var queryStr1 = format('insert into ' + req.body.name + ' (' + attrNamesStr + ') values %L', [row]);
 				console.log(queryStr1);
-
 				await connector.connectAsync()
 					.then(session =>
 					Promise.all([
@@ -314,8 +318,6 @@ async function create_table(req, client, exists, res) {
 							console.error("Something bad happened: ", error)
 					});
 			}
-
-
 			} */
 		else {
 			await client.run(queryStr);
@@ -324,8 +326,3 @@ async function create_table(req, client, exists, res) {
 	console.log('insert queries complete')
 	res.status(200).send();
 }
-
-
-
-
-

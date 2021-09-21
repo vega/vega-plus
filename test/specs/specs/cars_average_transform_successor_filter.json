@@ -13,7 +13,22 @@
         },
         {
           "type": "filter",
-          "expr": "datum.Cylinders >= 4"
+          "expr": "datum.cylinders >= 6"
+        },
+        {
+          "type": "aggregate",
+          "fields": [
+            "miles_per_gallon"
+          ],
+          "ops": [
+            "average"
+          ],
+          "as": [
+            "miles_per_gallon"
+          ],
+          "groupby": [
+            "cylinders"
+          ]
         }
       ]
     }
