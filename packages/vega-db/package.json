@@ -13,7 +13,6 @@
     "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
     "vega-expression": "^5.0.0",
-    "vega-transform-db": "^1.0.0",
     "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"
   },

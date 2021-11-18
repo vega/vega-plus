@@ -62,6 +62,7 @@ export function run(spec: vega.Spec) {
       placeholder.innerHTML = svg;
     });
   })
+  console.log(view)
 
   return view;
 }

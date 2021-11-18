@@ -9114,10 +9114,15 @@ vega-time@^2.0.3, vega-time@^2.0.4, vega-time@~2.0.4:
     d3-time "^2.0.0"
     vega-util "^1.15.2"
 
-vega-transform-db@1.0.4, vega-transform-db@^1.0.0:
+vega-transform-db@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.4.tgz#5da57682b65924db8ce824c61ee8f0ba2e3f55d6"
   integrity sha512-e7LyJn03Z7I/y0xurwukAFhpdObmFcEfLBEBHoknHkpub0vVqGy30fIVtlOx0tH+8r2ZgpX4EEE14gdty3208g==
+
+vega-transform-db@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.6.tgz#181a603f858c1a7b00ad48a05b44576b1ec2c96e"
+  integrity sha512-HyusBjr5NEWtqM9IQqC6KdrQV3GCAi8XBAUEc8Lc9aSkNjcj0ASxx/Gc6bLo2AzqEVapcpCofiKzRURv1d6N0g==
 
 vega-transform-omnisci-core@^0.0.10:
   version "0.0.10"
