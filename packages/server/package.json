@@ -12,10 +12,6 @@
     "body-parser": "^1.19.0",
     "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
-<<<<<<< HEAD
-=======
-    "vega-transform-db": "^1.0.4",
->>>>>>> aa656d091eff0f9fd1b23da1340af20e02cb2d3d
     "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"
   },
@@ -42,7 +38,7 @@
     "parcel-bundler": "^1.12.3",
     "ts-jest": "^26.1.4",
     "tsc-watch": "^4.2.8",
-    "typescript": "^3.9.5",
+    "typescript": "^4.5.2",
     "webpack": "^4.43.0"
   }
 }

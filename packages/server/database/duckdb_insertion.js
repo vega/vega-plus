@@ -65,7 +65,7 @@ var i;
 for (i = 0; i < test_cases.length; i++) {
     var data_name = test_cases[i];
     var client = db.connect();
-    var data = require('../../../sample_data/' + data_name + '.json');
+    var data = require('../../../sample_data/data/' + data_name + '.json');
     var schema = postgresSchemaFor(data[0]);
     console.log('creating table ' + data_name);
     console.log('built postgres schema: ' + JSON.stringify(schema));

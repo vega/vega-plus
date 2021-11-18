@@ -29,7 +29,7 @@
     "gh-pages": "^3.0.0",
     "parcel-bundler": "^1.12.3",
     "tsc-watch": "^4.2.8",
-    "typescript": "^3.9.5",
+    "typescript": "^4.5.2",
     "webpack": "^4.43.0"
   }
 }

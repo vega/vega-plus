@@ -90,7 +90,7 @@ var test_cases = [
 describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
   test(spec_file, async () => {
-    var spec_vg = require(`./specs/vega_specs/${spec_file}.json`);
+    var spec_vg = require(`../sample_data/specs/vega_specs/${spec_file}.json`);
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec_vg), {
@@ -104,7 +104,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
 
 
-    var spec = require(`./specs/specs/${spec_file}.json`);
+    var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
     const runtime = vega.parse(spec);
 
     var view_s = new vega.View(runtime, {
