@@ -12,6 +12,10 @@
     "body-parser": "^1.19.0",
     "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
+<<<<<<< HEAD
+=======
+    "vega-transform-db": "^1.0.4",
+>>>>>>> aa656d091eff0f9fd1b23da1340af20e02cb2d3d
     "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"
   },
