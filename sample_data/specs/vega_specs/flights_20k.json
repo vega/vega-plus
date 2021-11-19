@@ -6,7 +6,7 @@
   "data": [
     {
       "name": "table",
-      "url": "sample_data/flights_20k.json",
+      "url": "sample_data/data/flights_20k.json",
       "transform": [
         {
           "type": "aggregate",

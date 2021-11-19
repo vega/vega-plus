@@ -34,7 +34,7 @@
     "data": [
       {
         "name": "table",
-        "url": "sample_data/pie_chart.json",
+        "url": "sample_data/data/pie_chart.json",
         "transform": [
           {
             "type": "pie",
