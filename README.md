@@ -13,29 +13,31 @@ An interactive web demo of Scalable Vega components with examples of updating da
 The middleware server required for running the Scalable Vega code and interacting with the user chosen database.
 
 
-## Installation
+## Pre-Requisite
 1. Install and start PostgreSQL.
-2. Create a PostgreSQL database named `scalable_vega`, e.g., `createdb scalable_vega`. You don't need to do anything if you use DuckDB.
-3. Run `cd /path/to/dev/repos`.
-4. Run `git clone git@github.com:leibatt/scalable-vega.git`.
-5. Run `yarn build` to install scalable-vega library dependencies.
-6. For using prepopulated database, look at additional notes.
+2. Create a PostgreSQL database named `scalable_vega`, e.g., `createdb scalable_vega`. You don't need to do anything if you want to use DuckDB.
 
-## Running Application Server
+## Installation
+1. Run `git clone git@github.com:leibatt/scalable-vega.git`.
+2. Run `yarn build` to install scalable-vega library dependencies.
+3. For using prepopulated database in demo, look at additional notes.
+
+## Running Middleware Server
 1. Run `yarn build:server` to install scalable-vega server dependencies.
 2. Run `yarn start:server_pg` to start the application server with postgres, for DuckDB run `yarn start:server_duck`
 2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `./packages/server/server.js` file and can be customized.
 
 ## Running the Web Demo
-1. Make sure you have the application server running.
+1. Make sure you have the middleware server running (follow previous section).
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
-3. Run `yarn start:app` to start the web server.
-4. Open a browser tab to localhost:1234.
-5. Upload the cars dataset from `./sample_data/cars.json` to the data input.
-6. Upload the cars Vega spec from `./test/specs/specs/cars_average_transform_successor.json` to the specs input and see the visualization.
+3. Run 'yarn build:app' to build dependencies for the demo/application UI.
+4. Run `yarn start:app` to start the web server.
+5. Open a browser tab to localhost:1234.
+6. Upload the cars dataset from `./sample_data/data/cars.json` to the data input.
+7. Upload a cars vega spec from `./sample_data/data/specs/specs/` to the specs input on the webpage and see the visualization.
 
 ## Running Unit Tests
-1. Again make sure you have the application server running. 
+1. Again make sure you have the middleware server running. 
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`. 
 3. The Unit Tests assume a prepopulated database, either do so by uploading data using the web demo or use the provided database (look at additional notes).
 4. For running the unit tests:
