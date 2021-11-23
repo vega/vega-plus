@@ -20,6 +20,9 @@
           "sort": {
             "field": [
               "product"
+            ],
+            "order": [
+              "ascending"
             ]
           },
           "field": "sale"

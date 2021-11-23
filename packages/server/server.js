@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function () { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -36,23 +36,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var cors = require("cors");
+//import * as cors from 'cors';
 var bodyParser = require("body-parser");
 var Pool = require('pg').Pool;
 var format = require('pg-format');
 var duckdb = require('duckdb');
 var MapdCon = require("@mapd/connector/dist/node-connector.js").MapdCon;
+var cors = require('cors');
 var express = require('express');
 var app = express();
 var port = 3000;
-app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-// Cache Work
-var cache_map = new Map();
-var queries = [];
-var count_queries = 0;
-var max_cache = 8;
+app.use(cors());
+app.options('*', cors());
+var allowCrossDomain = function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+};
+app.use(allowCrossDomain);
 // Setup Databases
 var db = new duckdb.Database('./database/scalable-vega.db');
 var pool = new Pool({
@@ -94,82 +98,77 @@ function handleError(err, res) {
     console.error(msg);
     res.status(400).send(msg);
 }
-function cache_storage(key, value) {
-    return __awaiter(this, void 0, void 0, function () {
+app.post('/query', function (req, res) {
+    return __awaiter(void 0, void 0, void 0, function () {
+        var client, query_1, results, err_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
-        });
-    });
-}
-app.post('/query', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var client, query_1, results_q, results, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 10, 11, 12]);
-                if (!req.body.query) {
-                    throw 'request body must define query property';
-                }
-                query_1 = req.body.query;
-                results_q = cache_map.get(query_1);
-                if (!queries.includes(query_1)) return [3 /*break*/, 1];
-                console.log('Cache in play');
-                res.status(200).send(results_q);
-                return [3 /*break*/, 9];
-            case 1:
-                console.log('Cache not in play');
-                if (!(flag == 1)) return [3 /*break*/, 4];
-                return [4 /*yield*/, pool.connect()];
-            case 2:
-                client = _a.sent();
-                return [4 /*yield*/, client.query(query_1)];
-            case 3:
-                results = _a.sent();
-                cache_storage(query_1, results['rows']);
-                res.status(200).send(results['rows']);
-                client.release();
-                return [3 /*break*/, 9];
-            case 4:
-                if (!(flag == 2)) return [3 /*break*/, 6];
-                return [4 /*yield*/, connector
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 9, 10, 11]);
+                    if (!req.body.query) {
+                        throw 'request body must define query property';
+                    }
+                    console.log("connected to " + req.body.postgresConnectionString);
+                    query_1 = req.body.query;
+                    console.log("running query: " + query_1);
+                    if (!(flag == 1)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, pool.connect()];
+                case 1:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.query(query_1)];
+                case 2:
+                    results = _a.sent();
+                    console.log("Hello", results['rows']);
+                    res.status(200).send(results['rows']);
+                    return [3 /*break*/, 8];
+                case 3:
+                    if (!(flag == 2)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, connector
                         .connectAsync().then(function (session) {
-                        return Promise.all([
-                            session.queryAsync(query_1, defaultQueryOptions)
-                        ]);
-                    }).then(function (values) {
-                        cache_storage(query_1, values[0]);
-                        res.status(200).send(values[0]);
-                    })["catch"](function (error) {
-                        console.error("Something bad happened: ", error);
-                    })];
-            case 5:
-                _a.sent();
-                return [3 /*break*/, 9];
-            case 6: return [4 /*yield*/, db.connect()];
-            case 7:
-                client = _a.sent();
-                return [4 /*yield*/, client.all(query_1, function (err, results) {
+                            return Promise.all([
+                                session.queryAsync(query_1, defaultQueryOptions)
+                            ]);
+                        }).then(function (values) {
+                            console.log(query_1, values);
+                            console.log("OmniSciDB", values[0]);
+                            res.status(200).send(values[0]);
+                        })["catch"](function (error) {
+                            console.error("Something bad happened: ", error);
+                        })];
+                case 4:
+                    _a.sent();
+                    return [3 /*break*/, 8];
+                case 5: return [4 /*yield*/, db.connect()];
+                case 6:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.all(query_1, function (err, results) {
                         if (err) {
                             throw err;
                         }
-                        cache_storage(query_1, results);
+                        console.log("DuckDb", results);
                         res.status(200).send(results);
                     })];
-            case 8:
-                _a.sent();
-                _a.label = 9;
-            case 9: return [3 /*break*/, 12];
-            case 10:
-                err_1 = _a.sent();
-                handleError(err_1, res);
-                return [3 /*break*/, 12];
-            case 11:
-                console.log("Final");
-                return [7 /*endfinally*/];
-            case 12: return [2 /*return*/];
-        }
+                case 7:
+                    _a.sent();
+                    _a.label = 8;
+                case 8: return [3 /*break*/, 11];
+                case 9:
+                    err_1 = _a.sent();
+                    handleError(err_1, res);
+                    return [3 /*break*/, 11];
+                case 10:
+                    if (flag) {
+                        if (client) {
+                            client.release();
+                        }
+                    }
+                    console.log("Final");
+                    return [7 /*endfinally*/];
+                case 11: return [2 /*return*/];
+            }
+        });
     });
-}); });
+});
 function postgresTypeFor(value) {
     // FixMe: want to use INTs too, if possible.
     // Client needs to send more type data in this case.
@@ -222,45 +221,46 @@ function listToSQLTuple(l, keepQuotes) {
     out = out.replace(/"/g, keepQuotes ? '\'' : '');
     return out;
 }
-app.post('/createSql', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var client, exists, existsQueryStr, response, err_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 7, 8, 9]);
-                if (!req.body.data) {
-                    throw 'request body must define data property';
-                }
-                if (!req.body.name) {
-                    throw 'request body must define name property';
-                }
-                exists = false;
-                existsQueryStr = 'select exists(select 1 from information_schema.tables where 		table_name=' +
-                    '\'' + req.body.name.toLowerCase() + '\');';
-                console.log(existsQueryStr);
-                if (!(flag == 1)) return [3 /*break*/, 3];
-                return [4 /*yield*/, pool.connect()];
-            case 1:
-                client = _a.sent();
-                return [4 /*yield*/, client.query(existsQueryStr)];
-            case 2:
-                response = _a.sent();
-                if (response.rows[0]['exists']) {
-                    exists = true;
-                    console.log('table ' + req.body.name + ' already exists');
-                }
-                else {
+app.post('/createSql', function (req, res) {
+    return __awaiter(void 0, void 0, void 0, function () {
+        var client, exists, existsQueryStr, response, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 7, 8, 9]);
+                    if (!req.body.data) {
+                        throw 'request body must define data property';
+                    }
+                    if (!req.body.name) {
+                        throw 'request body must define name property';
+                    }
                     exists = false;
-                    console.log('table ' + req.body.name + ' does not exist');
-                }
-                create_table(req, client, exists, res);
-                return [3 /*break*/, 6];
-            case 3:
-                if (!(flag == 0)) return [3 /*break*/, 6];
-                return [4 /*yield*/, db.connect()];
-            case 4:
-                client = _a.sent();
-                return [4 /*yield*/, client.all('select * from ' + req.body.name.toLowerCase(), function (err, results) {
+                    existsQueryStr = 'select exists(select 1 from information_schema.tables where 		table_name=' +
+                        '\'' + req.body.name.toLowerCase() + '\');';
+                    console.log(existsQueryStr);
+                    if (!(flag == 1)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, pool.connect()];
+                case 1:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.query(existsQueryStr)];
+                case 2:
+                    response = _a.sent();
+                    if (response.rows[0]['exists']) {
+                        exists = true;
+                        console.log('table ' + req.body.name + ' already exists');
+                    }
+                    else {
+                        exists = false;
+                        console.log('table ' + req.body.name + ' does not exist');
+                    }
+                    create_table(req, client, exists, res);
+                    return [3 /*break*/, 6];
+                case 3:
+                    if (!(flag == 0)) return [3 /*break*/, 6];
+                    return [4 /*yield*/, db.connect()];
+                case 4:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.all('select * from ' + req.body.name.toLowerCase(), function (err, results) {
                         if (err) {
                             exists = false;
                             console.log('table ' + req.body.name + ' does not exist');
@@ -273,28 +273,29 @@ app.post('/createSql', function (req, res) { return __awaiter(void 0, void 0, vo
                         create_table(req, client, exists, res);
                         console.log('Created Table');
                     })];
-            case 5:
-                _a.sent();
-                _a.label = 6;
-            case 6: return [3 /*break*/, 9];
-            case 7:
-                err_2 = _a.sent();
-                handleError(err_2, res);
-                return [3 /*break*/, 9];
-            case 8:
-                if (flag == 1) {
-                    if (client) {
-                        client.release();
+                case 5:
+                    _a.sent();
+                    _a.label = 6;
+                case 6: return [3 /*break*/, 9];
+                case 7:
+                    err_2 = _a.sent();
+                    handleError(err_2, res);
+                    return [3 /*break*/, 9];
+                case 8:
+                    if (flag == 1) {
+                        if (client) {
+                            client.release();
+                        }
                     }
-                }
-                else {
-                    console.log("Final");
-                }
-                return [7 /*endfinally*/];
-            case 9: return [2 /*return*/];
-        }
+                    else {
+                        console.log("Final");
+                    }
+                    return [7 /*endfinally*/];
+                case 9: return [2 /*return*/];
+            }
+        });
     });
-}); });
+});
 function create_table(req, client, exists, res) {
     return __awaiter(this, void 0, void 0, function () {
         var data, schema, createTableQueryStr, attrNames, attrName, attrNamesStr, rows, i, item, row, j, queryStr;

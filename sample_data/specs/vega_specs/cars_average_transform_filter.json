@@ -5,37 +5,26 @@
   "padding": 10,
   "data": [
     {
-      "name": "points",
-      "url": "sample_data/cars.json"
-    },
-    {
-      "name": "binned",
-      "source": "points",
+      "name": "cars",
+      "url": "sample_data/data/cars.json",
       "transform": [
         {
-          "type": "bin",
-          "field": "Miles_per_Gallon",
-          "extent": [
-            0,
-            50
-          ],
-          "maxbins": 10
+          "type": "filter",
+          "expr": " datum.Origin != 'Europe'"
         },
         {
           "type": "aggregate",
-          "key": "bin0",
-          "groupby": [
-            "bin0",
-            "bin1"
-          ],
           "fields": [
-            "bin0"
+            "Miles_per_Gallon"
           ],
           "ops": [
-            "count"
+            "average"
           ],
           "as": [
-            "count"
+            "Miles_per_Gallon"
+          ],
+          "groupby": [
+            "Cylinders"
           ]
         }
       ]
@@ -44,71 +33,65 @@
   "scales": [
     {
       "name": "xscale",
-      "type": "linear",
+      "type": "band",
+      "domain": {
+        "data": "cars",
+        "field": "Cylinders"
+      },
       "range": "width",
-      "domain": [
-        0,
-        50
-      ]
+      "padding": 0.05,
+      "round": true
     },
     {
       "name": "yscale",
-      "type": "linear",
-      "range": "height",
-      "round": true,
       "domain": {
-        "data": "binned",
-        "field": "count"
+        "data": "cars",
+        "field": "Miles_per_Gallon"
       },
-      "zero": true,
-      "nice": true
+      "nice": true,
+      "range": "height"
     }
   ],
   "axes": [
     {
       "orient": "bottom",
       "scale": "xscale",
-      "zindex": 1
+      "title": "Number of Cylinders"
     },
     {
       "orient": "left",
       "scale": "yscale",
-      "tickCount": 5,
-      "zindex": 1
+      "title": "Miles per Gallon"
     }
   ],
   "marks": [
     {
       "type": "rect",
       "from": {
-        "data": "binned"
+        "data": "cars"
       },
       "encode": {
-        "update": {
+        "enter": {
           "x": {
             "scale": "xscale",
-            "field": "bin0"
+            "field": "Cylinders"
           },
-          "x2": {
+          "width": {
             "scale": "xscale",
-            "field": "bin1",
-            "offset": 0
+            "band": 1
           },
           "y": {
             "scale": "yscale",
-            "field": "count"
+            "field": "Miles_per_Gallon"
           },
           "y2": {
             "scale": "yscale",
             "value": 0
-          },
-          "fill": {
-            "value": "steelblue"
           }
         },
-        "hover": {
+        "update": {
           "fill": {
-            "value": "firebrick"
+            "value": "steelblue"
           }
         }
       }

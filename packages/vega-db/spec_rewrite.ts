@@ -1,5 +1,5 @@
 import { Transforms, AggregateTransform, FilterTransform, ProjectTransform, StackTransform, CollectTransform } from "vega"
-import { parse } from "vega-expression"
+import { parseExpression } from "vega-expression"
 import { array } from "vega-util"
 
 
@@ -322,6 +322,9 @@ const stackTransformToSql = (tableName: string, transform: StackTransform, db: s
 }
 
 const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
+  function parse(str) {
+    return JSON.stringify(parseExpression(str));
+  }
   const filter = expr2sql(parse(transform.expr))
   console.log(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName

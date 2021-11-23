@@ -6,19 +6,15 @@
   "data": [
     {
       "name": "cars",
-      "url": "sample_data/cars.json",
+      "url": "sample_data/data/cars.json",
       "transform": [
-        {
-          "type": "filter",
-          "expr": " datum.Origin != 'Europe'"
-        },
         {
           "type": "aggregate",
           "fields": [
             "Miles_per_Gallon"
           ],
           "ops": [
-            "average"
+            "stdevp"
           ],
           "as": [
             "Miles_per_Gallon"

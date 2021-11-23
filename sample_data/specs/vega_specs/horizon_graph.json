@@ -35,7 +35,7 @@
       },
       {
         "name": "table",
-        "url": "sample_data/horizon_graph.json"
+        "url": "sample_data/data/horizon_graph.json"
 
       }
     ],

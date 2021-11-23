@@ -26,7 +26,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
   test(spec_file, async () => {
 
-    var spec = require(`./specs/specs/${spec_file}.json`);
+    var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
     const newspec = specRewrite(spec)
     
     const runtime = vega.parse(newspec);

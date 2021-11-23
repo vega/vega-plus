@@ -6,23 +6,19 @@
   "data": [
     {
       "name": "points",
-      "url": "sample_data/cars.json"
+      "url": "sample_data/data/cars.json"
     },
     {
       "name": "binned",
       "source": "points",
       "transform": [
         {
-          "type": "extent",
-          "field": "Miles_per_Gallon",
-          "signal": "extent"
-        },
-        {
           "type": "bin",
           "field": "Miles_per_Gallon",
-          "extent": {
-            "signal": "extent"
-          },
+          "extent": [
+            0,
+            50
+          ],
           "maxbins": 10
         },
         {
@@ -50,9 +46,10 @@
       "name": "xscale",
       "type": "linear",
       "range": "width",
-      "domain": {
-        "signal": "extent"
-      }
+      "domain": [
+        0,
+        50
+      ]
     },
     {
       "name": "yscale",

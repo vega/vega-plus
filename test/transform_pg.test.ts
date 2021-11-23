@@ -1,4 +1,4 @@
-import { specRewrite } from "../packages/vega-db/spec_rewrite"
+import { dataflowRewritePostgres } from "../packages/vega-db/post_rewrite"
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -47,6 +47,12 @@ function compare_tolerance(actual, modified) {
 
 }
 beforeAll(() => {
+  // const DBOptions = {
+  //   "method": 'postgres'
+  // };
+
+  // (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
+  // VegaTransformPostgres.setDBOptions(DBOptions);
   const httpOptions = {
     "url": 'http://localhost:3000/query',
     "mode": "cors",
@@ -61,30 +67,30 @@ beforeAll(() => {
 });
 
 var test_cases = [
-  ['cars_average_sourced', 'cars'],
-  ['cars_count_transform_successor', 'cars'],
-  ['cars_distinct_transform_successor', 'cars'],
+  // ['cars_average_sourced', 'cars'],
+  // ['cars_count_transform_successor', 'cars'],
+  // ['cars_distinct_transform_successor', 'cars'],
   ['cars_histogram_extent', 'binned'],
-  ['cars_histogram', 'binned'],
-  ['cars_max_transform_successor', 'cars'],
-  ['cars_median_transform_successor', 'cars'],
-  ['cars_min_transform_successor', 'cars'],
-  ['cars_missing_transform_successor', 'cars'],
-  ['cars_q1_transform_successor', 'cars'],
-  ['cars_stderr_transform_successor', 'cars'],
-  ['cars_stdev_transform_successor', 'cars'],
-  ['cars_stdevp_transform_successor', 'cars'],
-  ['cars_sum_transform_successor', 'cars'],
-  ['cars_valid_transform_successor', 'cars'],
-  ['cars_variance_transform_successor', 'cars'],
-  ['cars_variancep_transform_successor', 'cars'],
+  // ['cars_histogram', 'binned'],
+  // ['cars_max_transform_successor', 'cars'],
+  // ['cars_median_transform_successor', 'cars'],
+  // ['cars_min_transform_successor', 'cars'],
+  // ['cars_missing_transform_successor', 'cars'],
+  // ['cars_q1_transform_successor', 'cars'],
+  // ['cars_stderr_transform_successor', 'cars'],
+  // ['cars_stdev_transform_successor', 'cars'],
+  // ['cars_stdevp_transform_successor', 'cars'],
+  // ['cars_sum_transform_successor', 'cars'],
+  // ['cars_valid_transform_successor', 'cars'],
+  // ['cars_variance_transform_successor', 'cars'],
+  // ['cars_variancep_transform_successor', 'cars'],
 
 ]
 
 describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
   test(spec_file, async () => {
-    var spec_vg = require(`./specs/vega_specs/${spec_file}.json`);
+    var spec_vg = require(`../sample_data/specs/vega_specs/${spec_file}.json`);
     var loader = vega.loader();
 
     var view = new vega.View(vega.parse(spec_vg), {
@@ -96,19 +102,23 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     var result_vg = view.data(data_name);
     console.log(result_vg, spec_file);
 
-    var spec = require(`./specs/specs/${spec_file}.json`);
-    const newspec = specRewrite(spec)
 
-    const runtime = vega.parse(newspec);
+
+    var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
+    const runtime = vega.parse(spec);
 
     var view_s = new vega.View(runtime, {
       renderer: 'none'
     })
       .logLevel(vega.Info)
 
+    dataflowRewritePostgres(view_s);
+    //console.log(view['_runtime']['nodes'])
     await view_s.runAsync();
 
     var result_s = view_s.data(data_name);
+    console.log(view_s['_runtime'].data.binned);
+    console.log(view_s.data(data_name));
     compare_tolerance(result_vg, result_s);
   });
 });

@@ -5,22 +5,22 @@
   "padding": 10,
   "data": [
     {
-      "name": "cars",
-      "url": "sample_data/cars.json",
+      "name": "table",
+      "url": "sample_data/data/flights_20k.json",
       "transform": [
         {
           "type": "aggregate",
           "fields": [
-            "Miles_per_Gallon"
+            "delay"
           ],
           "ops": [
-            "stdevp"
+            "average"
           ],
           "as": [
-            "Miles_per_Gallon"
+            "delay"
           ],
           "groupby": [
-            "Cylinders"
+            "distance"
           ]
         }
       ]
@@ -29,20 +29,19 @@
   "scales": [
     {
       "name": "xscale",
-      "type": "band",
+      "type": "linear",
       "domain": {
-        "data": "cars",
-        "field": "Cylinders"
+        "data": "table",
+        "field": "distance"
       },
       "range": "width",
-      "padding": 0.05,
       "round": true
     },
     {
       "name": "yscale",
       "domain": {
-        "data": "cars",
-        "field": "Miles_per_Gallon"
+        "data": "table",
+        "field": "delay"
       },
       "nice": true,
       "range": "height"
@@ -52,42 +51,37 @@
     {
       "orient": "bottom",
       "scale": "xscale",
-      "title": "Number of Cylinders"
+      "title": "Distance"
     },
     {
       "orient": "left",
       "scale": "yscale",
-      "title": "Miles per Gallon"
+      "title": "Average Delay"
     }
   ],
   "marks": [
     {
-      "type": "rect",
+      "type": "symbol",
       "from": {
-        "data": "cars"
+        "data": "table"
       },
       "encode": {
         "enter": {
           "x": {
             "scale": "xscale",
-            "field": "Cylinders"
-          },
-          "width": {
-            "scale": "xscale",
-            "band": 1
+            "field": "distance"
           },
           "y": {
             "scale": "yscale",
-            "field": "Miles_per_Gallon"
-          },
-          "y2": {
-            "scale": "yscale",
-            "value": 0
+            "field": "delay"
           }
         },
         "update": {
           "fill": {
             "value": "steelblue"
+          },
+          "fillOpacity": {
+            "value": 0.5
           }
         }
       }

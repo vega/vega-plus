@@ -7,7 +7,7 @@
   "data": [
     {
       "name": "table",
-      "url": "sample_data/product.json",
+      "url": "sample_data/data/product.json",
       "transform": [
         {
           "type": "stack",
