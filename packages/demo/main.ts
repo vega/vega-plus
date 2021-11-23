@@ -40,7 +40,6 @@ export function run(spec: vega.Spec) {
 
   const runtime = vega.parse(spec)
 
-
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
     .logLevel(vega.Info)
@@ -56,7 +55,6 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec('rewrite', spec.data, 'Rewritten Transforms With SQL');
 
   view.runAfter(view => {
-    console.log(view2dot(view));
     const dot = `${view2dot(view)}`
     hpccWasm.graphviz.layout(dot, 'svg', 'dot').then(svg => {
       const placeholder = document.getElementById('graph-placeholder');
