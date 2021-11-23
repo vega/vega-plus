@@ -30,7 +30,7 @@ The middleware server required for running the Scalable Vega code and interactin
 ## Running the Web Demo
 1. Make sure you have the middleware server running (follow previous section).
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
-3. Run 'yarn build:app' to build dependencies for the demo/application UI.
+3. Run `yarn build:app` to build dependencies for the demo/application UI.
 4. Run `yarn start:app` to start the web server.
 5. Open a browser tab to localhost:1234.
 6. Upload the cars dataset from `./sample_data/data/cars.json` to the data input.
