@@ -1,41 +1,42 @@
 import 'regenerator-runtime/runtime'
-import * as vega from "vega";
+import * as vega from 'vega';
 // defines the VTP node type
-import VegaTransformPostgres from "vega-transform-db"
+import VegaTransformPostgres from 'vega-transform-db'
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
-import { specRewrite } from "../vega-db/spec_rewrite"
+import { specRewrite } from '../vega-db/spec_rewrite'
 import { view2dot } from '../vega-db/view2dot'
-var hpccWasm = window["@hpcc-js/wasm"];
+var hpccWasm = window['@hpcc-js/wasm'];
 const querystring = require('querystring');
 const http = require('http');
-import { dataflowRewritePostgres } from "../vega-db/post_rewrite"
+import { dataflowRewritePostgres } from '../vega-db/post_rewrite'
+global.fetch = require('node-fetch');
 
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
   // FixMe: should we define these attributes in the spec somehow?
   const httpOptions = {
-    "url": 'http://localhost:3000/query',
-    "mode": "cors",
-    "method": "POST",
-    "headers": {
+    'url': 'http://localhost:3000/query',
+    'mode': 'cors',
+    'method': 'POST',
+    'headers': {
       //'Access-Control-Allow-Origin': '*',
       //'Content-Type': 'application/json'
-      "Content-Type": "application/x-www-form-urlencoded"
+      'Content-Type': 'application/x-www-form-urlencoded'
     }
   };
 
-  (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
+  (vega as any).transforms['dbtransform'] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
 
-  loadOriginalSpec("original", spec, "Original Specification");
+  loadOriginalSpec('original', spec, 'Original Specification');
 
   // make a vega execution object (runtime) from the spec
   // const newspec = specRewrite(spec)
-  // console.log(newspec, "rewrite");
+  // console.log(newspec, 'rewrite');
 
   // const runtime = vega.parse(newspec);
-  // console.log(runtime, "runtime");
+  // console.log(runtime, 'runtime');
 
   const runtime = vega.parse(spec)
 
@@ -43,22 +44,22 @@ export function run(spec: vega.Spec) {
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
     .logLevel(vega.Info)
-    .renderer("svg")
-    .initialize(document.querySelector("#view"));
+    .renderer('svg')
+    .initialize(document.querySelector('#view'));
 
   dataflowRewritePostgres(view)
-  console.log(view, "df");
+  console.log(view, 'df');
 
   // execute the rewritten dataflow for the view
   view.runAsync();
 
-  loadOriginalSpec("rewrite", spec.data, "Rewritten Transforms With SQL");
+  loadOriginalSpec('rewrite', spec.data, 'Rewritten Transforms With SQL');
 
   view.runAfter(view => {
     console.log(view2dot(view));
     const dot = `${view2dot(view)}`
-    hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
-      const placeholder = document.getElementById("graph-placeholder");
+    hpccWasm.graphviz.layout(dot, 'svg', 'dot').then(svg => {
+      const placeholder = document.getElementById('graph-placeholder');
       placeholder.innerHTML = svg;
     });
   })
@@ -71,10 +72,10 @@ function loadOriginalSpec(id, spec, title) {
 
   const container = document.getElementById(id);
   // Insert original vega spec
-  const ogSpecContainer = document.createElement("div");
+  const ogSpecContainer = document.createElement('div');
   ogSpecContainer.id = id;
-  const ogSpecCode = document.createElement("pre");
-  ogSpecCode.classList.add("prettyprint");
+  const ogSpecCode = document.createElement('pre');
+  ogSpecCode.classList.add('prettyprint');
   ogSpecCode.innerHTML = JSON.stringify(spec, null, 4);
 
   ogSpecContainer.innerHTML = `<h3>${title}</h3>`;
@@ -92,7 +93,7 @@ function handleVegaSpec() {
 
   };
   reader.readAsText(this.files[0]);
-  (<HTMLInputElement>document.getElementById("vega-spec")).value = "";
+  (<HTMLInputElement>document.getElementById('vega-spec')).value = '';
 }
 
 function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: number, relationName: string) {
@@ -147,14 +148,25 @@ function handleData() {
     if (filename.slice(filename.length - '.json'.length) != '.json') {
       throw Error(`file ${filename} must have .json extension`);
     }
-    const relationName = filename.slice(0, (filename.length - '.json.'.length) + 1).replace("-", "_");
+    const relationName = filename.slice(0, (filename.length - '.json.'.length) + 1).replace('-', '_');
     const data = JSON.parse(e.target.result);
     uploadSqlData(data, relationName);
   }
   filename = this.files[0].name;
   reader.readAsText(this.files[0]);
-  (<HTMLInputElement>document.getElementById("data")).value = "";
+  (<HTMLInputElement>document.getElementById('data')).value = '';
 }
 
-document.getElementById("vega-spec").addEventListener("change", handleVegaSpec, false);
-document.getElementById("data").addEventListener("change", handleData, false);
+function handleDemo() {
+  const cars_spec = [require('../../sample_data/specs/specs/cars_average_sourced.json'), require('../../sample_data/specs/specs/cars_count_transform_successor.json'), require('../../sample_data/specs/specs/cars_histogram_extent.json'), require('../../sample_data/specs/specs/cars_min_transform_successor.json'), require('../../sample_data/specs/specs/cars_missing_transform_successor.json'), require('../../sample_data/specs/specs/cars_q1_transform_successor.json'), require('../../sample_data/specs/specs/cars_stdev_transform_successor.json'), require('../../sample_data/specs/specs/cars_stdevp_transform_successor.json'), require('../../sample_data/specs/specs/cars_sum_transform_successor.json')]; 
+  var temp = Math.floor(Math.random() * 9);
+  const demo_spec = cars_spec[temp];
+  const cars_data = require('../../sample_data/data/cars.json');
+  console.log(temp);
+  uploadSqlData(cars_data, 'cars');
+  run(demo_spec);
+}
+
+document.getElementById('vega-spec').addEventListener('change', handleVegaSpec, false);
+document.getElementById('data').addEventListener('change', handleData, false);
+document.getElementById('demoviz').addEventListener('click', handleDemo);
