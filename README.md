@@ -20,7 +20,7 @@ The middleware server required for running the Scalable Vega code and interactin
 ## Installation
 1. Run `git clone git@github.com:leibatt/scalable-vega.git`.
 2. Run `yarn build` to install scalable-vega library dependencies.
-3. For using prepopulated database in demo, look at additional notes.
+3. For using prepopulated database in demo, look at [additional notes](#additional-notes).
 
 ## Running Middleware Server
 1. Run `yarn build:server` to install scalable-vega server dependencies.
@@ -28,7 +28,7 @@ The middleware server required for running the Scalable Vega code and interactin
 2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `./packages/server/server.js` file and can be customized.
 
 ## Running the Web Demo
-1. Make sure you have the middleware server running (follow previous section).
+1. Make sure you have the [middleware server running](#running-middleware-server).
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`.
 3. Run `yarn build:app` to build dependencies for the demo/application UI.
 4. Run `yarn start:app` to start the web server.
@@ -37,7 +37,7 @@ The middleware server required for running the Scalable Vega code and interactin
 7. Upload a cars vega spec from `./sample_data/data/specs/specs/` to the specs input on the webpage and see the visualization.
 
 ## Running Unit Tests
-1. Again make sure you have the middleware server running. 
+1. Again make sure you have the [middleware server running](#running-middleware-server). 
 2. In another terminal window, run `cd /path/to/dev/repos/scalable-vega`. 
 3. The Unit Tests assume a prepopulated database, either do so by uploading data using the web demo or use the provided database (look at additional notes).
 4. For running the unit tests:
