@@ -33,8 +33,8 @@ The middleware server required for running the Scalable Vega code and interactin
 3. Run `yarn build:app` to build dependencies for the demo/application UI.
 4. Run `yarn start:app` to start the web server.
 5. Open a browser tab to localhost:1234.
-6. Upload the cars dataset from `./sample_data/data/cars.json` to the data input or click on the `Upload Demo Data` Button.
-7. After uploading a dataset to database, upload a cars vega spec from `./sample_data/data/specs/specs/` to the specs inputor click on the `Show me a Demo Spec` Button and see the visualization.
+6. Upload the cars dataset from `./sample_data/data/cars.json` to the data input or click on the `Upload Demo Data` button.
+7. After uploading a dataset to database, upload a cars vega spec from `./sample_data/data/specs/specs/` to the specs inputor click on the `Show me a Demo Spec` button and see the visualization.
 
 ## Running Unit Tests
 1. Again make sure you have the [middleware server running](#running-middleware-server). 
