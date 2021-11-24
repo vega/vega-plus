@@ -18,7 +18,6 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
-    // "prebuild": "rm -rf ./dist",
     "build": "yarn --frozen-lockfile",
     "prepublishOnly": "npm run build",
     "semantic-release": "semantic-release"
