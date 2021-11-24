@@ -128,6 +128,7 @@ function uploadSqlDataHelper(data: Object[], rowsPerChunk: number, startOffset: 
   if (endOffset < data.length) {
     uploadSqlDataHelper(data, rowsPerChunk, endOffset, relationName);
   }
+
 }
 
 function uploadSqlData(data: Object[], relationName: string) {
@@ -136,6 +137,7 @@ function uploadSqlData(data: Object[], relationName: string) {
   const rowBytesSample: number = data.length > 0 ? JSON.stringify(data[0]).length : 1;
   const rowsPerChunk: number = Math.floor(chunkBytes / rowBytesSample);
   uploadSqlDataHelper(data, rowsPerChunk, 0, relationName);
+  alert('Dataset ' + relationName + ' is being uploaded to the database');
 }
 
 function handleData() {
@@ -155,16 +157,20 @@ function handleData() {
   (<HTMLInputElement>document.getElementById('data')).value = '';
 }
 
-function handleDemo() {
+function handleDemoData() {
+  const cars_data = require('../../sample_data/data/cars.json');  
+  uploadSqlData(cars_data, 'cars');
+}
+
+
+function handleDemoViz() {
   const cars_spec = [require('../../sample_data/specs/specs/cars_average_sourced.json'), require('../../sample_data/specs/specs/cars_count_transform_successor.json'), require('../../sample_data/specs/specs/cars_histogram_extent.json'), require('../../sample_data/specs/specs/cars_min_transform_successor.json'), require('../../sample_data/specs/specs/cars_missing_transform_successor.json'), require('../../sample_data/specs/specs/cars_q1_transform_successor.json'), require('../../sample_data/specs/specs/cars_stdev_transform_successor.json'), require('../../sample_data/specs/specs/cars_stdevp_transform_successor.json'), require('../../sample_data/specs/specs/cars_sum_transform_successor.json')]; 
   var temp = Math.floor(Math.random() * 9);
   const demo_spec = cars_spec[temp];
-  const cars_data = require('../../sample_data/data/cars.json');
-  console.log(temp);
-  uploadSqlData(cars_data, 'cars');
-  run(demo_spec);
+  run(demo_spec); 
 }
 
 document.getElementById('vega-spec').addEventListener('change', handleVegaSpec, false);
 document.getElementById('data').addEventListener('change', handleData, false);
-document.getElementById('demoviz').addEventListener('click', handleDemo);
+document.getElementById('demoviz').addEventListener('click', handleDemoViz);
+document.getElementById('demodat').addEventListener('click', handleDemoData);
