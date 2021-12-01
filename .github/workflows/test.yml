@@ -43,7 +43,8 @@ jobs:
           PGPASSWORD: postgres
   
       - name: Install and resolve dependencies
-        run: | 
+        run: |
+          yarn --frozen-lockfile
           yarn build
           yarn build:app
           yarn build:server
