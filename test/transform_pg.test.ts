@@ -67,23 +67,23 @@ beforeAll(() => {
 });
 
 var test_cases = [
-  // ['cars_average_sourced', 'cars'],
-  // ['cars_count_transform_successor', 'cars'],
-  // ['cars_distinct_transform_successor', 'cars'],
+  ['cars_average_sourced', 'cars'],
+  ['cars_count_transform_successor', 'cars'],
+  ['cars_distinct_transform_successor', 'cars'],
   ['cars_histogram_extent', 'binned'],
-  // ['cars_histogram', 'binned'],
-  // ['cars_max_transform_successor', 'cars'],
-  // ['cars_median_transform_successor', 'cars'],
-  // ['cars_min_transform_successor', 'cars'],
-  // ['cars_missing_transform_successor', 'cars'],
-  // ['cars_q1_transform_successor', 'cars'],
-  // ['cars_stderr_transform_successor', 'cars'],
-  // ['cars_stdev_transform_successor', 'cars'],
-  // ['cars_stdevp_transform_successor', 'cars'],
-  // ['cars_sum_transform_successor', 'cars'],
-  // ['cars_valid_transform_successor', 'cars'],
-  // ['cars_variance_transform_successor', 'cars'],
-  // ['cars_variancep_transform_successor', 'cars'],
+  ['cars_histogram', 'binned'],
+  ['cars_max_transform_successor', 'cars'],
+  ['cars_median_transform_successor', 'cars'],
+  ['cars_min_transform_successor', 'cars'],
+  ['cars_missing_transform_successor', 'cars'],
+  ['cars_q1_transform_successor', 'cars'],
+  ['cars_stderr_transform_successor', 'cars'],
+  ['cars_stdev_transform_successor', 'cars'],
+  ['cars_stdevp_transform_successor', 'cars'],
+  ['cars_sum_transform_successor', 'cars'],
+  ['cars_valid_transform_successor', 'cars'],
+  ['cars_variance_transform_successor', 'cars'],
+  ['cars_variancep_transform_successor', 'cars'],
 
 ]
 
@@ -100,7 +100,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     await view.runAsync();
 
     var result_vg = view.data(data_name);
-    console.log(result_vg, spec_file);
+    // console.log(result_vg, spec_file);
 
 
 
@@ -113,12 +113,9 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
       .logLevel(vega.Info)
 
     dataflowRewritePostgres(view_s);
-    //console.log(view['_runtime']['nodes'])
     await view_s.runAsync();
 
     var result_s = view_s.data(data_name);
-    console.log(view_s['_runtime'].data.binned);
-    console.log(view_s.data(data_name));
     compare_tolerance(result_vg, result_s);
   });
 });
