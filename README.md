@@ -19,7 +19,7 @@ The middleware server required for running the Scalable Vega code and interactin
 
 ## Installation
 1. Run `git clone git@github.com:leibatt/scalable-vega.git`.
-2. Run `yarn build` to install scalable-vega library dependencies.
+2. Run `yarn --frozen-lockfile` and `yarn build` to install scalable-vega library dependencies.
 3. For using prepopulated database in demo, look at [additional notes](#additional-notes).
 
 ## Running Middleware Server
