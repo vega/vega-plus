@@ -14,14 +14,20 @@
       ]
     },
     {
-      "name": "binned",
+      "name": "extent",
       "source": "points",
       "transform": [
         {
           "type": "extent",
           "field": "miles_per_gallon",
           "signal": "extent"
-        },
+        }
+      ]
+    },
+    {
+      "name": "binned",
+      "source": "points",
+      "transform": [
         {
           "type": "bin",
           "field": "miles_per_gallon",
