@@ -25,7 +25,7 @@ The middleware server required for running the Scalable Vega code and interactin
 ## Running Middleware Server
 1. Run `yarn build:server` to install scalable-vega server dependencies.
 2. Run `yarn start:server_pg` to start the application server with postgres, for DuckDB run `yarn start:server_duck`
-2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `./packages/server/server.js` file and can be customized.
+2. All the config information for the databases and server (including user, password and ports to be used) is currently stored in the `./packages/server/duck_db.js`/`./packages/server/postgres_db.js` files and can be customized.
 
 ## Running the Web Demo
 1. Make sure you have the [middleware server running](#running-middleware-server).
