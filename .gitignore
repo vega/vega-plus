@@ -1,3 +1,4 @@
+*.js
 env
 yarn.lock
 node_modules
