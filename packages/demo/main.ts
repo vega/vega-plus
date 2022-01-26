@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime'
 import * as vega from 'vega';
 // defines the VTP node type
 import VegaTransformPostgres from 'vega-transform-db'
+// import VegaTransformPostgres from './new_transform'
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { specRewrite } from '../vega-db/spec_rewrite'
 import { view2dot } from '../vega-db/view2dot'
@@ -32,13 +33,117 @@ export function run(spec: vega.Spec) {
   loadOriginalSpec('original', spec, 'Original Specification');
 
   // make a vega execution object (runtime) from the spec
-  // const newspec = specRewrite(spec)
-  // console.log(newspec, 'rewrite');
+  const newspec = specRewrite(spec)
+  console.log(newspec, 'rewrite');
+  const newnewspec = {
+    "$schema": "https://vega.github.io/schema/vega/v5.json",
+    "width": 400,
+    "height": 200,
+    "padding": 10,
+    "data": [
 
-  // const runtime = vega.parse(newspec);
-  // console.log(runtime, 'runtime');
+        {
+            "name": "cars",
+            
+            "transform": [
+                {
+                  "type": "dbtransform",
+                "query": {
+                    "signal": "\"SELECT cylinders,AVG(miles_per_gallon) as miles_per_gallon       FROM cars       GROUP BY cylinders\""
+                },
+                "orig":{
+                    "type": "aggregate",
+                    "fields": [
+                        "miles_per_gallon"
+                    ],
+                    "ops": [
+                        "average"
+                    ],
+                    "as": [
+                        "miles_per_gallon"
+                    ],
+                    "groupby": [
+                        "cylinders"
+                    ]
+                  }
+                }
+            ]
+        }
+    ],
+    "scales": [
+        {
+            "name": "xscale",
+            "type": "band",
+            "domain": {
+                "data": "cars",
+                "field": "cylinders"
+            },
+            "range": "width",
+            "padding": 0.05,
+            "round": true
+        },
+        {
+            "name": "yscale",
+            "domain": {
+                "data": "cars",
+                "field": "miles_per_gallon"
+            },
+            "nice": true,
+            "range": "height"
+        }
+    ],
+    "axes": [
+        {
+            "orient": "bottom",
+            "scale": "xscale",
+            "title": "Number of Cylinders"
+        },
+        {
+            "orient": "left",
+            "scale": "yscale",
+            "title": "Miles per Gallon"
+        }
+    ],
+    "marks": [
+        {
+            "type": "rect",
+            "from": {
+                "data": "cars"
+            },
+            "encode": {
+                "enter": {
+                    "x": {
+                        "scale": "xscale",
+                        "field": "cylinders"
+                    },
+                    "width": {
+                        "scale": "xscale",
+                        "band": 1
+                    },
+                    "y": {
+                        "scale": "yscale",
+                        "field": "miles_per_gallon"
+                    },
+                    "y2": {
+                        "scale": "yscale",
+                        "value": 0
+                    }
+                },
+                "update": {
+                    "fill": {
+                        "value": "steelblue"
+                    }
+                }
+            }
+        }
+    ]
+}
 
-  const runtime = vega.parse(spec)
+
+  const runtime = vega.parse(newspec);
+  console.log(runtime, 'runtime');
+
+  // const runtime = vega.parse(spec)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
@@ -46,7 +151,7 @@ export function run(spec: vega.Spec) {
     .renderer('svg')
     .initialize(document.querySelector('#view'));
 
-  dataflowRewritePostgres(view)
+  // dataflowRewritePostgres(view)
   console.log(view, 'df');
 
   // execute the rewritten dataflow for the view

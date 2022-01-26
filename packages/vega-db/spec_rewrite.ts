@@ -9,7 +9,7 @@ function percentileContSql(field: string, fraction: number, db: string) {
     case "postgres":
       return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
     case "duckdb":
-      return `QUANTILE(${field}, ${fraction})`;
+      return `QUANTILE_CONT(${field}, ${fraction})`;
     default:
       throw Error(`Unsupported database: ${db}`);
   }
@@ -323,10 +323,9 @@ const stackTransformToSql = (tableName: string, transform: StackTransform, db: s
 
 const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
   function parse(str) {
-    return JSON.stringify(parseExpression(str));
+    return parseExpression(str);
   }
   const filter = expr2sql(parse(transform.expr))
-  console.log(parse(transform.expr))
   tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
 
   const sql =
@@ -337,10 +336,11 @@ const filterTransformToSql = (tableName: string, transform: FilterTransform, db:
   return sql
 }
 
-function expr2sql(expr: string) {
+function expr2sql(expr) {
   var memberDepth = 0
   function visit(ast) {
-    const generator = Generators[ast.type];
+    var generator = Generators[ast.type];
+    if (generator == null) console.log('Unsupported type: ' + ast.type);
     return generator(ast);
   }
   const Generators = {
@@ -380,12 +380,106 @@ function expr2sql(expr: string) {
     LogicalExpression: n => {
       n.operator = n.operator === '&&' ? 'AND' : 'OR'
       return visit(n.left) + ' ' + n.operator + ' ' + visit(n.right)
-    },
-  }
+    }
+
+  };
+
   return visit(expr)
 }
 
 export function specRewrite(vgSpec) {
+  const dataSpec = vgSpec.data
+  const dbTransformInd = []   //the data item to be removed(the one only indicating using db and not succeed by other transforms )
+  var table = ""
+  const newData = []
+  var db = "postgres"
+  var transformCounter = 0    // to generate a unique name for the transform in case we need it in nested sql
+
+
+  for (const [index, spec] of dataSpec.entries()) {
+    if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
+      if (spec.transform.length == 1) {
+        dbTransformInd.push(index)
+      }
+      table = spec.transform[0]["relation"]
+      db = spec.transform[0].db ? spec.transform[0].db : db
+
+      // if the data spec doesn't contain any explicit transform, collect all useful fields as data
+      const markFileds: string[] = collectNonTransformFields(spec.name, vgSpec.marks);
+      if (markFileds.length > 0) {
+        spec.transform[0] = {
+          type: "dbtransform",
+          query: {
+            signal: vegaNonTransformToSql(table, markFileds)
+          }
+        }
+      }
+
+      // successor transform
+      if (spec.transform.length > 1) {
+        const dbTransforms = []
+        var skip = false;
+        for (var i = 1; i < spec.transform.length; i++) {
+
+          spec.transform[i].name = spec.transform[i].type + 'Transform' + transformCounter++
+          dataRewrite(table, spec.transform[i], db, dbTransforms, newData)
+          if (skip) break // skip the aggregate follwing bin
+        }
+
+        dataSpec[index].transform = dbTransforms
+      }
+      continue;
+
+    }
+
+    // sourced transform
+    if (spec.transform && spec.transform.length > 0 && dbTransformInd.length > 0) {
+
+      const dbTransforms = []
+      var skip = false;
+      for (const transform of spec.transform) {
+
+        transform.name = transform.type + 'Transform' + transformCounter++
+        for (const ind of dbTransformInd) {
+          if (spec.source && spec.source === dataSpec[ind].name) {
+            console.log(dataSpec[ind].transform[0])
+            table = dataSpec[ind].transform[0].relation
+            delete spec.source
+          }
+        }
+
+        dataRewrite(table, transform, db, dbTransforms, newData)
+        if (skip) break
+      }
+
+      if (dbTransforms.length > 0) {
+        dataSpec[index].transform = dbTransforms
+      } else {
+        dbTransformInd.push(index)
+      }
+      console.log(dbTransforms, index)
+
+    }
+  }
+  console.log(dataSpec, "dataspc")
+  console.log(dbTransformInd)
+  console.log(newData, "newdata")
+
+  // remove the original "dbtransform" transform that indicating using db
+  for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
+    //console.log(dataSpec[i])
+    dataSpec.splice(i, 1);
+  }
+
+  console.log(newData, "newdata")
+  vgSpec.data = newData.concat(dataSpec)
+
+  return vgSpec
+}
+
+
+export function SQLRewrite(vgSpec) {
+  const vega2sql = {}
   const dataSpec = vgSpec.data
   const dbTransformInd = []   //the data item to be removed(the one only indicating using db and not succeed by other transforms )
   var table = ""
@@ -467,4 +561,3 @@ export function specRewrite(vgSpec) {
 
   return vgSpec
 }
-

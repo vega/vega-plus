@@ -67,14 +67,14 @@ var test_cases = [
     ['cars_histogram_extent', 'binned'],
     ['cars_histogram', 'binned'],
     ['cars_max_transform_successor', 'cars'],
-    // ['cars_median_transform_successor', 'cars'],
+    ['cars_median_transform_successor', 'cars'],
     ['cars_min_transform_successor', 'cars'],
-    // ['cars_q1_transform_successor', 'cars'],
+    ['cars_q1_transform_successor', 'cars'],
     ['cars_stderr_transform_successor', 'cars'],
     ['cars_stdev_transform_successor', 'cars'],
     ['cars_stdevp_transform_successor', 'cars'],
     ['cars_sum_transform_successor', 'cars'],
-    //['cars_valid_transform_successor', 'cars'],
+    ['cars_valid_transform_successor', 'cars'],
     ['cars_variance_transform_successor', 'cars'],
     ['cars_variancep_transform_successor', 'cars'],
 
@@ -98,6 +98,7 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
         var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
         spec.data[0].transform[0].db = "duckdb"
         const newspec = specRewrite(spec)
+        console.log(newspec)
 
         const runtime = vega.parse(newspec);
 
@@ -109,6 +110,8 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
         await view_s.runAsync();
 
         var result_s = view_s.data(data_name);
+        console.log(result_s, spec_file)
+
 
         compare_tolerance(result_vg, result_s);
     });

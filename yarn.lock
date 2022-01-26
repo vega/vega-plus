@@ -9046,6 +9046,11 @@ vega-time@^2.0.3, vega-time@^2.0.4, vega-time@~2.0.4:
     d3-time "^2.0.0"
     vega-util "^1.15.2"
 
+vega-transform-db@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.1.tgz#abb6aaf1b877d6332e2864747128e97fdbf86f54"
+  integrity sha512-ssnEGn+GdanUMfW/RX8CbPIzUfIQxOs7YOOEUYIP2me+P5V3aP/rCEKCZqmsI+aDutJtLR+Sw4nyfcO2sRk+jQ==
+
 vega-transform-db@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.8.tgz#3bad473478d3b9d291967ed7a45158a92cca52ea"
