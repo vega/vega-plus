@@ -21,9 +21,9 @@
   },
   "scripts": {
     "demo:cleanup": "rm -rf .cache dist",
-    "dev": "npm run cleanup && parcel ./index.html",
+    "dev": "npm run cleanup && parcel build./index.html",
     "demo:start": "parcel index.html",
-    "build": "parcel build index.html && yarn --frozen-lockfile",
+    "build": "yarn --frozen-lockfile",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
