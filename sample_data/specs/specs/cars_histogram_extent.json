@@ -14,13 +14,13 @@
       ]
     },
     {
-      "name": "extent",
+      "name": "ext",
       "source": "points",
       "transform": [
         {
           "type": "extent",
           "field": "miles_per_gallon",
-          "signal": "extent"
+          "signal": "ext"
         }
       ]
     },
@@ -32,7 +32,7 @@
           "type": "bin",
           "field": "miles_per_gallon",
           "extent": {
-            "signal": "extent"
+            "signal": "ext"
           },
           "maxbins": 10
         },

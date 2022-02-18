@@ -3,6 +3,7 @@ name: Run Tests
 on:
   push:
     branches: [ master ]
+  pull_request:
 
   workflow_dispatch:
 
@@ -70,6 +71,7 @@ jobs:
     
       - name: Install and resolve dependencies
         run: |
+          yarn --frozen-lockfile
           yarn build
           yarn build:app
           yarn build:server

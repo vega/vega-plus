@@ -15,13 +15,13 @@
     "node-fetch": "^2.6.1",
     "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
-    "vega-transform-db": "^1.0.8",
+    "vega-transform-db": "^1.0.9",
     "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
     "demo:cleanup": "rm -rf .cache dist",
-    "dev": "npm run cleanup && parcel ./index.html",
+    "dev": "npm run cleanup && parcel build./index.html",
     "demo:start": "parcel index.html",
     "build": "yarn --frozen-lockfile",
     "deploy": "npm run build && gh-pages -d dist"
