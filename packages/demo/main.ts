@@ -28,14 +28,7 @@ export function run(spec: vega.Spec) {
 
   loadOriginalSpec('original', spec, 'Original Specification');
 
-  // make a vega execution object (runtime) from the spec
-  // const newspec = specRewrite(spec)
-  // console.log(newspec, 'rewrite');
-
-  // const runtime = vega.parse(newspec);
-  // console.log(runtime, 'runtime');
-  // var new_runtime = runtimeRewrite(runtime)
-  var runtime = parse(spec)
+  var runtime = parse(spec, httpOptions)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
@@ -43,7 +36,6 @@ export function run(spec: vega.Spec) {
     .renderer('svg')
     .initialize(document.querySelector('#view'));
 
-  // dataflowRewritePostgres(view)
   console.log(view, 'df');
 
   // execute the rewritten dataflow for the view

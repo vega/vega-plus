@@ -1,4 +1,4 @@
-import { specRewrite } from "../packages/vega-db/spec_rewrite"
+import { specRewrite, runtimeRewrite } from '../packages/vega-db/index';
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -46,15 +46,17 @@ function compare_tolerance(actual, modified) {
 
 
 }
+
+const httpOptions = {
+    "url": 'http://localhost:3000/query',
+    "mode": "cors",
+    "method": "POST",
+    "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+};
+
 beforeAll(() => {
-    const httpOptions = {
-        "url": 'http://localhost:3000/query',
-        "mode": "cors",
-        "method": "POST",
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-    };
 
     (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
     VegaTransformPostgres.setHttpOptions(httpOptions);
@@ -97,10 +99,9 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
         var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
         spec.data[0].transform[0].db = "duckdb"
-        const newspec = specRewrite(spec)
-        console.log(newspec)
-
-        const runtime = vega.parse(newspec);
+        
+        const newSpec = specRewrite(spec)
+        const runtime = runtimeRewrite(vega.parse(newSpec))
 
         var view_s = new vega.View(runtime, {
             renderer: 'none'
@@ -111,7 +112,6 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
 
         var result_s = view_s.data(data_name);
         console.log(result_s, spec_file)
-
 
         compare_tolerance(result_vg, result_s);
     });

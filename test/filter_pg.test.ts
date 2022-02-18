@@ -1,4 +1,4 @@
-import { specRewrite } from "../packages/vega-db/spec_rewrite"
+import { specRewrite, runtimeRewrite } from '../packages/vega-db/index';
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -45,18 +45,19 @@ function compare_tolerance(actual, modified) {
     }
   }
 
-
 }
-beforeAll(() => {
-  const httpOptions = {
-    "url": 'http://localhost:3000/query',
-    "mode": "cors",
-    "method": "POST",
-    "headers": {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  };
 
+const httpOptions = {
+  "url": 'http://localhost:3000/query',
+  "mode": "cors",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/x-www-form-urlencoded"
+  }
+};
+
+beforeAll(() => {
+  
   (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
 });
@@ -125,9 +126,9 @@ describe.each(test_cases)('successor %s', (name, transform) => {
     }
     spec.data[0].transform = transform
     spec.data[0].transform.unshift(dbtransform)
-    const newspec = specRewrite(spec)
 
-    const runtime = vega.parse(newspec);
+    const newSpec = specRewrite(spec)
+    const runtime = runtimeRewrite(vega.parse(newSpec))
 
     var view_s = new vega.View(runtime, {
       renderer: 'none'

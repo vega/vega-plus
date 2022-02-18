@@ -47,6 +47,10 @@ export function runtimeRewrite(runtime) {
     for (const [ind, op] of operators.entries()) {
 
         if (op.type === "scale") {
+            if (!op.params.domain.hasOwnProperty('$ref')) {
+                // domain is explicitly specified
+                break
+            }
             let ref_id = op.params.domain.$ref
             let ref = operators[op.params.domain.$ref - 1]
 
