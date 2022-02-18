@@ -1,4 +1,4 @@
-import { specRewrite } from "../packages/vega-db/spec_rewrite"
+import { specRewrite, runtimeRewrite } from '../packages/vega-db/index';
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -27,9 +27,9 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
   test(spec_file, async () => {
 
     var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
-    const newspec = specRewrite(spec)
     
-    const runtime = vega.parse(newspec);
+    const newSpec = specRewrite(spec)
+    const runtime = runtimeRewrite(vega.parse(newSpec))
 
     var view_s = new vega.View(runtime, {
       renderer: 'none'

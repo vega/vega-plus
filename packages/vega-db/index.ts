@@ -4,7 +4,6 @@ export { runtimeRewrite } from './src/runtime_rewrite';
 import { specRewrite } from './src/spec_rewrite';
 import { runtimeRewrite } from './src/runtime_rewrite'; 
 import * as vega from 'vega';
-// import VegaTransformPostgres from '../demo/new_transform'
 import VegaTransformPostgres from "vega-transform-db"
 
 

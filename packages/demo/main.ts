@@ -1,8 +1,8 @@
 import 'regenerator-runtime/runtime'
 import * as vega from 'vega';
 // defines the VTP node type
-import VegaTransformPostgres from '../demo/new_transform'
-// import VegaTransformPostgres from 'vega-transform-db'
+// import VegaTransformPostgres from '../demo/new_transform'
+import VegaTransformPostgres from 'vega-transform-db'
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { view2dot } from './view2dot'
 var hpccWasm = window['@hpcc-js/wasm'];
