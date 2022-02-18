@@ -23,7 +23,7 @@
     "demo:cleanup": "rm -rf .cache dist",
     "dev": "npm run cleanup && parcel ./index.html",
     "demo:start": "parcel index.html",
-    "build": "yarn --frozen-lockfile",
+    "build": "parcel build index.html && yarn --frozen-lockfile",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {

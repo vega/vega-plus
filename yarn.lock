@@ -9447,11 +9447,6 @@ vega-transform-db@1.0.1:
   resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.1.tgz#abb6aaf1b877d6332e2864747128e97fdbf86f54"
   integrity sha512-ssnEGn+GdanUMfW/RX8CbPIzUfIQxOs7YOOEUYIP2me+P5V3aP/rCEKCZqmsI+aDutJtLR+Sw4nyfcO2sRk+jQ==
 
-vega-transform-db@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.8.tgz#3bad473478d3b9d291967ed7a45158a92cca52ea"
-  integrity sha512-nyykQrnlhHtkacsC55V05XfGYWfjxhtF4O4KEWh3TG73NYGBHlsBwiaOTdCZ6QDT2G4pmn4nxtlmzjAGHAqI4Q==
-
 vega-transform-db@^1.0.9:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/vega-transform-db/-/vega-transform-db-1.0.9.tgz#537168a5f0887d8119bb50ddd0e5f4f626585282"
