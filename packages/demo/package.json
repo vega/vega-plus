@@ -21,7 +21,7 @@
   },
   "scripts": {
     "demo:cleanup": "rm -rf .cache dist",
-    "dev": "npm run cleanup && parcel build./index.html",
+    "dev": "parcel build ./index.html",
     "demo:start": "parcel index.html",
     "build": "yarn --frozen-lockfile",
     "deploy": "npm run build && gh-pages -d dist"
