@@ -1,4 +1,4 @@
-import { dataflowRewritePostgres } from "../packages/vega-db/post_rewrite"
+import { specRewrite, runtimeRewrite } from '../packages/vega-db/index';
 import VegaTransformPostgres from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
@@ -46,21 +46,17 @@ function compare_tolerance(actual, modified) {
 
 
 }
-beforeAll(() => {
-  // const DBOptions = {
-  //   "method": 'postgres'
-  // };
 
-  // (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
-  // VegaTransformPostgres.setDBOptions(DBOptions);
-  const httpOptions = {
-    "url": 'http://localhost:3000/query',
-    "mode": "cors",
-    "method": "POST",
-    "headers": {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  };
+const httpOptions = {
+  "url": 'http://localhost:3000/query',
+  "mode": "cors",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/x-www-form-urlencoded"
+  }
+};
+
+beforeAll(() => {
 
   (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
   VegaTransformPostgres.setHttpOptions(httpOptions);
@@ -100,19 +96,17 @@ describe.each(test_cases)('comparing results', (spec_file, data_name) => {
     await view.runAsync();
 
     var result_vg = view.data(data_name);
-    // console.log(result_vg, spec_file);
-
 
 
     var spec = require(`../sample_data/specs/specs/${spec_file}.json`);
-    const runtime = vega.parse(spec);
+    const newSpec = specRewrite(spec)
+    const runtime = runtimeRewrite(vega.parse(newSpec))
 
     var view_s = new vega.View(runtime, {
       renderer: 'none'
     })
       .logLevel(vega.Info)
 
-    dataflowRewritePostgres(view_s);
     await view_s.runAsync();
 
     var result_s = view_s.data(data_name);

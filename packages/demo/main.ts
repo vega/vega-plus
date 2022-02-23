@@ -1,16 +1,15 @@
 import 'regenerator-runtime/runtime'
 import * as vega from 'vega';
 // defines the VTP node type
+// import VegaTransformPostgres from '../demo/new_transform'
 import VegaTransformPostgres from 'vega-transform-db'
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
-import { specRewrite } from '../vega-db/spec_rewrite'
-import { view2dot } from '../vega-db/view2dot'
+import { view2dot } from './view2dot'
 var hpccWasm = window['@hpcc-js/wasm'];
 const querystring = require('querystring');
 const http = require('http');
-import { dataflowRewritePostgres } from '../vega-db/post_rewrite'
 global.fetch = require('node-fetch');
-
+import { parse } from '../vega-db/index'
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
@@ -20,8 +19,6 @@ export function run(spec: vega.Spec) {
     'mode': 'cors',
     'method': 'POST',
     'headers': {
-      //'Access-Control-Allow-Origin': '*',
-      //'Content-Type': 'application/json'
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   };
@@ -31,14 +28,7 @@ export function run(spec: vega.Spec) {
 
   loadOriginalSpec('original', spec, 'Original Specification');
 
-  // make a vega execution object (runtime) from the spec
-  // const newspec = specRewrite(spec)
-  // console.log(newspec, 'rewrite');
-
-  // const runtime = vega.parse(newspec);
-  // console.log(runtime, 'runtime');
-
-  const runtime = vega.parse(spec)
+  var runtime = parse(spec, httpOptions)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
@@ -46,7 +36,6 @@ export function run(spec: vega.Spec) {
     .renderer('svg')
     .initialize(document.querySelector('#view'));
 
-  dataflowRewritePostgres(view)
   console.log(view, 'df');
 
   // execute the rewritten dataflow for the view

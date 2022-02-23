@@ -1,5 +1,5 @@
+*.js
 env
-yarn.lock
 node_modules
 dist
 yarn-error.log
