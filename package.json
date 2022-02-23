@@ -1,7 +1,10 @@
 {
-  "name": "vega-db-monorepo",
+  "name": "vega-plus",
   "version": "0.0.1",
-  "main": "index.js",
+  "source": "packages/vega-db/index.ts",
+  "main": "packages/vega-db/dist/main.js",
+  "module": "packages/vega-db/dist/module.js",
+  "types": "packages/vega-db/dist/types.d.ts",
   "repository": "git@github.com:leibatt/scalable-vega.git",
   "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
   "license": "BSD-3-Clause",
@@ -18,6 +21,7 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
+    "prepublishOnly": "yarn build",
     "build": "yarn workspace vega-db build",
     "build:app": "yarn workspace vega-db-demo build",
     "build:server": "yarn workspace vega-db-server build",
