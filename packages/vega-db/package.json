@@ -1,14 +1,14 @@
 {
-  "name": "vega-db",
+  "name": "vega-plus",
   "version": "0.0.1",
   "source": "index.ts",
-  "main": "dist/main.js",
+  "main": "dist/index.js",
   "module": "dist/module.js",
   "types": "dist/types.d.ts",
   "repository": "git@github.com:leibatt/scalable-vega.git",
   "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
   "license": "BSD-3-Clause",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@types/node": "^14.0.13",
     "apache-arrow": "^3.0.0",
@@ -21,7 +21,7 @@
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
-    "build": "yarn --frozen-lockfile && parcel build index.ts",
+    "build": "yarn --frozen-lockfile && tsc --noEmit false",
     "prepublishOnly": "npm run build",
     "semantic-release": "semantic-release"
   },

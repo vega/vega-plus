@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime'
 import * as vega from 'vega';
+import {parse} from 'vega-db';
 // defines the VTP node type
 // import VegaTransformPostgres from '../demo/new_transform'
 import VegaTransformPostgres from 'vega-transform-db'
@@ -9,7 +10,6 @@ var hpccWasm = window['@hpcc-js/wasm'];
 const querystring = require('querystring');
 const http = require('http');
 global.fetch = require('node-fetch');
-import { parse } from '../vega-db/index'
 
 export function run(spec: vega.Spec) {
   // (re-)run vega using the scalable vega version
