@@ -7,7 +7,6 @@ function ExtentOpToSql(op, prev) {
 }
 
 function scaleExtent2sql(operators, ref, counter) {
-    console.log("extent for scale")
 
     // find the data source
     let pulse_id = ref.params.pulse.$ref

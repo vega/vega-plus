@@ -61,7 +61,7 @@ export function specRewrite(vgSpec) {
                 transform.name = transform.type + 'Transform' + transformCounter++
                 for (const ind of dbTransformInd) {
                     if (spec.source && spec.source === dataSpec[ind].name) {
-                        console.log(dataSpec[ind].transform[0])
+                        // console.log(dataSpec[ind].transform[0])
                         table = dataSpec[ind].transform[0].relation
                         delete spec.source
                     }
@@ -76,13 +76,10 @@ export function specRewrite(vgSpec) {
             } else {
                 dbTransformInd.push(index)
             }
-            console.log(dbTransforms, index)
+            // console.log(dbTransforms, index)
             
         }
     }
-    console.log(dataSpec, "dataspc")
-    console.log(dbTransformInd)
-    console.log(newData, "newdata")
     
     // remove the original "dbtransform" transform that indicating using db
     for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
@@ -90,7 +87,7 @@ export function specRewrite(vgSpec) {
         dataSpec.splice(i, 1);
     }
     
-    console.log(newData, "newdata")
+    // console.log(newData, "newdata")
     vgSpec.data = newData.concat(dataSpec)
     
     return vgSpec
