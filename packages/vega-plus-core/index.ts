@@ -4,16 +4,12 @@ export { runtimeRewrite } from './src/runtime_rewrite';
 import { specRewrite } from './src/spec_rewrite';
 import { runtimeRewrite } from './src/runtime_rewrite'; 
 import * as vega from 'vega';
-import VegaTransformPostgres from "vega-transform-db"
 
+export function parse(spec: vega.Spec, transform_type: string, transform:vega.Transform, config?:object, option?:object) {
 
-export function parse(spec: vega.Spec, httpOptions) {
-    
-    (vega as any).transforms['dbtransform'] = VegaTransformPostgres;
-    VegaTransformPostgres.setHttpOptions(httpOptions);
-
+    (vega as any).transforms[transform_type] = transform
     const newSpec = specRewrite(spec)
-    const runtime = vega.parse(newSpec)
+    const runtime = vega.parse(newSpec, config, option)
     console.log(runtime)
     return runtimeRewrite(runtime)
 }
