@@ -28,7 +28,7 @@ export function run(spec: vega.Spec) {
 
   loadOriginalSpec('original', spec, 'Original Specification');
 
-  var runtime = parse(spec, httpOptions)
+  var runtime = parse(spec, "dbtransform", VegaTransformPostgres)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
