@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime'
 import * as vega from 'vega';
-import {parse} from 'vega-db';
+import { parse } from '../vega-plus-core/index';
 // defines the VTP node type
 // import VegaTransformPostgres from '../demo/new_transform'
 import VegaTransformPostgres from 'vega-transform-db'

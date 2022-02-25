@@ -22,7 +22,7 @@
   },
   "scripts": {
     "prepublishOnly": "yarn build",
-    "build": "yarn workspace vega-db build",
+    "build": "yarn workspace vega-plus build",
     "build:app": "yarn workspace vega-db-demo build",
     "build:server": "yarn workspace vega-db-server build",
     "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/vega-db/node_modules ./packages/vega-db/dist ./packages/vega-db/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",

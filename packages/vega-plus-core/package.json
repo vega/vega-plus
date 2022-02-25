@@ -1,0 +1,40 @@
+{
+  "name": "vega-plus",
+  "version": "0.0.1",
+  "source": "index.ts",
+  "main": "dist/index.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
+  "repository": "git@github.com:leibatt/scalable-vega.git",
+  "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
+  "license": "BSD-3-Clause",
+  "private": false,
+  "dependencies": {
+    "@types/node": "^14.0.13",
+    "apache-arrow": "^3.0.0",
+    "body-parser": "^1.19.0",
+    "vega": "^5.19.1",
+    "vega-encode": "^4.8.0",
+    "vega-expression": "^5.0.0",
+    "vega-transform-db": "^1.0.9",
+    "vega-transform-omnisci-core": "^0.0.10",
+    "vega-transforms": "^4.9.0"
+  },
+  "scripts": {
+    "build": "yarn --frozen-lockfile && tsc --noEmit false",
+    "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.21",
+    "express": "^4.17.1",
+    "gh-pages": "^3.0.0",
+    "node-fetch": "^2.6.1",
+    "parcel": "^2.3.2",
+    "parcel-bundler": "^1.12.3",
+    "ts-jest": "^26.1.4",
+    "tsc-watch": "^4.2.8",
+    "typescript": "^4.5.2",
+    "webpack": "^4.43.0"
+  }
+}
