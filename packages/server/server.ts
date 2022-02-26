@@ -1,8 +1,8 @@
 import * as bodyParser from 'body-parser';
 import {Duck_Db} from './duck_db.js';
 import {Postgres_Db} from './postgres_db.js'
-const cors = require('cors');
-const express = require('express');
+import cors from 'cors'
+import express from 'express'
 const app = express();
 
 var type = '';

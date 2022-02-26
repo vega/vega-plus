@@ -1,6 +1,6 @@
-const {Pool} = require('pg');
+import {Pool} from 'pg';
 import { Database } from "./models"
-const format = require('pg-format');
+import format from 'pg-format'
 
 export type DbRows = Record<string, unknown>[]
 
