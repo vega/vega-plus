@@ -1,6 +1,6 @@
-const duckdb = require('duckdb');
+import duckdb from 'duckdb'
 import { Database } from "./models"
-const format = require('pg-format');
+import format from 'pg-format'
 
 export type DbRows = Record<string, unknown>[]
 
