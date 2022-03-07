@@ -14,15 +14,14 @@
     "body-parser": "^1.19.0",
     "vega": "^5.19.1",
     "vega-encode": "^4.8.0",
-    "vega-transform-omnisci-core": "^0.0.10",
     "vega-transforms": "^4.9.0"
   },
   "scripts": {
     "server:cleanup": "rm -rf .cache dist",
     "dev": "npm run cleanup",
     "build": "yarn --frozen-lockfile && tsc --noEmit false",
-    "server:start_pg": "./node_modules/.bin/tsc-watch server.ts --onSuccess 'node server.js pg'",
-    "server:start_duck": "./node_modules/.bin/tsc-watch server.ts --onSuccess 'node server.js'"
+    "server:start_pg": "./node_modules/.bin/tsc-watch server.ts --esModuleInterop --onSuccess 'node server.js pg'",
+    "server:start_duck": "./node_modules/.bin/tsc-watch server.ts --esModuleInterop --onSuccess 'node server.js'"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",

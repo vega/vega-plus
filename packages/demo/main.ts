@@ -3,7 +3,7 @@ import * as vega from 'vega';
 import { parse } from '../vega-plus-core/index';
 // defines the VTP node type
 // import VegaTransformPostgres from '../demo/new_transform'
-import VegaTransformPostgres from 'vega-transform-db'
+import VegaTransformDB from "vega-transform-db"
 // includes the actual rewrite rules for the vega dataflow and translation to SQL
 import { view2dot } from './view2dot'
 var hpccWasm = window['@hpcc-js/wasm'];
@@ -23,12 +23,13 @@ export function run(spec: vega.Spec) {
     }
   };
 
-  (vega as any).transforms['dbtransform'] = VegaTransformPostgres;
-  VegaTransformPostgres.setHttpOptions(httpOptions);
+  VegaTransformDB.type('Server');
+  vega.transforms["dbtransform"] = VegaTransformDB;
+  VegaTransformDB.setHttpOptions(httpOptions);
 
   loadOriginalSpec('original', spec, 'Original Specification');
 
-  var runtime = parse(spec, "dbtransform", VegaTransformPostgres)
+  var runtime = parse(spec, "dbtransform", VegaTransformDB)
 
   // bind the execution to a dom element as a view
   var view = new vega.View(runtime)
