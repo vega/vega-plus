@@ -1,11 +1,13 @@
 {
-  "name": "vega-db-server",
-  "version": "0.0.0",
-  "main": "index.js",
+  "name": "vega-plus-server",
+  "version": "0.0.1",
+  "source": "index.ts",
+  "main": "dist/index.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
   "repository": "git@github.com:leibatt/scalable-vega.git",
   "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
   "license": "BSD-3-Clause",
-  "private": true,
   "dependencies": {
     "@types/node": "^14.0.13",
     "apache-arrow": "^3.0.0",
@@ -18,7 +20,7 @@
   "scripts": {
     "server:cleanup": "rm -rf .cache dist",
     "dev": "npm run cleanup",
-    "build": "yarn --frozen-lockfile",
+    "build": "yarn --frozen-lockfile && tsc --noEmit false",
     "server:start_pg": "./node_modules/.bin/tsc-watch server.ts --onSuccess 'node server.js pg'",
     "server:start_duck": "./node_modules/.bin/tsc-watch server.ts --onSuccess 'node server.js'"
   },
