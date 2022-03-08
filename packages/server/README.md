@@ -25,6 +25,6 @@ Or, equavalently, you can import and use our default server code equavalent to t
 ## API Reference
 <a name="run_server" href="#run_server">#</a>
 <b>run_server</b>(<i>type: string = "pg"</i>)
-* type: a string indicating which DBMS to use. We currently support PostgreSQL("pg") and DuckDB("duckdb"). And the defualt type is "pg".
+* type: a string indicating which DBMS to use. We currently support PostgreSQL("pg") and DuckDB("duckdb"). And the default type is "pg".
 
 To be continued with the DB wrapper API...
