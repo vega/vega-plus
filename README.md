@@ -1,4 +1,4 @@
-# Scalable Vega
+# VegaPlus
 
 A demo of how to run Vega with a database. This is a fork of [this project](https://github.com/heavyairship/scalable-vega) by @heavyairship, which is a fork of [another project](https://github.com/vega/scalable-vega) by @domoritz.
 
