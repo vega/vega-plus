@@ -32,8 +32,8 @@
     "start:demo-server": "yarn workspace vega-db-demo demo:start-server",
     "start:demo-duckdb": "yarn workspace vega-db-demo demo:start-duckdb",
     "start:demo-sqlite": "yarn workspace vega-db-demo demo:start-sqlite",
-    "start:server_pg": "yarn workspace vega-db-server server:start_pg",
-    "start:server_duck": "yarn workspace vega-db-server server:start_duck",
+    "start:server_pg": "yarn workspace vega-plus-server server:start_pg",
+    "start:server_duck": "yarn workspace vega-plus-server server:start_duck",
     "start:duckdb-sample": "cd packages/server && cd ../.. && node packages/server/database/duckdb_insertion.js",
     "test": "jest"
   },
