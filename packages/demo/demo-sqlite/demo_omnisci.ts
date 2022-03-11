@@ -1,8 +1,7 @@
 import 'regenerator-runtime/runtime'
 import * as vega from "vega";
 import VegaTransformDB from "vega-transform-db"
-var MapdCon = require("@mapd/connector/dist/browser-connector");
-import { specRewrite } from "vega-plus"
+import { specRewrite } from "../../vega-plus-core/index"
 var htmldiff = require("../dependencies/htmldiff")
 import { view2dot } from '../dependencies/view2dot'
 var hpccWasm = window["@hpcc-js/wasm"];
