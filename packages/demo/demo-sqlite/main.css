@@ -1,0 +1,63 @@
+body {
+  font-family: sans-serif;
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.vega-bind-name {
+  margin-right: 1em;
+}
+
+html {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    pre {
+      border-width: 1 !important;
+      font-size: 1em;
+      max-width: 800px;
+      max-height: 800px;
+      overflow:auto;
+    }
+    .prettyprint pre {
+      max-width: 800px;
+    }
+
+    body {
+      padding: 2em;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .container div {
+      margin-right: 1em;
+      max-width: 500px;
+      padding: 5px;
+    }
+
+    .placeholder{
+      overflow: auto;
+    }
+ins {
+    text-decoration: none;
+    background-color: #d4fcbc;
+}
+
+del {
+    text-decoration: line-through;
+    background-color: #fbb6c2;
+    color: #555;
+}
+
+.topleft {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 18px;
+}
