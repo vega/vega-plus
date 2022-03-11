@@ -83,7 +83,7 @@ jobs:
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
 
-  build_server:
+  build_serverless:
     if: success()
     needs: build_duckdb
     runs-on: ubuntu-latest
