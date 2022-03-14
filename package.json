@@ -1,5 +1,5 @@
 {
-  "name": "vega-plus",
+  "name": "vega-plus-monorepo",
   "version": "0.0.1",
   "source": "packages/vega-db/index.ts",
   "main": "packages/vega-db/dist/main.js",
