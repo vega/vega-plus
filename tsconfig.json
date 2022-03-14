@@ -13,6 +13,6 @@
     ]
   },
   "files": [
-    "./packages/server/server.ts"
+    "./packages/server/index.ts"
   ]
 }
