@@ -1,0 +1,42 @@
+{
+  "author": "Junran Yang, Sai Yerramreddy",
+  "bugs": {
+    "url": "https://github.com/leibatt/vega-transform-pg/issues"
+  },
+  "description": "Vega transform for databases",
+  "devDependencies": {
+    "eslint": "^7.15.0",
+    "microbundle": "^0.13.0"
+  },
+  "peerDependencies": {
+    "vega": "^5.3.0"
+  },
+  "homepage": "https://github.com/leibatt/vega-transform-pg#readme",
+  "jsdelivr": "build/vega-transform-pg.umd.js",
+  "keywords": [
+    "vega",
+    "transform",
+    "database",
+    "postgres",
+    "duckdb"
+  ],
+  "license": "BSD-3-Clause",
+  "main": "build/vega-transform-db.js",
+  "module": "build/vega-transform-db.mjs",
+  "name": "vega-transform-db",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leibatt/vega-transform-pg.git"
+  },
+  "scripts": {
+    "build": "microbundle --external vega --name VegaTransformDB",
+    "lint": "eslint index.js",
+    "postpublish": "git push && git push --tags",
+    "prepublishOnly": "yarn build",
+    "watch": "microbundle watch --external vega --name VegaTransformDB"
+  },
+  "source": "index.js",
+  "umd:main": "build/vega-transform-db.umd.js",
+  "unpkg": "build/vega-transform-db.umd.js",
+  "version": "1.0.10"
+}
