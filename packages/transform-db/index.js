@@ -1,6 +1,5 @@
 import { inherits, ingest, Transform } from "vega";
 const querystring = require('querystring');
-const http = require('http');
 
 /**
  * Generates a function to query data from a database.
