@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm/dist/index.min.js"></script>
+
+  <title>Vega Plus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" type="text/css" media="screen" href="./main.css" />
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="./demo_omnisci.ts"></script>
+  <script src="../dependencies/htmldiff.js"></script>
+</head>
+
+<body>
+  <div class="topleft"><img src="vp.png" style="width:25px;height:25px;"></div>
+
+  <header class="w3-container">
+    <h1>Vega Plus (DuckDB) Demo</h1>
+  </header>
+  <div class="w3-container" align="center">
+  <p>
+    A demo of how to make Vega scalable for massive datasets by pushing some of
+    the necessary computation down into a scalable backend. Check out the code
+    on <a href="https://github.com/leibatt/scalable-vega">GitHub</a>.
+  </p>
+</div>
+
+<div class="w3-panel w3-card w3-hover-shadow">
+  <h2 align="center">Visualization</h2>
+    <h4 align="center">Vega</h4>
+    <div id="vega_view" class="w3-panel w3-card" align="center"> Left </div>
+    <h4 align="center">Vega Plus</h4>
+    <div id="vegap_view" class="w3-panel w3-card" align="center"> Right </div>
+</div>
+
+</div>
+
+<div class="w3-panel w3-card">
+    <h2 align="center">Difference in Specs</h2>
+    <div class="w3-grey" id="output" class="placeholder">
+    </div>
+</div>
+<div class="w3-panel w3-card">
+  <h2 align="center">Vega Plus Dataflow Graph</h2>
+  <div id="graph-placeholder" class="placeholder"></div>
+</div>
+
+</html>

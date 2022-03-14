@@ -71,5 +71,5 @@ Once `vega-transform-db` has been imported and registered, Vega specs can refere
 Similar to Vega's [parse API](https://vega.github.io/vega/docs/api/parser/), our parser requires two additional parameters:
 
 * type: a string which is the type(name) of the custom transform you registered
-* transform: a custome transform object that you registered
+* transform: a custom transform object that you registered
 

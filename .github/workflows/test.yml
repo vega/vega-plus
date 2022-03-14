@@ -47,7 +47,7 @@ jobs:
         run: |
           yarn --frozen-lockfile
           yarn build
-          yarn build:app
+          yarn build:demo
           yarn build:server
       - name: Run Application Server for Postgres
         run: yarn start:server_pg &
@@ -73,7 +73,7 @@ jobs:
         run: |
           yarn --frozen-lockfile
           yarn build
-          yarn build:app
+          yarn build:demo
           yarn build:server
           yarn start:duckdb-sample 
         
@@ -82,3 +82,22 @@ jobs:
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
+
+  build_serverless:
+    if: success()
+    needs: build_duckdb
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+    
+      - name: Install and resolve dependencies
+        run: |
+          yarn --frozen-lockfile
+          yarn build
+        
+      - name: Run Serverless Test for SQLite
+        run: yarn test serverless_sqlite

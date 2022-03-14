@@ -7,6 +7,7 @@
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.13.1-dev282.0",
     "@hpcc-js/wasm": "^1.5.1",
     "@observablehq/graphviz": "0.2.1",
     "@types/node": "^14.0.13",
@@ -20,8 +21,10 @@
   },
   "scripts": {
     "demo:cleanup": "rm -rf .cache dist",
-    "demo:start": "parcel index.html",
-    "build": "yarn --frozen-lockfile && parcel build ./index.html",
+    "demo:start-server": "parcel demo-server/index.html",
+    "demo:start-sqlite": "parcel demo-sqlite/index.html --https",
+    "demo:start-duckdb": "parcel demo-duckdb/index.html --https",
+    "build": "yarn --frozen-lockfile && parcel build --public-url '/vegaplus/' demo-server/index.html demo-sqlite/index.html demo-duckdb/index.html --detailed-report",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
