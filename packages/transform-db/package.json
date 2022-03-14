@@ -5,8 +5,8 @@
   },
   "description": "Vega transform for databases",
   "devDependencies": {
-    "eslint": "^7.15.0",
-    "microbundle": "^0.13.0"
+    "eslint": "^8.11.0",
+    "microbundle": "^0.14.2"
   },
   "peerDependencies": {
     "vega": "^5.3.0"
