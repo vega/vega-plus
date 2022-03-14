@@ -1,5 +1,5 @@
 import { specRewrite, runtimeRewrite } from '../packages/vega-plus-core/index';
-import VegaTransformDB  from "../packages/transform-db"
+import VegaTransformDB from "vega-transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
 

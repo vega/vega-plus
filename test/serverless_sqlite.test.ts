@@ -1,5 +1,5 @@
 import { specRewrite, runtimeRewrite } from '../packages/vega-plus-core/index';
-import VegaTransformDB from "../packages/transform-db"
+import VegaTransformDB from "vega-transform-db"
 import * as vega from "vega"
 var initSqlJs = require('./sql-wasm.js');
 const fs = require("fs");
