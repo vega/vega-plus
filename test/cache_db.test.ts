@@ -1,5 +1,5 @@
 import { specRewrite, runtimeRewrite } from '../packages/vega-plus-core/index';
-import VegaTransformDB from "../packages/transform-db/build/vega-transform-db"
+import VegaTransformDB  from "../packages/transform-db"
 import * as vega from "vega"
 global.fetch = require("node-fetch");
 
@@ -14,8 +14,8 @@ beforeAll(() => {
     }
   };
 
-  (vega as any).transforms["dbtransform"] = VegaTransformPostgres;
-  VegaTransformPostgres.setHttpOptions(httpOptions);
+  (vega as any).transforms["dbtransform"] = VegaTransformDB;
+  VegaTransformDB.setHttpOptions(httpOptions);
 });
 
 var test_cases = [
