@@ -15,7 +15,7 @@ Here is a [complete example](https://github.com/leibatt/scalable-vega/blob/maste
 `/query`. The route `/createSql` is a utility route used during development and testing that creates and
 populates a relation from a list of JSON tuples. The `/query` route forwards an SQL query to a backend database. 
 
-You can run a similar server.ts with 
+You can write a similar server.ts and run it with 
 ```
 tsc --esModuleInterop server.ts
 node server.js pg

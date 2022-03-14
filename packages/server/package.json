@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "module": "dist/module.js",
   "types": "dist/types.d.ts",
-  "repository": "git@github.com:leibatt/scalable-vega.git",
+  "repository": "git@github.com:vega/vega-plus.git",
   "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
   "license": "BSD-3-Clause",
   "dependencies": {
