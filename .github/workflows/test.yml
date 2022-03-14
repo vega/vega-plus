@@ -49,6 +49,7 @@ jobs:
           yarn build
           yarn build:demo
           yarn build:server
+          yarn build:transform
       - name: Run Application Server for Postgres
         run: yarn start:server_pg &
         
@@ -75,6 +76,7 @@ jobs:
           yarn build
           yarn build:demo
           yarn build:server
+          yarn build:transform
           yarn start:duckdb-sample 
         
       - name: Run Application Server for DuckDB
@@ -98,6 +100,7 @@ jobs:
         run: |
           yarn --frozen-lockfile
           yarn build
+          yarn build:transform
         
       - name: Run Serverless Test for SQLite
         run: yarn test serverless_sqlite
