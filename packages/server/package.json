@@ -20,8 +20,8 @@
     "server:cleanup": "rm -rf .cache dist",
     "dev": "npm run cleanup",
     "build": "yarn --frozen-lockfile && tsc --noEmit false",
-    "server:start_pg": "./node_modules/.bin/tsc-watch index.ts --onSuccess 'node index.js pg'",
-    "server:start_duck": "./node_modules/.bin/tsc-watch index.ts --onSuccess 'node index.js'"
+    "server:start_pg": "./node_modules/.bin/tsc-watch index.ts --esModuleInterop --onSuccess 'node index.js pg'",
+    "server:start_duck": "./node_modules/.bin/tsc-watch index.ts --esModuleInterop --onSuccess 'node index.js'"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
