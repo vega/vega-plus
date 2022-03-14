@@ -26,7 +26,6 @@
     "build": "yarn workspace vega-plus build",
     "build:demo": "yarn workspace vega-db-demo build",
     "build:server": "yarn workspace vega-plus-server build",
-    "build:vega-transform-db": "yarn workspace vega-transform-db build",
     "cleanup": "rm -rf .cache dist node_modules && rm -rf ./packages/vega-db/node_modules ./packages/vega-db/dist ./packages/vega-db/.cache && rm -rf ./packages/demo/node_modules ./packages/demo/dist ./packages/demo/.cache && rm -rf ./packages/server/node_modules ./packages/server/dist ./packages/server/.cache",
     "dev": "npm run cleanup && parcel ./packages/demo/index.html",
     "deploy": "npm run build && gh-pages -d dist",
