@@ -9,37 +9,37 @@
   "author": "Junran Yang, Sai Yerramreddy, Hyekang Kevin Joo, Siyao Li, Leilani Battle, Dominik Moritz",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@types/node": "^14.0.13",
-    "apache-arrow": "^3.0.0",
-    "body-parser": "^1.19.0",
-    "vega": "^5.19.1",
-    "vega-encode": "^4.8.0",
-    "vega-transforms": "^4.9.0"
+    "@types/node": "^17.0.21",
+    "apache-arrow": "^7.0.0",
+    "body-parser": "^1.19.2",
+    "vega": "^5.22.0",
+    "vega-encode": "^4.9.0",
+    "vega-transforms": "^4.10.0"
   },
   "scripts": {
     "server:cleanup": "rm -rf .cache dist",
     "dev": "npm run cleanup",
     "build": "yarn --frozen-lockfile && tsc --noEmit false",
-    "server:start_pg": "./node_modules/.bin/tsc-watch index.ts --esModuleInterop --onSuccess 'node index.js pg'",
-    "server:start_duck": "./node_modules/.bin/tsc-watch index.ts --esModuleInterop --onSuccess 'node index.js'"
+    "server:start_pg": "./node_modules/.bin/tsc-watch index.ts --outDir ./dist --esModuleInterop --onSuccess 'node ./dist/index.js pg'",
+    "server:start_duck": "./node_modules/.bin/tsc-watch index.ts --outDir ./dist --esModuleInterop --onSuccess 'node ./dist/index.js'"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.6",
-    "@types/jest": "^26.0.21",
-    "@mapd/connector": "^5.5.1",
+    "@mapd/connector": "^5.5.2",
+    "@types/cors": "^2.8.12",
+    "@types/jest": "^27.4.1",
     "cors": "^2.8.5",
-    "duckdb": "^0.2.5",
-    "express": "^4.17.1",
-    "gh-pages": "^3.0.0",
-    "node-fetch": "^2.6.1",
-    "pg": "^8.2.1",
+    "duckdb": "^0.3.2",
+    "express": "^4.17.3",
+    "gh-pages": "^3.2.3",
+    "jest": "^27.5.1",
+    "node-fetch": "2.6.7",
+    "parcel-bundler": "^1.12.3",
+    "pg": "^8.7.3",
     "pg-format": "^1.0.4",
     "pg-native": "^3.0.0",
-    "jest": "^26.6.3",
-    "parcel-bundler": "^1.12.3",
-    "ts-jest": "^26.1.4",
-    "tsc-watch": "^4.2.8",
-    "typescript": "^4.5.2",
-    "webpack": "^4.43.0"
+    "ts-jest": "^27.1.3",
+    "tsc-watch": "^4.6.2",
+    "typescript": "^4.6.2",
+    "webpack": "^5.70.0"
   }
 }

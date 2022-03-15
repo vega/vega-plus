@@ -2,6 +2,7 @@ env
 node_modules
 dist
 src
+build
 yarn-error.log
 package-lock.json
 .cache

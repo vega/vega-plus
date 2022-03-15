@@ -10,15 +10,15 @@
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
-    "@hpcc-js/wasm": "^1.5.1",
+    "@hpcc-js/wasm": "^1.13.0",
     "@observablehq/graphviz": "0.2.1",
-    "@types/node": "^14.0.13",
-    "body-parser": "^1.19.0",
+    "@types/node": "^17.0.21",
+    "body-parser": "^1.19.2",
     "fs": "^0.0.1-security",
-    "vega": "^5.19.1",
-    "vega-encode": "^4.8.0",
+    "vega": "^5.22.0",
+    "vega-encode": "^4.9.0",
     "vega-transform-db": "^1.0.10",
-    "vega-transforms": "^4.9.0",
+    "vega-transforms": "^4.10.0",
     "web-worker": "^1.2.0"
   },
   "scripts": {
@@ -35,22 +35,22 @@
     "start:demo-sqlite": "yarn workspace vega-db-demo demo:start-sqlite",
     "start:server_pg": "yarn workspace vega-plus-server server:start_pg",
     "start:server_duck": "yarn workspace vega-plus-server server:start_duck",
-    "start:duckdb-sample": "cd packages/server && cd ../.. && node packages/server/database/duckdb_insertion.js",
+    "start:duckdb-sample": "cd packages/server && cd ../.. && rm -f packages/server/database/*.db && rm -f packages/server/database/*.db.wal && node packages/server/database/duckdb_insertion.js",
     "test": "jest"
   },
   "workspaces": [
     "./packages/*"
   ],
   "devDependencies": {
-    "@types/jest": "^26.0.21",
-    "express": "^4.17.1",
-    "gh-pages": "^3.0.0",
-    "jest": "^26.6.3",
-    "node-fetch": "^2.6.1",
+    "@types/jest": "^27.4.1",
+    "express": "^4.17.3",
+    "gh-pages": "^3.2.3",
+    "jest": "^27.5.1",
+    "node-fetch": "^2.6.7",
     "parcel-bundler": "^1.12.3",
-    "ts-jest": "^26.1.4",
-    "tsc-watch": "^4.2.8",
-    "typescript": "4.5.2",
-    "webpack": "^4.43.0"
+    "ts-jest": "^27.1.3",
+    "tsc-watch": "^4.6.2",
+    "typescript": "4.6.2",
+    "webpack": "^5.70.0"
   }
 }
