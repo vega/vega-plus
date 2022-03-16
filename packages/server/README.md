@@ -27,4 +27,26 @@ Or, equavalently, you can import and use our default server code equavalent to t
 <b>run_server</b>(<i>type: string = "pg"</i>)
 * type: a string indicating which DBMS to use. We currently support PostgreSQL("pg") and DuckDB("duckdb"). And the default type is "pg".
 
-To be continued with the DB wrapper API...
+<a name="Postgres_Db" href="#Postgres_Db">#</a>
+<b>Postgres_Db</b>()
+* This loads connection for a default config postgres database, to use a custom postgres config instead of default config, set the `Postgres_Db.pool` to your connection pool for node-postgres. For example,
+```
+var pg_db = Postgres_Db();
+pg_db.pool = new Pool({
+        user: 'postgres',
+        host: 'localhost',
+        database: 'scalable_vega',
+        password: 'postgres',
+        port: 5432,
+    });
+```
+
+<a name="Duck_Db" href="#Duck_Db">#</a>
+<b>Duck_Db</b>()
+* This loads a DuckDB database from a default file location, to assign a DuckDB database from a custom file location, assign it to `Duck_Db.db`. For example,
+```
+var duck_db = Duck_Db();
+duck_db.db = new duckdb.Database("scalable-vega.db");
+```
+
+
