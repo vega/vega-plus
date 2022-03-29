@@ -1,6 +1,7 @@
 # VegaPlus
 
-A demo of how to run Vega with a database. This is a fork of [this project](https://github.com/heavyairship/scalable-vega) by @heavyairship, which is a fork of [another project](https://github.com/vega/scalable-vega) by @domoritz.
+A demo of how to run Vega by offloading computational-intensive operations to a separate database management system. 
+We have written a [demo paper](https://arxiv.org/pdf/2201.06742.pdf) about the research behind. 
 
 ## Workspace Packages
 We used [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) to structure this repository. 
