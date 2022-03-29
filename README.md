@@ -2,17 +2,18 @@
 
 A demo of how to run Vega with a database. This is a fork of [this project](https://github.com/heavyairship/scalable-vega) by @heavyairship, which is a fork of [another project](https://github.com/vega/scalable-vega) by @domoritz.
 
-## Packages
-### [vega-plus-core](https://www.npmjs.com/package/vega-plus)
+## Workspace Packages
+We used [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) to structure this repository. 
+### [vega-plus-core](https://github.com/vega/vega-plus/tree/master/packages/vega-plus-core)
 The primary VegaPlus library component to be used in your application. Install with `yarn add vega-plus-core`.
 
-### demo
+### [demo](https://github.com/vega/vega-plus/tree/master/packages/demo)
 An interactive web demo of VegaPlus components with examples of updating data and chart variables.
 
-### [server](https://www.npmjs.com/package/vega-plus-server)
+### [server](https://github.com/vega/vega-plus/tree/master/packages/server)
 The middleware server for using the VegaPlus with a DBMS backend (we now support PostgreSQL and DuckDB). Install wih `yarn add vega-plus-server`.
 
-### [transform-db](https://www.npmjs.com/package/vega-transform-db)
+### [transform-db](https://github.com/vega/vega-plus/tree/master/packages/transform-db)
 The customized Vega transform used by VegaPlus that sends queries to, and receives results from a DBMS. Install wih `yarn add vega-transform-db`.
 
 ## Developers
