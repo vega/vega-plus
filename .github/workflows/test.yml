@@ -50,9 +50,14 @@ jobs:
           yarn build:demo
           yarn build:server
           yarn build:transform
+
       - name: Run Application Server for Postgres
         run: yarn start:server_pg &
         
+      - name: Sleep for 4 seconds
+        run: sleep 4s
+        shell: bash
+
       - name: Run Yarn Test for Postgres
         run: |
           yarn test transform_pg
@@ -81,6 +86,10 @@ jobs:
         
       - name: Run Application Server for DuckDB
         run: yarn start:server_duck &
+
+      - name: Sleep for 4 seconds
+        run: sleep 4s
+        shell: bash
         
       - name: Run Yarn Test for DuckDB
         run: yarn test transform_duckdb
