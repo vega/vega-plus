@@ -14,6 +14,7 @@ var csv_url = require("../data/flights-1m.csv");
 
 async function DuckDBs(){
   var url = require("../data/flights-1m.parquet");
+  console.log(url, url_loc, window, window.location)
   url = url_loc + url
   const db = new DuckDB<"Test">(url, "flights");
   await db.initialize();
