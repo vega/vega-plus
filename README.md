@@ -3,6 +3,10 @@
 A demo of how to run Vega by offloading computational-intensive operations to a separate database management system. 
 We have written a [demo paper](https://arxiv.org/pdf/2201.06742.pdf) about the research behind. 
 
+## Demos
+- 3M flights in the browser with [DuckDB-WASM](https://github.com/duckdb/duckdb-wasm): https://vega.github.io/vega-plus/demo-duckdb
+- 3M flights in the browser with [SQL.JS](https://github.com/sql-js/sql.js): https://vega.github.io/vega-plus/demo-sqlite
+
 ## Workspace Packages
 We used [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) to structure this repository. 
 ### [vega-plus-core](https://github.com/vega/vega-plus/tree/master/packages/vega-plus-core)
