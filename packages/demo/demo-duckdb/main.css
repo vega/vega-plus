@@ -4,6 +4,62 @@ body {
   max-width: 1000px;
 }
 
+.loader {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 40px;
+  height: 40px;
+  margin-right: 20px;
+  border-radius: 50%;
+  animation: breathe 2000ms infinite;
+}
+
+.dot:nth-child(1) {
+  background: red;
+  animation-delay: 100ms;
+}
+
+.dot:nth-child(2) {
+  background: orange;
+  animation-delay: 300ms;
+}
+
+.dot:nth-child(3) {
+  background: yellow;
+  animation-delay: 500ms;
+}
+
+.dot:nth-child(4) {
+  background: green;
+  animation-delay: 700ms;
+}
+
+.dot:nth-child(5) {
+  background: blue;
+  animation-delay: 900ms;
+}
+
+.dot:nth-child(6) {
+  background: purple;
+  animation-delay: 1100ms;
+}
+
+@keyframes breathe {
+  50% {
+      width: 0;
+      height: 0;
+  }
+  100% {
+      transform: scale(1);
+  }
+}
+
 .vega-bind-name {
   margin-right: 1em;
 }

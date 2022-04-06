@@ -8,12 +8,13 @@ var hpccWasm = window["@hpcc-js/wasm"];
 import { DuckDB } from "../src"
 
 
-var url_loc = window.location.toString();
+var url_loc = window.location.origin.toString();
 var db = DuckDBs()
 var csv_url = require("../data/flights-1m.csv");
 
 async function DuckDBs(){
   var url = require("../data/flights-1m.parquet");
+  console.log(url, url_loc, window, window.location)
   url = url_loc + url
   const db = new DuckDB<"Test">(url, "flights");
   await db.initialize();
@@ -31,7 +32,7 @@ db.then(function(db){
 
     VegaTransformDB.type('Serverless');
     VegaTransformDB.QueryFunction(duck_db_query);
-    const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec, null, 4) + "</pre>"
+    const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
 
 
     const newspec = specRewrite(vega_spec)
@@ -59,7 +60,7 @@ db.then(function(db){
     // assign view and vega to window so we can debug them
     window["vega"] = vega;
     window["view"] = view;
-    const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec, null, 4) + "</pre>"
+    const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec['data'], null, 4) + "</pre>"
     let output = htmldiff(oldSpec, newSpec);
 
     // Show HTML diff output as HTML (crazy right?)!

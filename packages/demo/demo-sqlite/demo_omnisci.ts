@@ -8,7 +8,7 @@ var hpccWasm = window["@hpcc-js/wasm"];
 import { SqliteDB } from "../src";
 
 
-var url_loc = window.location.toString();
+var url_loc = window.location.origin.toString();
 var csv_url = require("../data/flights-1m.csv");
 var SQL_db = sqliteDB()
 
@@ -33,7 +33,7 @@ SQL_db.then(function(SQL_db){
 
     VegaTransformDB.type('Serverless');
     VegaTransformDB.QueryFunction(sql_query);
-    const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec, null, 4) + "</pre>"
+    const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
 
 
     const newspec = specRewrite(vega_spec)
@@ -61,7 +61,7 @@ SQL_db.then(function(SQL_db){
     // assign view and vega to window so we can debug them
     window["vega"] = vega;
     window["view"] = view;
-    const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec, null, 4) + "</pre>"
+    const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec['data'], null, 4) + "</pre>"
     let output = htmldiff(oldSpec, newSpec);
 
     // Show HTML diff output as HTML (crazy right?)!
