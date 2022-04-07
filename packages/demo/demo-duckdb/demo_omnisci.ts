@@ -10,10 +10,10 @@ import { DuckDB } from "../src"
 
 var url_loc = window.location.origin.toString();
 var db = DuckDBs()
-var csv_url = require("../data/flights-1m.csv");
+var csv_url = require("../data/flights-3m.csv");
 
 async function DuckDBs(){
-  var url = require("../data/flights-1m.parquet");
+  var url = require("../data/flights-3m.parquet");
   console.log(url, url_loc, window, window.location)
   url = url_loc + url
   const db = new DuckDB<"Test">(url, "flights");
@@ -94,7 +94,7 @@ const vegaplus_spec = {
   "signals": [
     {
       "name": "field",
-      "value": "ARR_TIME",
+      "value": "DISTANCE",
       "bind": {
         "input": "select",
         "options": [
@@ -103,7 +103,7 @@ const vegaplus_spec = {
     },
     {
       "name": "maxbins",
-      "value": 20,
+      "value": 50,
       "bind": {
         "input": "range",
         "min": 1,
@@ -273,7 +273,7 @@ const vega_spec = {
   "signals": [
     {
       "name": "field",
-      "value": "ARR_TIME",
+      "value": "DISTANCE",
       "bind": {
         "input": "select",
         "options": [
@@ -282,7 +282,7 @@ const vega_spec = {
     },
     {
       "name": "maxbins",
-      "value": 20,
+      "value": 50,
       "bind": {
         "input": "range",
         "min": 1,

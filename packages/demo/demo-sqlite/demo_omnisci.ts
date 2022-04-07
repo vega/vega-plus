@@ -9,11 +9,11 @@ import { SqliteDB } from "../src";
 
 
 var url_loc = window.location.origin.toString();
-var csv_url = require("../data/flights-1m.csv");
+var csv_url = require("../data/flights-3m.csv");
 var SQL_db = sqliteDB()
 
 async function sqliteDB(){
-  var data_url = require("../data/flights-1m.db")
+  var data_url = require("../data/flights-3m.db")
   data_url = url_loc + data_url
   const db = new SqliteDB<"Test">(data_url)
   await db.initialize();
@@ -96,7 +96,7 @@ const vegaplus_spec = {
   "signals": [
     {
       "name": "field",
-      "value": "ARR_TIME",
+      "value": "DISTANCE",
       "bind": {
         "input": "select",
         "options": [
@@ -105,7 +105,7 @@ const vegaplus_spec = {
     },
     {
       "name": "maxbins",
-      "value": 20,
+      "value": 50,
       "bind": {
         "input": "range",
         "min": 1,
@@ -275,7 +275,7 @@ const vega_spec = {
   "signals": [
     {
       "name": "field",
-      "value": "ARR_TIME",
+      "value": "DISTANCE",
       "bind": {
         "input": "select",
         "options": [
@@ -284,7 +284,7 @@ const vega_spec = {
     },
     {
       "name": "maxbins",
-      "value": 20,
+      "value": 50,
       "bind": {
         "input": "range",
         "min": 1,
