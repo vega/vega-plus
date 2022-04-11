@@ -47,8 +47,8 @@ SQL_db.then(function(SQL_db){
     console.log("Normal Vega Done", view);
 
     const newspec_vp = specRewrite(vegaplus_spec)
-    rename(newspec_vp.data, "dbtransform")
-    vega.transforms["dbtransform"] = VegaTransformDB;
+    rename(newspec_vp.data, "dbtransform");
+    (vega as any).transforms["dbtransform"] = VegaTransformDB;
     console.log("Vega Plus Start");  
     const runtime_vp = vega.parse(newspec_vp);
     const view_vp = new vega.View(runtime_vp)
@@ -67,7 +67,7 @@ SQL_db.then(function(SQL_db){
     // Show HTML diff output as HTML (crazy right?)!
     document.getElementById("output").innerHTML = output;
 
-    view.runAfter(view => {
+    view_vp.runAfter(view => {
       const dot = `${view2dot(view)}`
       hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
         const placeholder = document.getElementById("graph-placeholder");
@@ -146,7 +146,8 @@ const vegaplus_spec = {
           },
           "maxbins": {
             "signal": "maxbins"
-          }
+          },
+          "nice": false
         },
         {
           "type": "aggregate",

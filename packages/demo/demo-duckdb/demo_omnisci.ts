@@ -30,8 +30,8 @@ db.then(function(db){
       return results;
     }
 
-    VegaTransformDB.type('Serverless');
-    VegaTransformDB.QueryFunction(duck_db_query);
+    (VegaTransformDB as any).type('Serverless');
+    (VegaTransformDB as any).QueryFunction(duck_db_query);
     const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
 
 
@@ -46,8 +46,8 @@ db.then(function(db){
     console.log("Normal Vega Done");
 
     const newspec_vp = specRewrite(vegaplus_spec)
-    rename(newspec_vp.data, "dbtransform")
-    vega.transforms["dbtransform"] = VegaTransformDB;
+    rename(newspec_vp.data, "dbtransform");
+    (vega as any).transforms["dbtransform"] = VegaTransformDB;
     console.log("Vega Plus Start");  
     const runtime_vp = vega.parse(newspec_vp);
     const view_vp = new vega.View(runtime_vp)
@@ -66,7 +66,7 @@ db.then(function(db){
     // Show HTML diff output as HTML (crazy right?)!
     document.getElementById("output").innerHTML = output;
 
-    view.runAfter(view => {
+    view_vp.runAfter(view => {
       const dot = `${view2dot(view)}`
       hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
         const placeholder = document.getElementById("graph-placeholder");
@@ -144,7 +144,8 @@ const vegaplus_spec = {
           },
           "maxbins": {
             "signal": "maxbins"
-          }
+          },
+          "nice": false
         },
         {
           "type": "aggregate",
@@ -319,7 +320,8 @@ const vega_spec = {
           },
           "maxbins": {
             "signal": "maxbins"
-          }
+          },
+          "nice": false
         },
         {
           "type": "aggregate",

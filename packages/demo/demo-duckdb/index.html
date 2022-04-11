@@ -24,7 +24,15 @@
   <p>
     A demo of how to make Vega scalable for massive datasets by pushing some of
     the necessary computation down into a scalable backend. Check out the code
-    on <a href="https://github.com/leibatt/scalable-vega">GitHub</a>. This demo downnloads a dataset with 3M records.
+    on <a href="https://github.com/leibatt/scalable-vega">GitHub</a>. 
+  </p>
+  <p>
+    Note that at the beginning, the demo downnloads a dataset with 3M records.
+  </p>
+  <p>
+    This demo consists of three parts. With the first view, you can interact with the widegts and compare the latency between Vega and Vega Plus. 
+    From the second view you can see how we rewrite the Vega transforms in SQL so that they can be executed in DuckDB.
+    The last view is a visualization of the underlying Vega Plus dataflow graph, you can hover on the nodes in highlight to read the extracted SQL queries. 
   </p>
 </div>
 

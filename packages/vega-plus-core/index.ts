@@ -5,7 +5,7 @@ import { specRewrite } from './src/spec_rewrite';
 import { runtimeRewrite } from './src/runtime_rewrite'; 
 import * as vega from 'vega';
 
-export function parse(spec: vega.Spec, transform_type: string, transform:vega.Transform, config?:object, option?:object) {
+export function parse(spec: vega.Spec, transform_type: string, transform:any, config?:object, option?:object) {
 
     (vega as any).transforms[transform_type] = transform
     const newSpec = specRewrite(spec)
