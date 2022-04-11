@@ -1,7 +1,17 @@
 # VegaPlus
 
 A demo of how to run Vega by offloading computational-intensive operations to a separate database management system. 
-We have written a [demo paper](https://arxiv.org/pdf/2201.06742.pdf) about the research behind. 
+We have written a [demo paper](https://arxiv.org/pdf/2201.06742.pdf) about the research behind. Please cite us if you use Vega Plus in a publication.
+
+```bib 
+@article{2201.06742,
+Author = {Junran Yang and Hyekang Kevin Joo and Sai S. Yerramreddy and Siyao Li and Dominik Moritz and Leilani Battle},
+Title = {Demonstration of VegaPlus: Optimizing Declarative Visualization Languages},
+Year = {2022},
+Eprint = {arXiv:2201.06742},
+Doi = {10.1145/3514221.3520168},
+}
+```
 
 ## Demos
 - 3M flights in the browser with [DuckDB-WASM](https://github.com/duckdb/duckdb-wasm): https://vega.github.io/vega-plus/demo-duckdb

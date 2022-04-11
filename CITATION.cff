@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+url: "https://github.com/vega/vega-plus"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Yang"
+      given-names: "Junran"
+    - family-names: "Joo"
+      given-names: "Hyekang Kevin"
+    - family-names: "Yerramreddy"
+      given-names: "Sai S."
+    - family-names: "Li"
+      given-names: "Siyao"
+    - family-names: "Moritz"
+      given-names: "Dominik"
+    - family-names: "Battle"
+      given-names: "Leilani"
+  title: "Demonstration of VegaPlus: Optimizing Declarative Visualization Languages"
+  doi: 10.1145/3514221.3520168
+  year: 2022
