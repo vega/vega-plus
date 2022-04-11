@@ -4,7 +4,7 @@ A demo of how to run Vega by offloading computational-intensive operations to a 
 We have written a [demo paper](https://arxiv.org/pdf/2201.06742.pdf) about the research behind. Please cite us if you use Vega Plus in a publication.
 
 ```bib 
-@article{2201.06742,
+@article{yang2022vegaplus,
 Author = {Junran Yang and Hyekang Kevin Joo and Sai S. Yerramreddy and Siyao Li and Dominik Moritz and Leilani Battle},
 Title = {Demonstration of VegaPlus: Optimizing Declarative Visualization Languages},
 Year = {2022},
