@@ -1,18 +1,6 @@
 import { AggregateTransform } from "vega";
 
-function percentileContSql(field: string, fraction: number, db: string) {
-    // creates a percentile predicate for a SQL query
-    switch (db.toLowerCase()) {
-        case "postgres":
-        return `PERCENTILE_CONT(${fraction}) WITHIN GROUP (ORDER BY ${field})`;
-        case "duckdb":
-        return `QUANTILE_CONT(${field}, ${fraction})`;
-        default:
-        throw Error(`Unsupported database: ${db}`);
-    }
-}
-
-function aggregateOpToSql(op: string, field: string, db: string) {
+function aggregateOpToSql(op: string, field: string, db?: string) {
     // Converts supported Vega operations to SQL
     // for the given field.
     // FixMe: we will need to eventually support the case where
@@ -43,11 +31,11 @@ function aggregateOpToSql(op: string, field: string, db: string) {
         case "stderr":
         return `STDDEV_SAMP(${field})/SQRT(COUNT(${field}))`;
         case "median":
-        return percentileContSql(field, 0.5, db);
+        return `PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${field})`;
         case "q1":
-        return percentileContSql(field, 0.25, db);
+        return `PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ${field})`;
         case "q3":
-        return percentileContSql(field, 0.75, db);
+        return `PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ${field})`;
         case "min":
         return `MIN(${field})`;
         case "max":
@@ -61,7 +49,7 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
     const groupby = (transform.groupby as string[])
     const selectionList = groupby.slice()
     const validOpIdxs = [];
-    tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
+    tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.alias}` : tableName
     
     for (const [index, field] of (transform.fields as string[]).entries()) {
         

@@ -1,4 +1,4 @@
-import {FilterTransform} from "vega";
+import {FilterTransform, None} from "vega";
 import { parseExpression } from "vega-expression";
 
 export const filterTransformToSql = (tableName: string, transform: FilterTransform, db: string, prev: any) => {
@@ -6,7 +6,11 @@ export const filterTransformToSql = (tableName: string, transform: FilterTransfo
         return parseExpression(str);
     }
     const filter = expr2sql(parse(transform.expr))
-    tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
+    if (filter === null) {
+        console.log("return null")
+        return null
+    }
+    tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.alias}` : tableName
     
     const sql =
     `"SELECT * \
@@ -18,9 +22,15 @@ export const filterTransformToSql = (tableName: string, transform: FilterTransfo
 
 function expr2sql(expr) {
     var memberDepth = 0
+    var invalid = false
+
     function visit(ast) {
         var generator = Generators[ast.type];
-        if (generator == null) console.log('Unsupported type: ' + ast.type);
+        if (generator == null) {
+            invalid = true
+            console.log('Unsupported type: ' + ast.type);
+            return
+        }
         return generator(ast);
     }
     const Generators = {
@@ -63,6 +73,7 @@ function expr2sql(expr) {
         }
         
     };
-    
-    return visit(expr)
+    let expr_str = visit(expr)
+
+    return invalid? null : expr_str
 }

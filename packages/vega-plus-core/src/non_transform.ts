@@ -11,6 +11,8 @@ export function vegaNonTransformToSql(tableName: string, markFields: string[]) {
 }
 
 export function collectNonTransformFields(dataName: string, marks: any) {
+
+    // TODO: this was for dataflow, need to be changed to work for specs
     const fields: string[] = []
     for (const [index, mark] of marks.entries()) {
         if (mark.encode && mark.encode.enter && mark.from && mark.from.data === dataName) {

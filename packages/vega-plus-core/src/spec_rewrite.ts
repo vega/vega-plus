@@ -19,6 +19,7 @@ export function specRewrite(vgSpec) {
         if (spec.transform && spec.transform.length > 0 && spec.transform[0].type === "dbtransform") {
             if (spec.transform.length == 1) {
                 dbTransformInd.push(index)
+                console.log(dbTransformInd)
             }
             table = spec.transform[0]["relation"]
             db = spec.transform[0].db ? spec.transform[0].db : db
@@ -56,7 +57,7 @@ export function specRewrite(vgSpec) {
             
             const dbTransforms = []
             var skip = false;
-            for (const transform of spec.transform) {
+            for (const [index, transform] of spec.transform.entries()) {
                 
                 transform.name = transform.type + 'Transform' + transformCounter++
                 for (const ind of dbTransformInd) {
@@ -67,8 +68,11 @@ export function specRewrite(vgSpec) {
                     }
                 }
                 
-                dataRewrite(table, transform, db, dbTransforms, newData)
-                if (skip) break
+                skip = dataRewrite(table, transform, db, dbTransforms, newData)
+                if (skip) {
+                    dbTransforms.push(...spec.transform.slice(index))
+                    break
+                }
             }
             
             if (dbTransforms.length > 0) {
@@ -83,13 +87,14 @@ export function specRewrite(vgSpec) {
     
     // remove the original "dbtransform" transform that indicating using db
     for (var i = dbTransformInd.length - 1; dataSpec.length > 1 && i >= 0; i--) {
-        //console.log(dataSpec[i])
-        dataSpec.splice(i, 1);
+        console.log(i)
+        console.log(dataSpec[dbTransformInd[i]], "remove")
+        dataSpec.splice(dbTransformInd[i], 1);
     }
     
     // console.log(newData, "newdata")
     vgSpec.data = newData.concat(dataSpec)
-    
+    console.log(vgSpec)
     return vgSpec
 }
 
@@ -117,41 +122,50 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     }
     
     else if (transform.type === "bin") {
+        // TODO: need to include previous queries like in crossfilter
+        var prev = dbTransforms.pop() ?? null // null or a dbtransform
+        tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.name}` : tableName
+
         const maxbins = transform.maxbins ? transform.maxbins : 10
         let extent = {}
         
         if (transform.extent.hasOwnProperty("signal")) {
-            // getting "extent" from the data item that converted from signal
+            // geting "extent" from the data item that converted from signal
             const name = transform.extent["signal"]
             extent["signal"] = `[data('${name}')[0]['min'], data('${name}')[0]['max']]`
-        } else {
-            // extent is assigned explicitly as [min, max]
+        } else if (Array.isArray(transform.extent)){
+            // extent is assigned explicitly as the array [min, max]
             extent = transform.extent
-        }
+        } 
         
         var query = null;
+        let bin_name = `bin_${newData.length}`
+        let bin_signal = transform.signal? transform.signal : bin_name
+        let bin0 = transform.as? transform.as[0] : "bin0"
+        let bin1 = transform.as? transform.as[1] : "bin1"
         
         if (transform.field.hasOwnProperty("signal")) {
             
-            query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where " + ${transform.field['signal']} + " is null"`
-            
-            query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "`
-            
+            // query = `" select bin0 +" + ${bin_name}.step + " as bin1 , * from (select " + bins.step + " * floor(cast( " + ${transform.field['signal']} + " as float)/" + bins.step + ") as bin0, * from ${tableName} where " + ${transform.field['signal']} + " between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where " + ${transform.field['signal']} + " is null"`
+            query = `" select ${bin0} +" + ${bin_signal}.step + " as ${bin1}, * from (select " + ${bin_signal}.start + " + " + ${bin_signal}.step + " * floor((cast( " + ${transform.field['signal']} + " as float) - " + ${bin_signal}.start + ")/" + ${bin_signal}.step + ") as ${bin0}, * from ${tableName} where " + ${transform.field['signal']} + " between " + ${bin_signal}.start + " and " + ${bin_signal}.stop + ") as sub "`            
         } else {
             
-            query = `" select bin0 +" + bins.step + " as bin1 , * from (select " + bins.step + " * floor(cast(${transform.field} as float)/" + bins.step + ") as bin0, * from ${tableName} where ${transform.field} between " + bins.start + " and " + bins.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null"`
-            
+            // query = `" select bin0 +" + ${bin_signal}.step + " as bin1, * from (select " + ${bin_signal}.step + " * floor(cast(${transform.field} as float)/" + ${bin_signal}.step + ") as bin0, * from ${tableName} where ${transform.field} between " + ${bin_signal}.start + " and " + ${bin_signal}.stop + ") as sub "+ " UNION ALL select NULL as bin0, NULL as bin1, * from ${tableName} where ${transform.field} is null"`
+            query = `" select ${bin0} +" + ${bin_signal}.step + " as ${bin1}, * from (select " + ${bin_signal}.start + " + " + ${bin_signal}.step + " * floor((cast(${transform.field} as float) - "+${bin_signal}.start+")/" + ${bin_signal}.step + ") as ${bin0}, * from ${tableName} where ${transform.field} between " + ${bin_signal}.start + " and " + ${bin_signal}.stop + ") as sub "`
+
         }
         
         newData.push({
-            name: "bin",
+            name:bin_name,
             transform: [
                 {
                     type: "bin",
                     field: null,
-                    signal: "bins",
+                    as: [bin0, bin1],
+                    signal: bin_signal,
                     maxbins: maxbins,
-                    extent: extent
+                    extent: extent,
+                    nice: false
                 }
             ]
         })
@@ -180,12 +194,18 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
     
     else if (transform.type === "filter") {
         var prev = dbTransforms.pop() ?? null // null or a dbtransform
+        let sql = filterTransformToSql(tableName, transform, db, prev)
+
+        if (sql === null) {
+            console.log("skip")
+            return true
+        }
         
         dbTransforms.push({
             type: "dbtransform",
             name: transform['name'],
             query: {
-                signal: filterTransformToSql(tableName, transform, db, prev)
+                signal: sql
             }
         })
     }
@@ -228,6 +248,11 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
                 signal: collectTransformToSql(tableName, transform, db)
             }
         })
+    }
+
+    else {
+        // TODO: 
+        dbTransforms.push(transform)
     }
     
 }
