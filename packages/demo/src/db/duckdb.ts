@@ -30,9 +30,24 @@ export class DuckDB<Id extends string> {
   async queries(q: string): Promise<any> {
     var conn = await this.db.connect();
     const results = await conn.query(q);
-    var temp = results.toArray().toString();
-    temp = '[' + temp + ']'
-    temp = JSON.parse(temp);
+    // var temp = results.toArray().toString();
+    // temp = JSON.parse('['+temp+']');
+
+    // let temp = results.toArray().map(Object.fromEntries(
+    //   Object.entries(object1)
+    //   .map(([ key, val ]) => [ key, val * 2 ])
+    // ));
+
+    // let temp = Object.fromEntries(results.toArray().map([key, val] => [key, Number(val)]));
+    // let temp = results.toArray().map(e=> e[1] = Number(e[1]))
+    // temp = temp.map(Object.fromEntries)
+
+    let temp = results.toArray().map(Object.fromEntries)
+    temp.map(d=> {for (let key in d) {
+      d[key] = Number(d[key])
+    }
+    })
+
     return temp;
   }
 }

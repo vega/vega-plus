@@ -21,58 +21,147 @@ async function DuckDBs(){
   return db
 }
 
-
-
-
+async function time_view(runtime, querySelector) {
+  let start = Date.now()
+  console.log(start, "Start");  
+  const view = await new vega.View(runtime)
+    .logLevel(vega.Info)
+    .renderer("svg")
+    .initialize(document.querySelector(querySelector)).runAsync();
+  let end = Date.now()
+  console.log(end, "Done");
+  return {view: view, time: end - start}
+}
 db.then(function(db){
     async function duck_db_query(query){
       const results = await db.queries(query);
       return results;
     }
 
-    (VegaTransformDB as any).type('Serverless');
-    (VegaTransformDB as any).QueryFunction(duck_db_query);
-    const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
+    (async function() {
+      (VegaTransformDB as any).type('Serverless');
+      (VegaTransformDB as any).QueryFunction(duck_db_query);
+      const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
 
 
-    const newspec = specRewrite(vega_spec)
-    const runtime = vega.parse(newspec);
-    console.log("Normal Vega Start");  
-    const view = new vega.View(runtime)
-      .logLevel(vega.Info)
-      .renderer("svg")
-      .initialize(document.querySelector("#vega_view"));
-    view.runAsync();
-    console.log("Normal Vega Done");
+      const newspec = specRewrite(vega_spec)
+      const runtime = vega.parse(newspec);
+      console.log(Date.now(), "Normal Vega Start");  
+      console.log(runtime)
 
-    const newspec_vp = specRewrite(vegaplus_spec)
-    rename(newspec_vp.data, "dbtransform");
-    (vega as any).transforms["dbtransform"] = VegaTransformDB;
-    console.log("Vega Plus Start");  
-    const runtime_vp = vega.parse(newspec_vp);
-    const view_vp = new vega.View(runtime_vp)
-      .logLevel(vega.Info)
-      .renderer("svg")
-      .initialize(document.querySelector("#vegap_view"));  
-    view_vp.runAsync();
-    console.log("Vega Plus Done");
+      const normal_vg = await time_view(runtime, "#vega_view")
+      console.log(normal_vg.time, "Normal Vega");
+      const view = normal_vg.view
 
-    // assign view and vega to window so we can debug them
-    window["vega"] = vega;
-    window["view"] = view;
-    const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec['data'], null, 4) + "</pre>"
-    let output = htmldiff(oldSpec, newSpec);
+      const newspec_vp = specRewrite(vegaplus_spec)
+      rename(newspec_vp.data, "dbtransform");
+      (vega as any).transforms["dbtransform"] = VegaTransformDB;
+      const runtime_vp = vega.parse(newspec_vp);
 
-    // Show HTML diff output as HTML (crazy right?)!
-    document.getElementById("output").innerHTML = output;
+      let vg_p = await time_view(runtime_vp, "#vegap_view")
+      console.log(vg_p.time, "Vega Plus");
+      console.log(vg_p.view)
+      let view_vp = vg_p.view
 
-    view_vp.runAfter(view => {
-      const dot = `${view2dot(view)}`
-      hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
-        const placeholder = document.getElementById("graph-placeholder");
-        placeholder.innerHTML = svg;
+      vg_p.view.addSignalListener('field', function(name, value) {
+        console.log(`${name}_${value}: ${Date.now()}`);
       });
-    })
+      
+
+
+      // assign view and vega to window so we can debug them
+      window["vega"] = vega;
+      window["view"] = view;
+      const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec['data'], null, 4) + "</pre>"
+      let output = htmldiff(oldSpec, newSpec);
+
+      // Show HTML diff output as HTML (crazy right?)!
+      document.getElementById("output").innerHTML = output;
+
+      view_vp.runAfter(view => {
+        console.log("runafter")
+        const dot = `${view2dot(view)}`
+        hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
+          const placeholder = document.getElementById("graph-placeholder");
+          placeholder.innerHTML = svg;
+        });
+      })
+
+      function specLoad(format, url) {
+        return {
+          data: [
+            {name: 'table', format: format, "url": url}
+          ]
+        };
+      }
+
+      async function testReadCSV(csv) {
+        const  spec = specLoad({type: 'csv'}, csv);
+      
+        let t = Date.now();
+        await new vega.View(vega.parse(spec)).runAsync();
+        return Date.now() - t;
+      }
+
+      let load =  await testReadCSV(url_loc + csv_url)
+      console.log(load, "load time")
+      
+    })();
+
+
+    // (VegaTransformDB as any).type('Serverless');
+    // (VegaTransformDB as any).QueryFunction(duck_db_query);
+    // const oldSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vega_spec['data'], null, 4) + "</pre>"
+
+
+    // const newspec = specRewrite(vega_spec)
+    // const runtime = vega.parse(newspec);
+    // console.log(Date.now(), "Normal Vega Start");  
+    // // const view = new vega.View(runtime)
+    // //   .logLevel(vega.Info)
+    // //   .renderer("svg")
+    // //   .initialize(document.querySelector("#vega_view"));
+    // // view.runAsync();
+    // // console.log(Date.now(), "Normal Vega Done");
+    
+    
+    
+
+
+    // const newspec_vp = specRewrite(vegaplus_spec)
+    // rename(newspec_vp.data, "dbtransform");
+    // (vega as any).transforms["dbtransform"] = VegaTransformDB;
+    // const runtime_vp = vega.parse(newspec_vp);
+
+    // // console.log(Date.now(), "Vega Plus Start");  
+    // // const view_vp = new vega.View(runtime_vp)
+    // //   .logLevel(vega.Info)
+    // //   .renderer("svg")
+    // //   .initialize(document.querySelector("#vegap_view"));  
+    // // // console.log(view_vp) 
+    // // view_vp.runAsync();
+    // // console.log(Date.now(), "Vega Plus Done");
+    // let vg_p = time_view(runtime_vp, "#vegap_view")
+    // console.log(vg_p[1], "Normal Vega");
+    // let view_vp = vg_p[0]
+
+
+    // // assign view and vega to window so we can debug them
+    // window["vega"] = vega;
+    // window["view"] = view;
+    // const newSpec = "<pre class=\"prettyprint\">" + JSON.stringify(vegaplus_spec['data'], null, 4) + "</pre>"
+    // let output = htmldiff(oldSpec, newSpec);
+
+    // // Show HTML diff output as HTML (crazy right?)!
+    // document.getElementById("output").innerHTML = output;
+
+    // view_vp.runAfter(view => {
+    //   const dot = `${view2dot(view)}`
+    //   hpccWasm.graphviz.layout(dot, "svg", "dot").then(svg => {
+    //     const placeholder = document.getElementById("graph-placeholder");
+    //     placeholder.innerHTML = svg;
+    //   });
+    // })
 });
 
 function rename(dataSpec, type) {
