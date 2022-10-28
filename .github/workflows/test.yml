@@ -55,7 +55,7 @@ jobs:
         run: yarn start:server_pg &
         
       - name: Sleep for 4 seconds
-        run: sleep 4s
+        run: sleep 10s
         shell: bash
 
       - name: Run Yarn Test for Postgres
