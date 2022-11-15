@@ -33,15 +33,31 @@ function expr2sql(expr) {
         }
         return generator(ast);
     }
+    const call = (node) => {
+        if (node.callee.type === 'Identifier') {
+          const _args = node.arguments.map(a => visit(a));
+
+          switch (node.callee.name) {
+            case 'data':
+            //   return  `+ '(' + ${_args.join(',')} + ')' +`
+              return 'data(' + _args.join(',') + ')';
+
+          }
+      
+        }
+    };
     const Generators = {
         Literal: n => n.raw,
         
         Identifier: n => {
             const id = n.name;
-            if (memberDepth > 0) {
-                return id;
-            }
+            // if (memberDepth > 0) {
+            //     return id;
+            // }
+            return id;
         },
+
+        CallExpression: n => call(n),
         
         MemberExpression: n => {
             const d = !n.computed,
@@ -50,7 +66,12 @@ function expr2sql(expr) {
             const p = visit(n.property);
             
             if (d) memberDepth -= 1;
-            return p;
+
+            if (o == 'datum') {
+                n['fixed'] = true
+                return p
+            }
+            return o + (d ? '.'+p : '['+p+']');
         },
         
         BinaryExpression: n => {
@@ -64,7 +85,8 @@ function expr2sql(expr) {
                     n.operator = '!='
                 }
             }
-            return visit(n.left) + ' ' + n.operator + ' ' + right
+            const left = visit(n.left)
+            return (n.left['fixed'] ? left : '" +' + left + '+ "') + ' ' + n.operator + ' ' +  (n.right['fixed'] ? right : '" +' + right + '+ "')
         },
         
         LogicalExpression: n => {
