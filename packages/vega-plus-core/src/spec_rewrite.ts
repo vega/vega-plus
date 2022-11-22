@@ -115,7 +115,8 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
                 type: "dbtransform",
                 query: {
                     signal: query
-                }
+                },
+                signal:transform.signal
             }]
         })
         
@@ -165,14 +166,14 @@ export function dataRewrite(tableName: string, transform: Transforms, db: string
                     signal: bin_signal,
                     maxbins: maxbins,
                     extent: extent,
-                    nice: false
+                    nice: true
                 }
             ]
         })
         
         dbTransforms.push({
             type: "dbtransform",
-            name: transform['name'],
+            alias: bin_name,
             query: {
                 signal: query
             }

@@ -68,7 +68,6 @@ function expr2sql(expr) {
             if (d) memberDepth -= 1;
 
             if (o == 'datum') {
-                n['fixed'] = true
                 return p
             }
             return o + (d ? '.'+p : '['+p+']');
@@ -86,7 +85,7 @@ function expr2sql(expr) {
                 }
             }
             const left = visit(n.left)
-            return (n.left['fixed'] ? left : '" +' + left + '+ "') + ' ' + n.operator + ' ' +  (n.right['fixed'] ? right : '" +' + right + '+ "')
+            return (!n.left.computed ? left : '" +' + left + '+ "') + ' ' + n.operator + ' ' +  (!n.right.computed ? right : '" +' + right + '+ "')
         },
         
         LogicalExpression: n => {

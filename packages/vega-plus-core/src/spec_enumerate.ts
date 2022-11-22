@@ -9,9 +9,9 @@ type AugmentedData = {
   & ExtendedData
 
 type Plan = {
-    sql: {};
-    vega: {};
-    hybrid: {};
+    sql: {string:AugmentedData[]};
+    vega: {string:AugmentedData[]};
+    hybrid: {string:AugmentedData[]};
     type: string;
 }
 
@@ -89,7 +89,7 @@ export class DataTree {
 
     
     enumerateRecursion(curr: string | null, curr_plans, root= false) {
-        let next_plans: Plan = {sql:{}, vega:{}, hybrid:{}, type: 'sql'};
+        let next_plans: Plan = {sql: {} as  {string:AugmentedData[]}, vega:{}  as  {string:AugmentedData[]}, hybrid:{} as  {string:AugmentedData[]}, type: 'sql'};
 
         if (root) {
             // if (this.subPlans[curr].vega.length != 0) throw new Error('root cannot have pure vega');
@@ -101,8 +101,9 @@ export class DataTree {
                     throw new Error('duplicated key')
                 } 
             }
-            if (this.subPlans[curr].sql.length === 1) {
-                let next_plan = [this.subPlans[curr].sql[0]]
+            if (this.subPlans[curr].sql.length >= 1) {
+                let next_plan: AugmentedData[] = this.subPlans[curr].sql
+                debugger;
 
                 if (!next_plans.vega [`/${curr}_sql`]) { 
                     next_plans.vega [`/${curr}_sql`] = {plan: next_plan, type:'sql'}
@@ -129,6 +130,7 @@ export class DataTree {
 
                 let parent = null;
                 console.log(new_plan, "new planß")
+                console.log(JSON.stringify(curr_plan))
                 for (const i of new_plan['plan']) {
                     if (i['name'] === this.data[this.dataMap[curr]]['source']) {
                         parent = i
@@ -137,21 +139,20 @@ export class DataTree {
                 }
                 let parent_query;
                 if (curr_plan['type'] === 'sql') {
-                    debugger;
-
                     parent_query = parent.transform[0].query.signal;
                 } else {
                     throw new Error('should be of type sql')
                 }
 
                 for (const [id, next_plan] of Object.entries(this.subPlans[curr].hybrid)) {
-                    let copy: AugmentedData = JSON.parse(JSON.stringify(next_plan))
-                    const query = copy.transform[0]['query'].signal
+                    let copy: AugmentedData[] = JSON.parse(JSON.stringify(next_plan))
+                    debugger;
+                    const query = copy[0].transform[0]['query'].signal
                     const new_query = query.replace('$SOURCE$', ` (${parent_query}) ${this.data[this.dataMap[curr]]['source']}`)
                     delete copy['source']
-                    copy.transform[0]['query'].signal = new_query;
+                    copy[0].transform[0]['query'].signal = new_query;
                     let new_plan = JSON.parse(JSON.stringify(curr_plan)).plan
-                    new_plan.push(copy)
+                    new_plan.push(...copy, )
 
                     next_plans.vega[prefix + `/${id}`] = {plan: JSON.parse(JSON.stringify(new_plan)), type:'hybrid'}
 
@@ -165,25 +166,54 @@ export class DataTree {
 
             for (const [prefix, curr_plan] of Object.entries(curr_plans.vega)) {
 
-                let copy:AugmentedData[] = JSON.parse(JSON.stringify(curr_plan)).plan
-                copy.push(this.subPlans[curr].vega[0])
-                next_plans.vega[prefix + `/${curr}_vega`] = {plan: copy, type:'vega'}       
+                // console.log((JSON.stringify(curr_plans)))
+                // let copy:AugmentedData[] = JSON.parse(JSON.stringify(curr_plan)).plan
+
+
+                // copy.push(this.subPlans[curr].vega[0]) // fix: has been changed to dict because of multiple possible examples
+                // next_plans.vega[prefix + `/${curr}_vega`] = {plan: copy, type:'vega'}       
                 
-                if (!this.data[this.dataMap[curr]].children) {
-                    // should be turning to the next children
-                    let parent = null;
-                    for (const i of curr_plan['plan']) {
-                        if (i['name'] === this.data[this.dataMap[curr]]['source']) {
-                            parent = i
-                            break
+                // if (!this.data[this.dataMap[curr]].children) {
+                //     // should be turning to the next children
+                //     let parent = null;
+                //     for (const i of curr_plan['plan']) {
+                //         if (i['name'] === this.data[this.dataMap[curr]]['source']) {
+                //             parent = i
+                //             break
+                //         }
+                //     }
+
+                //     if (parent['transform'].length === 1 && parent['transform'][0].query) {
+                //         next_plans.sql[prefix + `/${curr}_vega`] = {plan: copy, type:'sql'}
+                //         next_plans.hybrid[prefix + `/${curr}_vega`] = {plan: copy, type:'sql'}
+                //     }
+
+                // }
+
+                for (const [id, next_plan] of Object.entries(this.subPlans[curr].vega)) {
+                    let copy:AugmentedData[] = JSON.parse(JSON.stringify(curr_plan)).plan
+
+                    debugger;
+                    copy = [...copy, ...(next_plan as AugmentedData[])]
+
+                    next_plans.vega[prefix + `/${id}_vega`] = {plan: copy, type:'vega'}       
+                
+                    if (!this.data[this.dataMap[curr]].children) {
+                        // should be turning to the next children
+                        let parent = null;
+                        for (const i of curr_plan['plan']) {
+                            if (i['name'] === this.data[this.dataMap[curr]]['source']) {
+                                parent = i
+                                break
+                            }
                         }
-                    }
 
-                    if (parent['transform'].length === 1 && parent['transform'][0].query) {
-                        next_plans.sql[prefix + `/${curr}_vega`] = {plan: copy, type:'sql'}
-                        next_plans.hybrid[prefix + `/${curr}_vega`] = {plan: copy, type:'sql'}
-                    }
+                        if (parent['transform'].length === 1 && parent['transform'][0].query) {
+                            next_plans.sql[prefix + `/${id}_vega`] = {plan: copy, type:'sql'}
+                            next_plans.hybrid[prefix + `/${id}_vega`] = {plan: copy, type:'sql'}
+                        }
 
+                    }
                 }
             }
 
@@ -208,6 +238,7 @@ export class DataTree {
                 let new_plan: any[] = JSON.parse(JSON.stringify(curr_plan)).plan
                 let copy = new_plan['plan']
                 console.log(copy)
+                debugger;
                 const query = this.subPlans[curr].sql[0].transform[0].query.signal
                 const new_query = query.replace('$SOURCE$', ` (${parent_query}) ${this.data[this.dataMap[curr]]['source']}`)
                 const new_data = {
@@ -216,7 +247,7 @@ export class DataTree {
                     transform: [{type:"dbtransform", query:{signal: new_query}}]
                 }
 
-                new_plan.push(new_data)
+                new_plan.push(new_data, ...this.subPlans[curr].sql.slice(1))
 
                 next_plans.sql[prefix + `/${curr}_sql`] = {plan: JSON.parse(JSON.stringify(new_plan)), type:'sql'}
                 next_plans.hybrid[prefix + `/${curr}_sql`] = {plan: JSON.parse(JSON.stringify(new_plan)), type:'sql'}
@@ -228,16 +259,19 @@ export class DataTree {
             if (curr === this.data[this.levels[this.levels.length-1][this.levels[this.levels.length-1].length-1]].name) {
                 this.plans = next_plans.vega
             }
-            console.log((JSON.stringify(next_plans)))
+            // console.log((JSON.stringify(next_plans)))
             return next_plans
         } 
 
         for (const child of this.data[this.dataMap[curr]].children) {
-            next_plans = this.enumerateRecursion(child.name, JSON.parse(JSON.stringify(next_plans)))
+            console.log(next_plans)
+            const copy = JSON.parse(JSON.stringify(next_plans))
+            debugger;
+            next_plans = this.enumerateRecursion(child.name, copy)
             
         }
 
-        console.log(next_plans)
+        return (next_plans)
     }
 
 } 

@@ -21,6 +21,8 @@ export type DbTransformProcessed = {
     alias?: string;
     db?: string;
     relation?: string;
+    signal?: string;
+    op?:string
 } 
 
 export type ExtendedTransforms = 
@@ -40,7 +42,7 @@ export type ExtendedData =
 
 export type EnumSeg = {
     sql: ExtendedData[];
-    vega: ExtendedData[];
+    vega:   {[key: string]: ExtendedData[]};
     hybrid:  {[key: string]: ExtendedData[]};
     orig: ExtendedData;
     sql_queries: any[];
@@ -53,11 +55,11 @@ export type EnumSeg = {
     or hyrid (start with sql query and the rest are unprocessed as in the original)
 */
 export function enumSegPlan(data:ExtendedData): EnumSeg {
-    const plan = {sql:[], vega:[], hybrid:{}, orig:data, sql_queries: []}
+    const plan = {sql:[], vega:{}, hybrid:{}, orig:data, sql_queries: []}
     let terminate: ExtendedTransforms;
 
     if (!data.transform) {
-        plan.vega.push(data)
+        plan.vega['original']= [data]
         return plan
     }
 
@@ -86,7 +88,7 @@ export function enumSegPlan(data:ExtendedData): EnumSeg {
         } 
     } else {
         // this data entry has exactly one pure vega plan,
-        plan.vega.push(data)
+        plan.vega['original'] = [data]
     }
 
     // accumulated id to the current iteration the 0s and 1s relect whether
@@ -112,12 +114,15 @@ export function enumSegPlan(data:ExtendedData): EnumSeg {
             // plan.sql should be empty
             if (!processed.length) return plan
 
-            plan.sql.push({
-                name: data.name,
-                source: data['source'],
-                id,
-                transform: terminate? [...processed, terminate] : [...processed]
-            })
+            plan.sql.push(
+                {
+                    name: data.name,
+                    source: data['source'],
+                    id,
+                    transform: terminate? [...processed, terminate] : [...processed]
+                },
+                ...newData? JSON.parse(JSON.stringify(newData)) : null
+            )
 
             return plan
         } else {
@@ -126,11 +131,29 @@ export function enumSegPlan(data:ExtendedData): EnumSeg {
                 let id = ac_id;
                 for (var j = i; j < data.transform.length; j++) id += '0';
 
-                plan.hybrid[id] = ({
-                    name: data.name,
-                    source: data['source'],
-                    transform: [...processed, terminate, ...data.transform.slice(i+1)]
-                })
+                if (processed.length) {
+                    // mixed of sql and vega
+                    plan.hybrid[id] = ([
+                        {
+                            name: data.name,
+                            source: data['source'],
+                            transform: [...processed, terminate, ...data.transform.slice(i+1)]
+                        },
+                        ...newData? JSON.parse(JSON.stringify(newData)) : null
+                    ])
+                } else {
+                    // sql queries won't affect downstream here. 
+                    // ex. extent only generates a side effect
+                    plan.vega[id] = ([
+                        {
+                            name: data.name,
+                            source: data['source'],
+                            transform: [...processed, terminate, ...data.transform.slice(i+1)]
+                        },
+                        ...newData? JSON.parse(JSON.stringify(newData)) : null
+                    ])
+                }
+                
 
                 return plan
             } else {
@@ -138,11 +161,26 @@ export function enumSegPlan(data:ExtendedData): EnumSeg {
                 ac_id = id;
                 for (var j = i + 1; j < data.transform.length; j++) id += '0';
 
-                plan.hybrid[id] = ({
-                    name: data.name,
-                    source: data['source'],
-                    transform: [...processed, ...data.transform.slice(i+1)]
-                })
+                if (processed.length) {
+                    plan.hybrid[id] = ([
+                        {
+                            name: data.name,
+                            source: data['source'],
+                            transform: [...processed, ...data.transform.slice(i+1)]
+                        },
+                        ...newData? JSON.parse(JSON.stringify(newData)) : null               
+                    ])
+                } else {
+                    plan.vega[id] = ([
+                        {
+                            name: data.name,
+                            source: data['source'],
+                            transform: [...processed, ...data.transform.slice(i+1)]
+                        },
+                        ...newData? JSON.parse(JSON.stringify(newData)) : null               
+                    ])
+                }
+                
             }
             
         }
@@ -157,11 +195,14 @@ export function processTransform(plan: EnumSeg, idx: number, processed: DbTransf
     const data = plan.orig
     const transform = data.transform[idx]
     let alias:string = `${data.name}_${transform.type}_${processed.length}`
-    var prev = processed.pop() ?? null; // null or a dbtransform
+    let prev = null
+    if (processed.length && transform.type != 'extent') {
+        prev = processed.pop() ?? null; // null or a dbtransform
+    } 
     let tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.alias}` : '$SOURCE$'
 
     if (transform.type === "extent") {
-        processExtent(transform, tableName, processed, newData)
+        processExtent(transform, tableName, processed, newData, alias)
     }
     else if (transform.type === "bin") {
         // TODO: need to include previous queries like in crossfilter
@@ -239,7 +280,7 @@ export function processTransform(plan: EnumSeg, idx: number, processed: DbTransf
     return null
 }
 
-function processExtent(transform: ExtentTransform, tableName: string, processed:DbTransformProcessed[], newData: ExtendedData[]) {
+function processExtent(transform: ExtentTransform, tableName: string, processed:DbTransformProcessed[], newData: ExtendedData[], alias:string) {
     let query: string = null;
 
     if (transform.field.hasOwnProperty("signal")) {
@@ -247,21 +288,24 @@ function processExtent(transform: ExtentTransform, tableName: string, processed:
     } else {
         query = `"select min(${transform.field}) as min, max(${transform.field}) as max from ${tableName}"`
     }
-    // newData.push({
-    //     name: transform.signal,
-    //     transform: [{
-    //         type: "dbtransform",
-    //         query: {
-    //             signal: query
-    //         }
-    //     }]
-    // })  
-    processed.push({
-        type: "dbtransform",
-        query: {
-            signal: query
-        }
-        })  
+    newData.push({
+        name: transform.signal,
+        transform: [{
+            type: "dbtransform",
+            query: {
+                signal: query
+            },
+            signal: transform.signal
+        }]
+    })  
+    // processed.push({
+    //     type: "dbtransform",
+    //     alias,
+    //     query: {
+    //         signal: query
+    //     },
+    //     signal: transform.signal
+    //     })  
 }
 
 function processBin(transform: BinTransform, tableName: string, processed:DbTransformProcessed[], newData: ExtendedData[], alias:string) {

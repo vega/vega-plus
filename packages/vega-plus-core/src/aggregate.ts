@@ -1,4 +1,4 @@
-import { AggregateTransform } from "vega";
+import { AggregateTransform, transforms } from "vega";
 
 function aggregateOpToSql(op: string, field: string, db?: string) {
     // Converts supported Vega operations to SQL
@@ -51,8 +51,8 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
     const validOpIdxs = [];
     tableName = prev ? `(${prev.query.signal.slice(1, -1)}) ${prev.alias}` : tableName
     
-    for (const [index, field] of (transform.fields as string[]).entries()) {
-        
+    for (const index in transform.fields) {
+        const field = transform.fields[index]
         const opt: string = transform.ops[index]
         const out: string = transform.as[index]
         if (transform.ops[index].hasOwnProperty('signal')) {
@@ -62,6 +62,12 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
             continue;
         }
         selectionList.push(field === null ? `${opt}(*) as ${out}` : aggregateOpToSql(opt, field, db) + ` as ${out}`)
+    }
+
+    if (!transform.fields && !transform.ops) {
+        const opt: string = "COUNT"
+        const out: string = transform.as[0]
+        selectionList.push(out === null ? `${opt}(*) as ${out}` : `${opt}(*)`)
     }
     
     let sql = ''
