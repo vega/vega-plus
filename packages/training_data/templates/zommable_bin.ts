@@ -1,3 +1,13 @@
+export const default_var = {
+    "table": "normal-2d",
+    "field_1": "u",
+    "field_2": "v",
+}
+
+export const trellis_parameter_types = {
+    "quantitative": ["field_1", "field_2", ],
+}
+
 export const zoomable_bin = {
     "$schema": "https://vega.github.io/schema/vega/v5.json",
     "description": "An interactive scatter plot example with binned aggregation supporting pan and zoom.",
@@ -173,7 +183,7 @@ export const zoomable_bin = {
         "transform": [
             {       
                 "type": "dbtransform",
-                "relation": "normal-2d"
+                "relation": () => { return "table" }
               },
         //   {"type": "extent", "field": "u", "signal": "xext"},
         //   {"type": "extent", "field": "v", "signal": "yext"}
@@ -182,12 +192,12 @@ export const zoomable_bin = {
       {
         "name": "xext",
         "source": "points",
-        "transform": [{"type": "extent", "field": "u", "signal": "xext"}]
+        "transform": [{"type": "extent", "field":  () => { return "field_1" }, "signal": "xext"}]
       },
       {
         "name": "yext",
         "source": "points",
-        "transform": [{"type": "extent", "field": "v", "signal": "yext"}]
+        "transform": [{"type": "extent", "field":  () => { return "field_2" }, "signal": "yext"}]
       },
       {
         "name": "density",
@@ -197,7 +207,7 @@ export const zoomable_bin = {
         //   {"type": "extent", "field": "v", "signal": "yextf"},
           {
             "type": "bin",
-            "field": "u",
+            "field": () => { return "field_1" },
             "extent": {"signal": "xdom"},
             "as": ["ustart", "uend"],
             "maxbins": 12,
@@ -205,7 +215,7 @@ export const zoomable_bin = {
           },
           {
             "type": "bin",
-            "field": "v",
+            "field": () => { return "field_2" },
             "extent": {"signal": "ydom"},
             "as": ["vstart", "vend"],
             "maxbins": 12,

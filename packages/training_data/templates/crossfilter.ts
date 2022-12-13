@@ -1,6 +1,12 @@
 export const default_var = {
-    "table_name": "table",
-    
+    "table": "flights",
+    "field_1": "ARR_DELAY",
+    "field_2": "DISTANCE",
+    "field_3": "ARR_TIME",
+}
+
+export const crossfilter_parameter_types = {
+    "quantitative": ["field_1", "field_2", "field_3"],
 }
 
 export const crossfilter_spec = {
@@ -22,16 +28,16 @@ export const crossfilter_spec = {
         "transform": [
           {       
             "type": "dbtransform",
-            "relation": "flights"
+            "relation": () => { return "table" }
           },
           {
             "type": "extent",
-            "field": "ARR_DELAY",
+            "field": () => { return "field_1" },
             "signal": "child__column_delay_layer_1_bin_maxbins_20_delay_extent"
           },
           {
             "type": "bin",
-            "field": "ARR_DELAY",
+            "field": () => { return "field_1" },
             "as": ["bin_maxbins_20_delay", "bin_maxbins_20_delay_end"],
             "signal": "child__column_delay_layer_1_bin_maxbins_20_delay_bins",
             "extent": {
@@ -41,12 +47,12 @@ export const crossfilter_spec = {
           },
           {
             "type": "extent",
-            "field": "DISTANCE",
+            "field": () => { return "field_2" },
             "signal": "child__column_distance_layer_0_bin_maxbins_20_distance_extent"
           },
           {
             "type": "bin",
-            "field": "DISTANCE",
+            "field": () => { return "field_2" },
             "as": ["bin_maxbins_20_distance", "bin_maxbins_20_distance_end"],
             "signal": "child__column_distance_layer_0_bin_maxbins_20_distance_bins",
             "extent": {
@@ -63,12 +69,12 @@ export const crossfilter_spec = {
         "transform": [
           {
             "type": "extent",
-            "field": "ARR_TIME",
+            "field": () => { return "field_3" },
             "signal": "child__column_time_layer_1_bin_maxbins_20_time_extent"
           },
           {
             "type": "bin",
-            "field": "ARR_TIME",
+            "field": () => { return "field_3" },
             "as": ["bin_maxbins_20_time", "bin_maxbins_20_time_end"],
             "signal": "child__column_time_layer_1_bin_maxbins_20_time_bins",
             "extent": {
@@ -315,7 +321,7 @@ export const crossfilter_spec = {
           },
           {
             "name": "brush_tuple_fields",
-            "value": [{"field": "DISTANCE", "channel": "x", "type": "R"}]
+            "value": [{"field": () => { return "field_2" }, "channel": "x", "type": "R"}]
           },
           {
             "name": "brush_translate_anchor",
@@ -666,7 +672,7 @@ export const crossfilter_spec = {
           },
           {
             "name": "brush_tuple_fields",
-            "value": [{"field": "ARR_DELAY", "channel": "x", "type": "R"}]
+            "value": [{"field":() => { return "field_1" }, "channel": "x", "type": "R"}]
           },
           {
             "name": "brush_translate_anchor",
@@ -1017,7 +1023,7 @@ export const crossfilter_spec = {
           },
           {
             "name": "brush_tuple_fields",
-            "value": [{"field": "ARR_TIME", "channel": "x", "type": "R"}]
+            "value": [{"field": () => { return "field_3" }, "channel": "x", "type": "R"}]
           },
           {
             "name": "brush_translate_anchor",
