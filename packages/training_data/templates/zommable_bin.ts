@@ -169,18 +169,32 @@ export const zoomable_bin = {
     "data": [
       {
         "name": "points",
-        "url": "data/normal-2d.json",
+        // "url": "data/normal-2d.json",
         "transform": [
-          {"type": "extent", "field": "u", "signal": "xext"},
-          {"type": "extent", "field": "v", "signal": "yext"}
+            {       
+                "type": "dbtransform",
+                "relation": "normal-2d"
+              },
+        //   {"type": "extent", "field": "u", "signal": "xext"},
+        //   {"type": "extent", "field": "v", "signal": "yext"}
         ]
+      },
+      {
+        "name": "xext",
+        "source": "points",
+        "transform": [{"type": "extent", "field": "u", "signal": "xext"}]
+      },
+      {
+        "name": "yext",
+        "source": "points",
+        "transform": [{"type": "extent", "field": "v", "signal": "yext"}]
       },
       {
         "name": "density",
         "source": "points",
         "transform": [
-          {"type": "extent", "field": "u", "signal": "xextf"},
-          {"type": "extent", "field": "v", "signal": "yextf"},
+        //   {"type": "extent", "field": "u", "signal": "xextf"},
+        //   {"type": "extent", "field": "v", "signal": "yextf"},
           {
             "type": "bin",
             "field": "u",

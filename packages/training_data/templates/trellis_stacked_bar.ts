@@ -1,8 +1,12 @@
-export const parameter_types = {
-    field_1: "categorical",
-    field_2: "categorical",
-    field_3: "categorical",
-    field_4: "quantitative",
+// export const parameter_types = {
+//     field_1: "categorical",
+//     field_2: "categorical",
+//     field_3: "categorical",
+//     field_4: "quantitative",
+// }
+export const trellis_parameter_types = {
+    "categorical": ["field_1", "field_2", "field_3"],
+    "quantitative": ["field_4"]
 }
 
 export const trellis_stacked_bar = {
@@ -15,7 +19,7 @@ export const trellis_stacked_bar = {
         "transform": [
             {
             "type": "dbtransform",
-            "relation": "flights"
+            "relation": () => { return "table" }
             }
         ]
       },
