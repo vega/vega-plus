@@ -94,6 +94,7 @@ prototype.transform = async function(_, pulse) {
   
     try {
       result = await postQuery();
+      console.log(result)
     } catch (error) {
       console.log(error);
     }
@@ -109,7 +110,7 @@ prototype.transform = async function(_, pulse) {
   const out = pulse.fork(pulse.NO_FIELDS & pulse.NO_SOURCE);
   out.rem = this.value;
 
-  if (this._argval.toArray) {
+  if (this._argval?.toArray) {
     // changing the result format for Extent transform
     // [{min:10, max, 100}] -> [10, 100]
     const temp = [result[0].min, result[0].max]
