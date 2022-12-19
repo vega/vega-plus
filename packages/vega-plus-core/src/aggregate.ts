@@ -66,7 +66,7 @@ export const aggregateTransformToSql = (tableName: string, transform: AggregateT
 
     if (!transform.fields && !transform.ops) {
         const opt: string = "COUNT"
-        const out: string = transform.as[0]
+        const out: string = transform.as ? transform.as[0] : null
         selectionList.push(out === null ? `${opt}(*) as ${out}` : `${opt}(*)`)
     }
     
